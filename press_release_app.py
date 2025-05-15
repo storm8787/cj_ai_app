@@ -12,7 +12,9 @@ from openai import OpenAI
 import os
 
 # ✅ OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+#openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 
 # ✅ PDF 텍스트 추출
 def extract_text_from_pdf(file_obj):

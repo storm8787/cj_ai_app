@@ -4,11 +4,11 @@
 # In[10]:
 
 
-import openai
 import streamlit as st
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from openai import OpenAI
 import os
 
 # ✅ OpenAI API 키 설정
@@ -77,14 +77,16 @@ def generate_press_release(user_request, similar_examples):
 """}
     ]
 
-    response = openai.ChatCompletion.create(
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])  # 키는 secrets에서 불러온다고 가정
+
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,
         temperature=0.5,
-        max_tokens=1500  # 길게 쓰고 싶으면 1000~1500까지 줘도 OK
+        max_tokens=1500
     )
 
-    return response.choices[0].message["content"]
+return response.choices[0].message.content
 
 # ✅ Streamlit 앱 시작
 st.title("📰 GPT 기반 보도자료 자동 생성기")

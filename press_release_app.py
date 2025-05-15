@@ -86,7 +86,7 @@ def generate_press_release(user_request, similar_examples):
         max_tokens=1500
     )
 
-return response.choices[0].message.content
+    return response.choices[0].message.content
 
 # ✅ Streamlit 앱 시작
 st.title("📰 GPT 기반 보도자료 자동 생성기")

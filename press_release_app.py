@@ -61,7 +61,9 @@ def generate_press_release(user_request, similar_examples):
     )
 
     user_query_prompt = (
-        f"제목: {user_request['제목']}\n\n"
+        f"입력한 제목 후보: {user_request['제목']}\n\n"
+        f"아래 내용 포인트를 반영하여 보도자료에 어울리는 제목을 새로 작성하고, "
+        f"그 제목을 '[제목]'에 반영해줘. 입력한 제목은 참고만 하고 그대로 쓰지 않아도 돼.\n\n"
         f"내용 포인트:\n- {joined_points}\n\n"
         f"요청사항:\n- {user_request['기타요청']}\n\n"
         f"{추가지시}"

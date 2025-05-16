@@ -13,6 +13,7 @@ from openai import OpenAI
 import os
 import pandas as pd
 import io
+import uuid
 
 # ✅ OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -151,28 +152,35 @@ def excel_merger():
     if uploaded_files:
         combined_df = pd.DataFrame()
 
-        for file in uploaded_files:
+        for idx, file in enumerate(uploaded_files):
             try:
+                # 안전한 내부 이름 생성 (영문 + 랜덤 UUID)
+                safe_filename = f"tempfile_{idx}_{uuid.uuid4().hex[:6]}.xlsx"
+
+                # Streamlit이 제공하는 file-like 객체에서 바로 읽기
                 df = pd.read_excel(file)
+                combined_df = pd.concat([combined_df, df], ignore_index=True)
+                st.success(f"✅ 파일 {file.name} 업로드 및 병합 완료")
             except Exception as e:
-                st.error(f"파일 {file.name} 읽는 중 오류 발생: {e}")
-                return
+                st.error(f"❌ 파일 '{file.name}' 처리 중 오류: {e}")
 
-            combined_df = pd.concat([combined_df, df], ignore_index=True)
+        if not combined_df.empty:
+            combined_df.reset_index(drop=True, inplace=True)
+            combined_df.index = combined_df.index + 1
+            combined_df.index.name = "순번"
 
-        st.success(f"총 {len(combined_df)}행이 병합되었습니다.")
-        st.dataframe(combined_df.head(30))
+            st.dataframe(combined_df.head(30))
 
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            combined_df.to_excel(writer, index=False, sheet_name='통합결과')
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                combined_df.to_excel(writer, index=False, sheet_name='통합결과')
 
-        st.download_button(
-            label="📥 통합 엑셀 다운로드",
-            data=output.getvalue(),
-            file_name="통합결과.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+            st.download_button(
+                label="📥 통합 엑셀 다운로드",
+                data=output.getvalue(),
+                file_name="통합결과.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 
 # ✅ 메인 함수 (기능 선택)

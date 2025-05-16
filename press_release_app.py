@@ -8,15 +8,15 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-#from openai import OpenAI
-import openai
+from openai import OpenAI
+#import openai
 import os
 import pandas as pd
 import io
 
 # ✅ OpenAI API 키 설정
-#client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+#openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # ✅ PDF 텍스트 추출
 def extract_text_from_pdf(file_obj):
@@ -82,8 +82,8 @@ def generate_press_release(user_request, similar_examples):
 """}
     ]
 
-#    response = client.chat.completions.create(
-    response = openai.ChatCompletion.create(    
+    response = client.chat.completions.create(
+#    response = openai.ChatCompletion.create(    
         model="gpt-4o",
         messages=messages,
         temperature=0.5,

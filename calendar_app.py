@@ -88,5 +88,5 @@ def calendar_app():
                 st.success("✅ 등록 완료! 아래 링크에서 확인 가능:")
                 st.markdown(f"[📅 일정 확인하기]({url})")
             except Exception as e:
-                st.error(f"❌ 오류 발생: {e}")
+                st.error(f"❌ 오류 발생!: {e}")
 

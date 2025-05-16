@@ -16,13 +16,6 @@ import io
 import uuid
 from io import BytesIO
 
-st.set_page_config(
-    page_title="더 가까이, 충주시 AI 연구",  # 크롬 탭 제목
-    page_icon="logo.png",  # 또는 아래처럼 이미지 favicon도 가능
-    layout="wide"
-)
-
-
 # ✅ OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 #openai.api_key = st.secrets["OPENAI_API_KEY"]

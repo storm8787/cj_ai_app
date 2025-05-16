@@ -14,6 +14,7 @@ import os
 import pandas as pd
 import io
 import uuid
+from io import BytesIO
 
 # ✅ OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -154,13 +155,11 @@ def excel_merger():
 
         for idx, file in enumerate(uploaded_files):
             try:
-                # 안전한 내부 이름 생성 (영문 + 랜덤 UUID)
-                safe_filename = f"tempfile_{idx}_{uuid.uuid4().hex[:6]}.xlsx"
-
-                # Streamlit이 제공하는 file-like 객체에서 바로 읽기
-                df = pd.read_excel(file)
+                # 파일을 메모리 상 안전하게 복사 (BytesIO로 읽기)
+                file_content = BytesIO(file.read())
+                df = pd.read_excel(file_content)
                 combined_df = pd.concat([combined_df, df], ignore_index=True)
-                st.success(f"✅ 파일 {file.name} 업로드 및 병합 완료")
+                st.success(f"✅ 파일 '{file.name}' 병합 완료")
             except Exception as e:
                 st.error(f"❌ 파일 '{file.name}' 처리 중 오류: {e}")
 

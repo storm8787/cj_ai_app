@@ -1,5 +1,5 @@
 openai
-streamlit>=1.30.0
+streamlit>=1.45.0
 scikit-learn
 PyPDF2
 pandas

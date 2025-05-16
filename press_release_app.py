@@ -8,13 +8,15 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from openai import OpenAI
+#from openai import OpenAI
+import openai
 import os
+import pandas as pd
+import io
 
 # ✅ OpenAI API 키 설정
-#openai.api_key = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
+#client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # ✅ PDF 텍스트 추출
 def extract_text_from_pdf(file_obj):
@@ -57,7 +59,6 @@ def generate_press_release(user_request, similar_examples):
         f"보도자료는 반드시 '[제목] 본문제목'으로 시작한 후, 한 줄 아래에 부제목 형태의 요약 문장을 넣어주세요. 부제목은 '-' 기호로 시작하세요.\n"
         f"전체 보도자료 분량은 약 {길이지시}자 내외로 작성해주세요. 필요 시 최대 토큰 수를 늘려도 괜찮습니다."
         f"전체 보도자료는 반드시 {길이지시}자 안팎(±10자 이내)로 작성해주세요."
-
     )
 
     user_query_prompt = (
@@ -81,9 +82,8 @@ def generate_press_release(user_request, similar_examples):
 """}
     ]
 
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])  # 키는 secrets에서 불러온다고 가정
-
-    response = client.chat.completions.create(
+#    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(    
         model="gpt-4o",
         messages=messages,
         temperature=0.5,
@@ -92,56 +92,65 @@ def generate_press_release(user_request, similar_examples):
 
     return response.choices[0].message.content
 
-# ✅ Streamlit 앱 시작
-st.title("📰 GPT 기반 보도자료 자동 생성기")
+# ✅ 보도자료 생성기 앱 함수
+def press_release_app():
+    st.title("📰 GPT 기반 보도자료 자동 생성기")
+    st.info("본 생성기는 충주시의 보도자료 4,000건을 기반으로 학습한 GPT 모델을 활용하여,\n" 
+            "충주시 스타일의 보도자료 초안을 자동으로 생성합니다.")
 
-# 📂 corpus.txt 자동 로딩
-txt_path = "data/corpus.txt"
-if os.path.exists(txt_path):
-    with open(txt_path, "r", encoding="utf-8") as f:
-        corpus_text = f.read()
-    documents = [doc.strip() for doc in corpus_text.split("---") if len(doc.strip()) > 50]
-    if not documents:
-        st.error("❌ corpus.txt에서 유효한 보도자료를 추출하지 못했습니다.")
-else:
-    st.error(f"❌ 텍스트 파일을 찾을 수 없습니다: {txt_path}")
-    st.stop()
-
-
-# 📥 사용자 입력값 수집
-제목 = st.text_input("📝 보도자료 제목을 입력하세요")
-담당부서 = st.text_input("🏢 담당 부서명을 입력하세요")
-담당자 = st.text_input("🧑‍🏫 담당자 이름을 입력하세요")
-
-문단수 = st.selectbox("📑 문단 수를 선택하세요", ["상관없음", "1개", "2개", "3개"])
-길이 = st.selectbox("📏 보도자료 길이", ["짧게", "중간", "길게"])  # 400, 600, 800자
-내용포인트 = st.text_area("📌 내용 포인트 (한 줄에 하나씩 입력)", height=150)
-기타요청 = st.text_area("🔧 기타 요청사항", height=100)
-
-
-# ✅ 실행 버튼
-if st.button("🚀 보도자료 생성하기"):
-    if 제목 and 내용포인트:
-        user_request = {
-            "제목": 제목,
-            "내용포인트": [line.strip() for line in 내용포인트.strip().split("\n") if line.strip()],
-            "기타요청": 기타요청.strip(),
-            "담당부서": 담당부서.strip(),
-            "담당자": 담당자.strip(),
-            "문단수": 문단수,
-            "길이": 길이
-        }
-
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(documents)
-        similar_examples = find_similar_docs(제목, documents, vectorizer, tfidf_matrix)
-
-        with st.spinner("🤖 GPT가 보도자료를 작성 중입니다..."):
-            press_release = generate_press_release(user_request, similar_examples)
-            st.success("✅ 보도자료가 생성되었습니다!")
-            st.text_area("📄 생성된 보도자료", press_release, height=500)
+    txt_path = "data/corpus.txt"
+    if os.path.exists(txt_path):
+        with open(txt_path, "r", encoding="utf-8") as f:
+            corpus_text = f.read()
+        documents = [doc.strip() for doc in corpus_text.split("---") if len(doc.strip()) > 50]
+        if not documents:
+            st.error("❌ corpus.txt에서 유효한 보도자료를 추출하지 못했습니다.")
+            return
     else:
-        st.warning("⚠️ 제목과 내용 포인트는 반드시 입력해야 합니다.")
+        st.error(f"❌ 텍스트 파일을 찾을 수 없습니다: {txt_path}")
+        return
+
+    제목 = st.text_input("📝 보도자료 제목을 입력하세요")
+    담당부서 = st.text_input("🏢 담당 부서명을 입력하세요")
+    담당자 = st.text_input("🧑‍🏫 관리자 이름을 입력하세요")
+    문단수 = st.selectbox("📑 문단 수를 선택하세요", ["상관없음", "1개", "2개", "3개"])
+    길이 = st.selectbox("📏 보도자료 길이", ["짧게", "중간", "길게"])
+    내용포인트 = st.text_area("📌 내용 포인트 (한 줄에 하나씩 입력)", height=150)
+    기타요청 = st.text_area("🔧 기타 요청사항", height=100)
+
+    if st.button("🚀 보도자료 생성하기"):
+        if 제목 and 내용포인트:
+            user_request = {
+                "제목": 제목,
+                "내용포인트": [line.strip() for line in 내용포인트.strip().split("\n") if line.strip()],
+                "기타요청": 기타요청.strip(),
+                "담당부서": 담당부서.strip(),
+                "담당자": 담당자.strip(),
+                "문단수": 문단수,
+                "길이": 길이
+            }
+
+            vectorizer = TfidfVectorizer()
+            tfidf_matrix = vectorizer.fit_transform(documents)
+            similar_examples = find_similar_docs(제목, documents, vectorizer, tfidf_matrix)
+
+            with st.spinner("🤖 GPT가 보도자료를 작성 중입니다..."):
+                press_release = generate_press_release(user_request, similar_examples)
+                st.success("✅ 보도자료가 생성되었습니다!")
+                st.text_area("📄 생성된 보도자료", press_release, height=500)
+        else:
+            st.warning("⚠️ 제목과 내용 포인트는 반드시 입력해야 합니다.")
+
+# ✅ 메인 함수 (기능 선택)
+def main():
+    st.sidebar.title("🧰 기능 선택")
+    selected_app = st.sidebar.radio("아래 기능 중 선택하세요", ["(생성형AI)보도자료 생성기"])
+
+    if selected_app == "(생성형AI)보도자료 생성기":
+        press_release_app()
+
+if __name__ == "__main__":
+    main()
 
 
 # In[ ]:

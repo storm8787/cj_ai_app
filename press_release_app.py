@@ -145,8 +145,27 @@ def press_release_app():
 
 # ✅ 엑셀 취합
 def excel_merger():
-    st.title("📊 엑셀 취합기")
-    st.info("여러 개의 엑셀 파일을 하나로 병합하여 미리보기 및 다운로드할 수 있습니다.")
+    st.title("✅ 한글 엑셀 업로드 테스트")
+
+    uploaded_file = st.file_uploader("한글 파일명을 가진 엑셀을 업로드하세요", type="xlsx")
+
+    if uploaded_file:
+        try:
+            content = uploaded_file.read()
+            file_data = BytesIO(content)
+            df = pd.read_excel(file_data)
+
+            st.success("✅ 파일 업로드 및 읽기 성공")
+            st.dataframe(df.head())
+
+        except Exception as e:
+            st.error(f"❌ 오류 발생: {e}")
+        
+        
+        ####################################
+        
+        st.title("📊 엑셀 취합기")
+        st.info("여러 개의 엑셀 파일을 하나로 병합하여 미리보기 및 다운로드할 수 있습니다.")
 
     uploaded_files = st.file_uploader("엑셀 파일을 업로드하세요", type="xlsx", accept_multiple_files=True)
 

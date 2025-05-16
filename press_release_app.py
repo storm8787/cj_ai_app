@@ -147,19 +147,18 @@ def press_release_app():
 def excel_merger():
     st.title("✅ 한글 엑셀 업로드 테스트")
 
-    uploaded_file = st.file_uploader("한글 파일명을 가진 엑셀을 업로드하세요", type="xlsx")
+    uploaded_zip = st.file_uploader("엑셀 ZIP 파일 업로드 (한글 이름 포함 가능)", type="zip")
 
-    if uploaded_file:
-        try:
-            content = uploaded_file.read()
-            file_data = BytesIO(content)
-            df = pd.read_excel(file_data)
-
-            st.success("✅ 파일 업로드 및 읽기 성공")
-            st.dataframe(df.head())
-
-        except Exception as e:
-            st.error(f"❌ 오류 발생: {e}")
+    if uploaded_zip:
+        import zipfile
+        combined_df = pd.DataFrame()
+        with zipfile.ZipFile(uploaded_zip) as archive:
+            for name in archive.namelist():
+                if name.endswith(".xlsx"):
+                    with archive.open(name) as file:
+                        df = pd.read_excel(BytesIO(file.read()))
+                        combined_df = pd.concat([combined_df, df], ignore_index=True)
+        st.dataframe(combined_df.head())
         
         
         ####################################

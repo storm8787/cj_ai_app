@@ -141,13 +141,48 @@ def press_release_app():
         else:
             st.warning("⚠️ 제목과 내용 포인트는 반드시 입력해야 합니다.")
 
+# ✅ 엑셀 취합
+def excel_merger():
+    st.title("📊 엑셀 취합기")
+    st.info("여러 개의 엑셀 파일을 하나로 병합하여 미리보기 및 다운로드할 수 있습니다.")
+
+    uploaded_files = st.file_uploader("엑셀 파일을 업로드하세요", type="xlsx", accept_multiple_files=True)
+
+    if uploaded_files:
+        combined_df = pd.DataFrame()
+
+        for file in uploaded_files:
+            df = pd.read_excel(file)
+            combined_df = pd.concat([combined_df, df], ignore_index=True)
+
+        st.success(f"총 {len(combined_df)}행이 병합되었습니다.")
+        st.dataframe(combined_df.head(30))
+
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            combined_df.to_excel(writer, index=False, sheet_name='통합결과')
+
+        st.download_button(
+            label="📥 통합 엑셀 다운로드",
+            data=output.getvalue(),
+            file_name="통합결과.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+
 # ✅ 메인 함수 (기능 선택)
 def main():
     st.sidebar.title("🧰 기능 선택")
-    selected_app = st.sidebar.radio("아래 기능 중 선택하세요", ["(생성형AI)보도자료 생성기"])
+    selected_app = st.sidebar.radio("아래 기능 중 선택하세요", [
+    "(생성형AI) 보도자료 생성기",
+    "(업무자동화) 엑셀 취합기"
+])
 
-    if selected_app == "(생성형AI)보도자료 생성기":
+    if selected_app == "(생성형AI) 보도자료 생성기":
         press_release_app()
+    elif selected_app == "(업무자동화) 엑셀 취합기":
+        excel_merger()
+
 
 if __name__ == "__main__":
     main()

@@ -5,14 +5,15 @@
 
 
 import streamlit as st
-from press_release_app import press_release_app
-from excel_merger import excel_merger
 
 st.set_page_config(
     page_title="더 가까이, 충주시 AI 연구",
     page_icon="logo.png",
     layout="wide"
 )
+
+from press_release_app import press_release_app
+from excel_merger import excel_merger
 
 def main():
     st.sidebar.title("🧰 기능 선택")

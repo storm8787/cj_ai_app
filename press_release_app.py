@@ -18,7 +18,7 @@ from io import BytesIO
 
 st.set_page_config(
     page_title="더 가까이, 충주시 AI 연구",  # 크롬 탭 제목
-    page_icon="🧭",  # 또는 아래처럼 이미지 favicon도 가능
+    page_icon="logo.png",  # 또는 아래처럼 이미지 favicon도 가능
     layout="wide"
 )
 
@@ -151,7 +151,7 @@ def press_release_app():
             st.warning("⚠️ 제목과 내용 포인트는 반드시 입력해야 합니다.")
 
 def excel_merger():
-    st.title("📊 엑셀 취합기 (한글 파일명 대응)")
+    st.title("📊 엑셀 취합기 (Streamlit Cloud 안정화 버전)")
     st.info("여러 개의 엑셀(.xlsx) 파일을 업로드하고 선택한 시트와 제목행을 기준으로 병합합니다.")
 
     header_row = st.number_input("📌 제목행은 몇 번째 행인가요? (1부터 시작)", min_value=1, value=1, step=1)
@@ -162,21 +162,22 @@ def excel_merger():
     if uploaded_files:
         combined_df = pd.DataFrame()
 
-        for file in uploaded_files:
+        for idx, file in enumerate(uploaded_files):
             try:
-                file_io = BytesIO(file.read())
+                file_bytes = file.read()
+                file_io = BytesIO(file_bytes)
                 file_io.seek(0)
 
                 if sheet_option == "모든 시트":
                     xls = pd.read_excel(file_io, sheet_name=None, header=header_row - 1)
-                    for sheet_name, sheet_df in xls.items():
-                        st.success(f"✅ 시트 '{sheet_name}' 병합 완료")
+                    for sheet_df in xls.values():
                         combined_df = pd.concat([combined_df, sheet_df], ignore_index=True)
                 else:
                     sheet_index = int(sheet_option.split("번째 시트")[0]) - 1
                     df = pd.read_excel(file_io, sheet_name=sheet_index, header=header_row - 1)
-                    st.success(f"✅ 시트 {sheet_index + 1} 병합 완료")
                     combined_df = pd.concat([combined_df, df], ignore_index=True)
+
+                st.success(f"✅ 파일 {idx + 1} 처리 완료")
 
             except Exception as e:
                 st.error(f"❌ 오류 발생: {e}")
@@ -199,6 +200,7 @@ def excel_merger():
                 file_name="통합결과.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 
             

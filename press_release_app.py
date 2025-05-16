@@ -143,43 +143,40 @@ def press_release_app():
         else:
             st.warning("⚠️ 제목과 내용 포인트는 반드시 입력해야 합니다.")
 
-# ✅ 엑셀 취합
+# ✅ 엑셀 취합 (zip 기반 + 옵션 설정)
 def excel_merger():
-    st.title("✅ 한글 엑셀 업로드 테스트")
+    st.title("📊 엑셀 취합기 (ZIP 기반)")
+    st.info("ZIP 파일로 업로드된 다수의 엑셀 파일을 선택된 시트와 제목행 기준으로 병합합니다.")
 
-    uploaded_zip = st.file_uploader("엑셀 ZIP 파일 업로드 (한글 이름 포함 가능)", type="zip")
+    # ✅ 사용자 설정 옵션
+    header_row = st.number_input("📌 제목행은 몇 번째 행인가요? (1부터 시작)", min_value=1, value=1, step=1)
+    sheet_option = st.selectbox("📄 병합할 시트를 선택하세요", [f"{i+1}번째 시트" for i in range(10)] + ["모든 시트"])
+
+    uploaded_zip = st.file_uploader("📂 엑셀 ZIP 파일을 업로드하세요", type="zip")
 
     if uploaded_zip:
-        import zipfile
         combined_df = pd.DataFrame()
+
         with zipfile.ZipFile(uploaded_zip) as archive:
-            for name in archive.namelist():
-                if name.endswith(".xlsx"):
+            xlsx_files = [name for name in archive.namelist() if name.endswith(".xlsx")]
+
+            for name in xlsx_files:
+                try:
                     with archive.open(name) as file:
-                        df = pd.read_excel(BytesIO(file.read()))
-                        combined_df = pd.concat([combined_df, df], ignore_index=True)
-        st.dataframe(combined_df.head())
-        
-        
-        ####################################
-        
-        st.title("📊 엑셀 취합기")
-        st.info("여러 개의 엑셀 파일을 하나로 병합하여 미리보기 및 다운로드할 수 있습니다.")
+                        file_content = BytesIO(file.read())
 
-    uploaded_files = st.file_uploader("엑셀 파일을 업로드하세요", type="xlsx", accept_multiple_files=True)
+                        if sheet_option == "모든 시트":
+                            xls = pd.read_excel(file_content, sheet_name=None, header=header_row - 1)
+                            for sheet_df in xls.values():
+                                combined_df = pd.concat([combined_df, sheet_df], ignore_index=True)
+                        else:
+                            sheet_index = int(sheet_option.split("번째 시트")[0]) - 1
+                            df = pd.read_excel(file_content, sheet_name=sheet_index, header=header_row - 1)
+                            combined_df = pd.concat([combined_df, df], ignore_index=True)
 
-    if uploaded_files:
-        combined_df = pd.DataFrame()
-
-        for idx, file in enumerate(uploaded_files):
-            try:
-                # 파일을 메모리 상 안전하게 복사 (BytesIO로 읽기)
-                file_content = BytesIO(file.read())
-                df = pd.read_excel(file_content)
-                combined_df = pd.concat([combined_df, df], ignore_index=True)
-                st.success(f"✅ 파일 '{file.name}' 병합 완료")
-            except Exception as e:
-                st.error(f"❌ 파일 '{file.name}' 처리 중 오류: {e}")
+                    st.success(f"✅ 파일 '{name}' 병합 완료")
+                except Exception as e:
+                    st.error(f"❌ 파일 '{name}' 처리 중 오류: {e}")
 
         if not combined_df.empty:
             combined_df.reset_index(drop=True, inplace=True)
@@ -191,6 +188,7 @@ def excel_merger():
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 combined_df.to_excel(writer, index=False, sheet_name='통합결과')
+            output.seek(0)
 
             st.download_button(
                 label="📥 통합 엑셀 다운로드",
@@ -198,8 +196,7 @@ def excel_merger():
                 file_name="통합결과.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
-
+            
 # ✅ 메인 함수 (기능 선택)
 def main():
     st.sidebar.title("🧰 기능 선택")

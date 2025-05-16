@@ -152,7 +152,12 @@ def excel_merger():
         combined_df = pd.DataFrame()
 
         for file in uploaded_files:
-            df = pd.read_excel(file)
+            try:
+                df = pd.read_excel(file)
+            except Exception as e:
+                st.error(f"파일 {file.name} 읽는 중 오류 발생: {e}")
+                return
+
             combined_df = pd.concat([combined_df, df], ignore_index=True)
 
         st.success(f"총 {len(combined_df)}행이 병합되었습니다.")

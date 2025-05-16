@@ -148,53 +148,33 @@ def excel_merger():
     st.title("📊 엑셀 취합기 (ZIP 기반)")
     st.info("ZIP 파일로 업로드된 다수의 엑셀 파일을 선택된 시트와 제목행 기준으로 병합합니다.")
 
-        # ✅ 사용자 설정 옵션
+    # ✅ 사용자 설정 옵션
     header_row = st.number_input("📌 제목행은 몇 번째 행인가요? (1부터 시작)", min_value=1, value=1, step=1)
     sheet_option = st.selectbox("📄 병합할 시트를 선택하세요", [f"{i+1}번째 시트" for i in range(10)] + ["모든 시트"])
 
-    uploaded_file = st.file_uploader("📂 엑셀 또는 ZIP 파일을 업로드하세요", type=["xlsx", "zip"])
+    uploaded_files = st.file_uploader("📂 엑셀 파일들을 업로드하세요", type=["xlsx"], accept_multiple_files=True)
 
-    if uploaded_file:
+    if uploaded_files:
         combined_df = pd.DataFrame()
 
-        try:
-            if uploaded_file.name.endswith(".zip"):
-                zip_bytes = BytesIO(uploaded_file.read())
-                with zipfile.ZipFile(zip_bytes) as archive:
-                    xlsx_files = [name for name in archive.namelist() if name.endswith(".xlsx")]
-
-                    for name in xlsx_files:
-                        try:
-                            with archive.open(name) as file:
-                                file_content = BytesIO(file.read())
-
-                                if sheet_option == "모든 시트":
-                                    xls = pd.read_excel(file_content, sheet_name=None, header=header_row - 1)
-                                    for sheet_df in xls.values():
-                                        combined_df = pd.concat([combined_df, sheet_df], ignore_index=True)
-                                else:
-                                    sheet_index = int(sheet_option.split("번째 시트")[0]) - 1
-                                    df = pd.read_excel(file_content, sheet_name=sheet_index, header=header_row - 1)
-                                    combined_df = pd.concat([combined_df, df], ignore_index=True)
-
-                            st.success(f"✅ 파일 '{name}' 병합 완료")
-                        except Exception as e:
-                            st.error(f"❌ 파일 '{name}' 처리 중 오류: {e}")
-            else:
-                # 단일 엑셀 파일 처리
-                file_content = BytesIO(uploaded_file.read())
+        for file in uploaded_files:
+            try:
+                file_bytes = file.read()
+                file_io = BytesIO(file_bytes)
 
                 if sheet_option == "모든 시트":
-                    xls = pd.read_excel(file_content, sheet_name=None, header=header_row - 1)
-                    combined_df = pd.concat(xls.values(), ignore_index=True)
+                    xls = pd.read_excel(file_io, sheet_name=None, header=header_row - 1)
+                    for sheet_name, sheet_df in xls.items():
+                        st.success(f"✅ 파일 '{file.name}' - 시트 '{sheet_name}' 병합 완료")
+                        combined_df = pd.concat([combined_df, sheet_df], ignore_index=True)
                 else:
                     sheet_index = int(sheet_option.split("번째 시트")[0]) - 1
-                    combined_df = pd.read_excel(file_content, sheet_name=sheet_index, header=header_row - 1)
+                    df = pd.read_excel(file_io, sheet_name=sheet_index, header=header_row - 1)
+                    st.success(f"✅ 파일 '{file.name}' - 시트 {sheet_index + 1} 병합 완료")
+                    combined_df = pd.concat([combined_df, df], ignore_index=True)
 
-                st.success(f"✅ 파일 '{uploaded_file.name}' 병합 완료")
-
-        except Exception as e:
-            st.error(f"❌ 파일 열기 실패: {e}")
+            except Exception as e:
+                st.error(f"❌ 파일 '{file.name}' 처리 중 오류: {e}")
 
         if not combined_df.empty:
             combined_df.reset_index(drop=True, inplace=True)
@@ -203,7 +183,7 @@ def excel_merger():
 
             st.dataframe(combined_df.head(30))
 
-            output = io.BytesIO()
+            output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 combined_df.to_excel(writer, index=False, sheet_name='통합결과')
             output.seek(0)

@@ -6,27 +6,28 @@
 
 import streamlit as st
 import datetime
-import os
-import pickle
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+import requests
+import json
 
-# 설정
-CLIENT_SECRETS_FILE = "client_secret.json"
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
-TOKEN_FILE = "token.pkl"
 
-def save_credentials(creds):
-    with open(TOKEN_FILE, "wb") as token:
-        pickle.dump(creds, token)
-
-def load_credentials():
-    if os.path.exists(TOKEN_FILE):
-        with open(TOKEN_FILE, "rb") as token:
-            return pickle.load(token)
-    return None
+def build_flow():
+    return Flow.from_client_config(
+        {
+            "web": {
+                "client_id": st.secrets["GOOGLE_CLIENT_ID"],
+                "client_secret": st.secrets["GOOGLE_CLIENT_SECRET"],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token"
+            }
+        },
+        scopes=SCOPES,
+        redirect_uri="http://localhost:8501/"  # 배포 시 수정 필요
+    )
 
 def create_event(creds, title, location, description, start_dt, end_dt):
     service = build("calendar", "v3", credentials=creds)
@@ -43,33 +44,25 @@ def create_event(creds, title, location, description, start_dt, end_dt):
 def calendar_app():
     st.title("📅 일정 등록기 (구글 캘린더)")
 
-    creds = load_credentials()
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            save_credentials(creds)
-        else:
-            if "code" not in st.experimental_get_query_params():
-                flow = Flow.from_client_secrets_file(
-                    CLIENT_SECRETS_FILE,
-                    scopes=SCOPES,
-                    redirect_uri="http://localhost:8501/"
-                )
-                auth_url, _ = flow.authorization_url(prompt='consent')
-                st.markdown(f"[🔐 구글 계정으로 로그인하기]({auth_url})")
-                st.stop()
-            else:
-                code = st.experimental_get_query_params()["code"][0]
-                flow = Flow.from_client_secrets_file(
-                    CLIENT_SECRETS_FILE,
-                    scopes=SCOPES,
-                    redirect_uri="http://localhost:8501/"
-                )
-                flow.fetch_token(code=code)
-                creds = flow.credentials
-                save_credentials(creds)
-                st.success("✅ 로그인 성공! 계속 진행하세요.")
-                st.experimental_rerun()
+    creds = None
+
+    if "code" in st.experimental_get_query_params():
+        code = st.experimental_get_query_params()["code"][0]
+        flow = build_flow()
+        flow.fetch_token(code=code)
+        creds = flow.credentials
+        st.success("✅ 로그인 성공!")
+        st.session_state["creds"] = creds.to_json()
+        st.experimental_rerun()
+
+    elif "creds" in st.session_state:
+        creds = Credentials.from_authorized_user_info(json.loads(st.session_state["creds"]), SCOPES)
+
+    else:
+        flow = build_flow()
+        auth_url, _ = flow.authorization_url(prompt='consent')
+        st.markdown(f"[🔐 구글 계정으로 로그인하기]({auth_url})")
+        st.stop()
 
     with st.form("calendar_form"):
         title = st.text_input("일정 제목", "충주시 간담회")

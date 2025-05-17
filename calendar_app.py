@@ -46,20 +46,16 @@ def calendar_app():
 
     creds = None
 
-    if "code" in st.experimental_get_query_params():
-        # ✅ 사용자가 로그인 완료 후 리디렉션될 때
-        # ↓ 구글에서 받은 인증 코드 처리
-        code = st.experimental_get_query_params()["code"][0]
+    if "code" in st.query_params:
+        code = st.query_params["code"][0]
         flow = build_flow()
         flow.fetch_token(code=code)
         creds = flow.credentials
 
-        # ✅ 로그인 인증 정보를 세션에 저장 (파일 저장 X)
         st.session_state["creds"] = creds.to_json()
-
-        # ✅ 새로고침해서 다음 화면으로 넘어가도록 유도
         st.success("✅ 로그인 성공!")
-        st.experimental_rerun()
+        st.rerun()  # ✅ 여기가 핵심
+
 
     elif "creds" in st.session_state:
         creds = Credentials.from_authorized_user_info(json.loads(st.session_state["creds"]), SCOPES)

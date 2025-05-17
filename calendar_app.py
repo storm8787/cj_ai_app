@@ -84,12 +84,13 @@ def calendar_app():
         # ✅ 로그인 버튼 (같은 탭 이동)
         st.markdown(
             f'''
-            <script>
-                window.location.href = "{auth_url}";
-            </script>
+            <a href="{auth_url}" target="_self">
+                <button style="font-size:18px;padding:10px 20px;">🔐 구글 계정으로 로그인하기</button>
+            </a>
             ''',
             unsafe_allow_html=True
         )
+
         st.stop()
 
     with st.form("calendar_form"):

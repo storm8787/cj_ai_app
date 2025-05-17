@@ -78,20 +78,16 @@ def calendar_app():
         flow = build_flow()
         auth_url, _ = flow.authorization_url(prompt='consent')
 
-        # ✅ 현재 기능 위치 기억
-        st.session_state["return_to"] = "(업무자동화) 구글 일정등록"
+        st.markdown("### 🔐 구글 계정으로 로그인하려면 아래 링크를 클릭하세요:")
 
-        # ✅ 로그인 버튼 (같은 탭 이동)
         st.markdown(
-            f'''
-            <a href="{auth_url}" target="_self">
-                <button style="font-size:18px;padding:10px 20px;">🔐 구글 계정으로 로그인하기</button>
-            </a>
-            ''',
+            f"[👉 구글 계정으로 로그인하기]({auth_url})",
             unsafe_allow_html=True
         )
 
+        st.warning("⚠️ 클릭 시 현재 탭에서 진행됩니다. 로그인 후 다시 일정 등록기로 돌아옵니다.")
         st.stop()
+
 
     with st.form("calendar_form"):
         title = st.text_input("일정 제목", "충주시 간담회")

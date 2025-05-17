@@ -75,7 +75,11 @@ def calendar_app():
     else:
         flow = build_flow()
         auth_url, _ = flow.authorization_url(prompt='consent')
-        st.markdown(f"[🔐 구글 계정으로 로그인하기]({auth_url})")
+        st.markdown(
+            f'<a href="{auth_url}">🔐 구글 계정으로 로그인하기</a>',
+            unsafe_allow_html=True
+        )
+
         st.stop()
 
     with st.form("calendar_form"):

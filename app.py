@@ -28,7 +28,7 @@ def main():
         "아래 기능 중 선택하세요", 
         [
             "(생성형AI) 보도자료 생성기",
-            "(업무자동화) 구글 일정등록",
+            #"(업무자동화) 구글 일정등록",
             "(업무자동화) 엑셀 취합기"
         ],
         index=["(생성형AI) 보도자료 생성기", "(업무자동화) 구글 일정등록", "(업무자동화) 엑셀 취합기"].index(
@@ -42,8 +42,8 @@ def main():
     # ✅ 기능 실행
     if selected_app == "(생성형AI) 보도자료 생성기":
         press_release_app()
-    elif selected_app == "(업무자동화) 구글 일정등록":
-        calendar_app()
+    #elif selected_app == "(업무자동화) 구글 일정등록":
+        #calendar_app()
     elif selected_app == "(업무자동화) 엑셀 취합기":
         excel_merger()        
 

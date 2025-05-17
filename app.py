@@ -21,7 +21,7 @@ def main():
 
     # ✅ 선택한 기능을 세션에 저장해서 로그인 후에도 유지
     if "selected_app" not in st.session_state:
-        st.session_state.selected_app = "(업무자동화) 구글 일정등록"  # 기본값 (또는 보도자료 생성기)
+        st.session_state.selected_app = "(생성형AI) 보도자료 생성기"  # 기본값 (또는 보도자료 생성기)
 
     # ✅ 선택 상태 유지되는 라디오 버튼
     selected_app = st.sidebar.radio(

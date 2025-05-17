@@ -14,7 +14,8 @@ st.set_page_config(
 
 from press_release_app import press_release_app
 from excel_merger import excel_merger
-from press_release_app import calendar_app
+from calendar_app import calendar_app
+
 
 
 def main():

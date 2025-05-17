@@ -46,14 +46,15 @@ def calendar_app():
 
     creds = None
 
-    st.write("🔐 code:", code)
-    st.write("📎 redirect_uri:", build_flow().redirect_uri)
-    st.write("📌 client_id:", st.secrets["GOOGLE_CLIENT_ID"][:10] + "...")
-
-
+   
     if "code" in st.query_params:
         try:
             code = st.query_params["code"][0]
+
+            st.write("🔐 code:", code)
+            st.write("📎 redirect_uri:", build_flow().redirect_uri)
+            st.write("📌 client_id:", st.secrets["GOOGLE_CLIENT_ID"][:10] + "...")
+            
             flow = build_flow()
             flow.fetch_token(code=code)
             creds = flow.credentials

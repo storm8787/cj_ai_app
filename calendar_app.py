@@ -47,14 +47,20 @@ def calendar_app():
     creds = None
 
     if "code" in st.query_params:
-        code = st.query_params["code"][0]
-        flow = build_flow()
-        flow.fetch_token(code=code)
-        creds = flow.credentials
+        try:
+            code = st.query_params["code"][0]
+            flow = build_flow()
+            flow.fetch_token(code=code)
+            creds = flow.credentials
 
-        st.session_state["creds"] = creds.to_json()
-        st.success("✅ 로그인 성공!")
-        st.rerun()  # ✅ 여기가 핵심
+            st.session_state["creds"] = creds.to_json()
+            st.success("✅ 로그인 성공!")
+            st.rerun()
+        except Exception as e:
+            st.error("❌ 로그인 실패. 다시 로그인해 주세요.")
+            if st.button("🔁 다시 로그인하기"):
+                st.session_state.clear()
+                st.rerun()
 
 
     elif "creds" in st.session_state:

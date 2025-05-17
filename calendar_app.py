@@ -46,6 +46,11 @@ def calendar_app():
 
     creds = None
 
+    st.write("🔐 code:", code)
+    st.write("📎 redirect_uri:", build_flow().redirect_uri)
+    st.write("📌 client_id:", st.secrets["GOOGLE_CLIENT_ID"][:10] + "...")
+
+
     if "code" in st.query_params:
         try:
             code = st.query_params["code"][0]
@@ -60,7 +65,7 @@ def calendar_app():
         except Exception as e:
             st.error("❌ 로그인 실패. 다시 로그인해 주세요.")
             st.session_state.clear()
-            st.rerun()
+            st.stop()
 
     elif "creds" in st.session_state:
         creds = Credentials.from_authorized_user_info(json.loads(st.session_state["creds"]), SCOPES)

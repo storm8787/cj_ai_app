@@ -48,22 +48,24 @@ def calendar_app():
 
    
     if "code" in st.query_params:
-        try:
-            #code = st.query_params["code"][0]
-            code = st.query_params.get("code")
+        code = st.query_params.get("code")
+        st.write("🔐 code:", code)
+        st.write("📎 redirect_uri:", build_flow().redirect_uri)
+        st.write("📌 client_id:", st.secrets["GOOGLE_CLIENT_ID"][:10] + "...")
 
-            st.write("🔐 code:", code)
-            st.write("📎 redirect_uri:", build_flow().redirect_uri)
-            st.write("📌 client_id:", st.secrets["GOOGLE_CLIENT_ID"][:10] + "...")
-            
-            flow = build_flow()
+        flow = build_flow()
+        try:
             flow.fetch_token(code=code)
             creds = flow.credentials
-
             st.session_state["creds"] = creds.to_json()
             st.success("✅ 로그인 성공!")
-            st.rerun()
 
+            # ✅ 로그인 성공 후 다시 돌아갈 기능 기억해둔 곳으로 이동
+            if "return_to" in st.session_state:
+                st.session_state.selected_app = st.session_state["return_to"]
+                del st.session_state["return_to"]
+
+            st.rerun()
         except Exception as e:
             st.error("❌ 로그인 실패. 다시 로그인해 주세요.")
             st.session_state.clear()
@@ -75,11 +77,15 @@ def calendar_app():
     else:
         flow = build_flow()
         auth_url, _ = flow.authorization_url(prompt='consent')
+
+        # ✅ 현재 기능 위치 기억
+        st.session_state["return_to"] = "(업무자동화) 구글 일정등록"
+
+        # ✅ 로그인 버튼 (같은 탭 이동)
         st.markdown(
             f'<a href="{auth_url}">🔐 구글 계정으로 로그인하기</a>',
             unsafe_allow_html=True
         )
-
         st.stop()
 
     with st.form("calendar_form"):

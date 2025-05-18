@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[2]:
 
 
 import streamlit as st
@@ -24,11 +24,11 @@ def load_insight_examples(section_id):
 def festival_basic_info():
     st.subheader("📌 축제 기본정보 입력")
 
-    festival_name = st.text_input("🎪 축제명", value="수안보온천제")
-    location = st.text_input("📍 축제 장소", value="충주시 수안보면 일원")
+    festival_name = st.text_input("🎪 축제명")
+    location = st.text_input("📍 축제 장소")
 
-    start_date = st.date_input("🗓 축제 시작일", value=date(2025, 4, 11))
-    end_date = st.date_input("🏁 축제 종료일", value=date(2025, 4, 13))
+    start_date = st.date_input("🗓 축제 시작일")
+    end_date = st.date_input("🏁 축제 종료일")
 
     period = f"{start_date.strftime('%Y.%m.%d')} ~ {end_date.strftime('%Y.%m.%d')}"
     days = (end_date - start_date).days + 1
@@ -154,6 +154,77 @@ def analyze_summary():
             if "summary_parts" not in st.session_state:
                 st.session_state.summary_parts = []
             st.session_state.summary_parts.append(summary)
+
+# ✅ 2번 분석기
+def analyze_daily_visitors():
+    st.subheader("📊 2. 축제 일자별 방문객 수 분석")
+
+    st.markdown("현지인과 외지인의 일자별 방문객 수를 입력하세요.")
+
+    days = ["4월 11일", "4월 12일", "4월 13일"]
+    local = {}
+    tourist = {}
+
+    for day in days:
+        col1, col2 = st.columns(2)
+        with col1:
+            local[day] = st.number_input(f"{day} 현지인", min_value=0, step=100, key=f"local_{day}")
+        with col2:
+            tourist[day] = st.number_input(f"{day} 외지인", min_value=0, step=100, key=f"tourist_{day}")
+
+    if st.button("🚀 일자별 분석 실행"):
+        # 데이터프레임 생성
+        data = {
+            "구분": ["현지인", "외지인", "전체"],
+        }
+        total_by_day = {}
+
+        for day in days:
+            total = local[day] + tourist[day]
+            total_by_day[day] = total
+            data[day] = [local[day], tourist[day], total]
+
+        # 합계 열 추가
+        total_local = sum(local.values())
+        total_tourist = sum(tourist.values())
+        total_all = total_local + total_tourist
+        data["합계"] = [total_local, total_tourist, total_all]
+        data["전체 대비 비율"] = [f"{total_local/total_all:.2%}", f"{total_tourist/total_all:.2%}", "100.00%"]
+
+        df = pd.DataFrame(data).set_index("구분")
+        st.dataframe(df, use_container_width=True)
+
+        # 날짜별 비율
+        st.markdown("\n### 📅 날짜별 전체 방문객 구성비")
+        date_table = {
+            "날짜": days,
+            "전체 방문객 수": [total_by_day[day] for day in days],
+            "전체 대비 구성비": [f"{(total_by_day[day]/total_all):.2%}" for day in days]
+        }
+        st.dataframe(pd.DataFrame(date_table), use_container_width=True)
+
+        # GPT 시사점
+        with st.spinner("🤖 GPT 시사점 생성 중..."):
+            prompt = f"""
+다음은 축제 기간 중 일자별 현지인 및 외지인 방문객 수입니다.
+
+- {days[0]}: 현지인 {local[days[0]]:,}명, 외지인 {tourist[days[0]]:,}명
+- {days[1]}: 현지인 {local[days[1]]:,}명, 외지인 {tourist[days[1]]:,}명
+- {days[2]}: 현지인 {local[days[2]]:,}명, 외지인 {tourist[days[2]]:,}명
+
+총 방문객 수는 {total_all:,}명이며, 일자별 구성비와 방문객 특성을 고려해 시사점을 3~5문장으로 행정문서 스타일로 작성해주세요.
+"""
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.5,
+                max_tokens=600
+            )
+            st.subheader("🧠 GPT 시사점")
+            st.write(response.choices[0].message.content)
 
 # ✅ 전체 분석기
 def festival_analysis_app():

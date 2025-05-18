@@ -25,6 +25,7 @@ def main():
         "(업무자동화) 엑셀 취합기"
     ]
     admin_features = [
+        "(관리자) 빅데이터 분석기"
         "(관리자) 테스트 페이지",
         "(관리자) 데이터 초기화"
     ]
@@ -44,7 +45,7 @@ def main():
     # ✅ 관리자 모드 UI는 맨 아래에 배치
     with st.sidebar.expander("🔐 관리자 모드", expanded=False):
         password = st.text_input("비밀번호를 입력하세요", type="password", key="admin_pw")
-        if password == "cjadmin123":
+        if password == "wjdqh5313!":
             st.session_state.admin_mode = True
             st.success("✅ 관리자 모드 활성화됨")
         elif password:
@@ -63,6 +64,8 @@ def main():
         press_release_app()
     elif st.session_state.selected_app == "(업무자동화) 엑셀 취합기":
         excel_merger()
+    elif st.session_state.selected_app == "(관리자) 빅데이터 분석기":
+        festival_analysis_app()
     elif st.session_state.selected_app == "(관리자) 테스트 페이지":
         st.title("👨‍💻 관리자용 테스트 페이지")
         st.write("관리자 전용 기능입니다.")
@@ -72,4 +75,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# In[ ]:
+
+
+
 

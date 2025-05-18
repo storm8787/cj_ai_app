@@ -177,3 +177,20 @@ def analyze_daily_visitors():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
+# ✅ 전체 분석기 실행 함수
+def festival_analysis_app():
+    st.title("🎯 축제 빅데이터 분석기")
+
+    # 축제 기본정보 먼저 입력
+    festival_basic_info()
+
+    selected = st.selectbox("📂 분석 항목 선택", [
+        "1. 축제 방문객 현황 분석",
+        "2. 축제 일자별 방문객 수 분석"
+    ])
+
+    if selected.startswith("1"):
+        analyze_summary()
+    elif selected.startswith("2"):
+        analyze_daily_visitors()
+

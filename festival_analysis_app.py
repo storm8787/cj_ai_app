@@ -118,7 +118,7 @@ def analyze_summary():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
-# ✅ 2번 분석기: 축제 일자별 방문객 수 분석 (전년도 + 올해 + 결과 테이블 포함)
+# ✅ 2번 분석기: 축제 일자별 방문객 수 분석 (전년도 + 올해 데이터, 표 + GPT 시사점)
 def analyze_daily_visitors():
     st.subheader("📊 2. 축제 일자별 방문객 수 분석")
     st.markdown("전년도 및 올해 현지인/외지인의 일자별 방문객 수를 입력하세요.")
@@ -133,10 +133,8 @@ def analyze_daily_visitors():
     days = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
     day_labels = [day.strftime("%Y.%m.%d") for day in days]
 
-    prev_local = {}
-    prev_tourist = {}
-    curr_local = {}
-    curr_tourist = {}
+    prev_local, prev_tourist = {}, {}
+    curr_local, curr_tourist = {}, {}
 
     for i, day in enumerate(days):
         st.markdown(f"### 📅 {i+1}일차 ({day_labels[i]})")
@@ -152,61 +150,76 @@ def analyze_daily_visitors():
 
     if st.button("🚀 일자별 분석 실행", key="daily_btn"):
         summary_lines = []
-        total_prev = 0
-        total_curr = 0
 
-        total_by_day = []
-        curr_local_row = []
-        curr_tourist_row = []
-        curr_total_row = []
+        # 데이터 저장용
+        data_rows = []
+
+        # 합계용
+        total_prev_local = total_prev_tourist = 0
+        total_curr_local = total_curr_tourist = 0
 
         for i, day in enumerate(days):
+            label = day.strftime("%Y.%m.%d")
+
+            # 값 추출
             pl = prev_local[day]
             pt = prev_tourist[day]
             cl = curr_local[day]
             ct = curr_tourist[day]
-            t_prev = pl + pt
-            t_curr = cl + ct
-            total_prev += t_prev
-            total_curr += t_curr
 
-            summary_line = f"{i+1}일차 - 올해: 현지인 {cl:,}명 / 외지인 {ct:,}명 / 전체 {t_curr:,}명"
-            if t_prev > 0:
-                summary_line = f"{i+1}일차 - 전년도: 현지인 {pl:,}명 / 외지인 {pt:,}명 / 전체 {t_prev:,}명 | {summary_line}"
-            summary_lines.append(summary_line)
+            # 합계 계산
+            pl_sum = pl + pt
+            cl_sum = cl + ct
 
-            total_by_day.append(t_curr)
-            curr_local_row.append(cl)
-            curr_tourist_row.append(ct)
-            curr_total_row.append(t_curr)
+            total_prev_local += pl
+            total_prev_tourist += pt
+            total_curr_local += cl
+            total_curr_tourist += ct
 
-        # ✅ 1. 날짜별 전체 방문객수 + 전체 대비 구성비
-        st.markdown("### 📅 날짜별 전체 방문객 구성비")
-        percent_by_day = [f"{(v/total_curr):.2%}" for v in total_by_day]
-        df_day = pd.DataFrame({
+            summary = f"{i+1}일차 - 올해: 현지인 {cl:,}명 / 외지인 {ct:,}명 / 전체 {cl_sum:,}명"
+            if pl_sum > 0:
+                summary = f"{i+1}일차 - 전년도: 현지인 {pl:,}명 / 외지인 {pt:,}명 / 전체 {pl_sum:,}명 | {summary}"
+            summary_lines.append(summary)
+
+            # 표용 데이터 정리
+            data_rows.append({
+                "구분": "전년도 현지인", label: pl
+            })
+            data_rows.append({
+                "구분": "전년도 외지인", label: pt
+            })
+            data_rows.append({
+                "구분": "전년도 전체", label: pl_sum
+            })
+            data_rows.append({
+                "구분": "올해 현지인", label: cl
+            })
+            data_rows.append({
+                "구분": "올해 외지인", label: ct
+            })
+            data_rows.append({
+                "구분": "올해 전체", label: cl_sum
+            })
+
+        # 📊 표 생성
+        df = pd.DataFrame(data_rows).groupby("구분").sum()
+        df["합계"] = df.sum(axis=1)
+        total_all = df.loc["올해 전체", "합계"]
+        df["전체 대비 비율"] = df["합계"].apply(lambda x: f"{(x / total_all):.2%}" if total_all > 0 else "0.00%")
+        st.markdown("### 📋 전년도 / 올해 방문객 수 비교")
+        st.dataframe(df, use_container_width=True)
+
+        # 📌 날짜별 전체 구성비
+        st.markdown("### 📅 날짜별 전체 방문객 구성비 (올해 기준)")
+        day_totals = [curr_local[day] + curr_tourist[day] for day in days]
+        day_percent = [f"{(v / sum(day_totals)):.2%}" if sum(day_totals) else "0.00%" for v in day_totals]
+        st.dataframe(pd.DataFrame({
             "날짜": day_labels,
-            "전체 방문객 수": total_by_day,
-            "전체 대비 구성비": percent_by_day
-        })
-        st.dataframe(df_day, use_container_width=True)
+            "전체 방문객 수": day_totals,
+            "전체 대비 구성비": day_percent
+        }), use_container_width=True)
 
-        # ✅ 2. 현지인/외지인 일자별 구성 + 전체 합계 + 비율
-        st.markdown("### 👥 구분별 일자별 방문객 수 및 비율")
-        total_local = sum(curr_local_row)
-        total_tourist = sum(curr_tourist_row)
-        total_all = total_local + total_tourist
-        local_ratio = f"{total_local / total_all:.2%}"
-        tourist_ratio = f"{total_tourist / total_all:.2%}"
-
-        df_type = pd.DataFrame({
-            "구분": ["현지인", "외지인", "전체"],
-            **{label: [curr_local_row[i], curr_tourist_row[i], curr_total_row[i]] for i, label in enumerate(day_labels)},
-            "합계": [total_local, total_tourist, total_all],
-            "전체 대비 비율": [local_ratio, tourist_ratio, "100.00%"]
-        }).set_index("구분")
-        st.dataframe(df_type, use_container_width=True)
-
-        # ✅ 3. GPT 시사점
+        # 🤖 GPT 시사점
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             examples = load_insight_examples("2_daily")
             prompt = f"""
@@ -216,7 +229,7 @@ def analyze_daily_visitors():
 [일자별 방문객 비교]
 {chr(10).join(summary_lines)}
 
-일자별 현황과 변화 양상을 반영해 3~5문장으로 시사점을 작성해주세요.
+일자별 현황과 전년도 대비 특성을 반영해 3~5문장으로 시사점을 작성해주세요.
 """
             response = client.chat.completions.create(
                 model="gpt-4o",
@@ -229,6 +242,7 @@ def analyze_daily_visitors():
             )
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
+
 
 
 # ✅ 전체 분석기 실행 함수

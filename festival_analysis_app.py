@@ -8,10 +8,10 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 
-# ✅ OpenAI API 설정
+# ✅ GPT 연결
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ 시사점 예시 로딩
+# ✅ 시사점 예시 불러오기
 def load_insight_examples(section_id):
     try:
         with open(f"data/insights/{section_id}.txt", encoding="utf-8") as f:
@@ -21,19 +21,17 @@ def load_insight_examples(section_id):
 
 # ✅ 축제 기본정보 입력
 def festival_basic_info():
-    st.subheader("🎪 축제 기본정보 입력")
+    st.subheader("📌 축제 기본정보 입력")
 
-    festival_name = st.text_input("축제명", value="2025년 수안보온천제")
-    location = st.text_input("축제 장소", value="충주시 수안보면 일원")
-    period = st.text_input("축제 기간", value="2025. 4. 11 ~ 4. 13")
-    days = st.number_input("축제 일수", min_value=1, value=3)
+    festival_name = st.text_input("🎪 축제명", value="2025년 수안보온천제")
+    location = st.text_input("📍 축제 장소", value="충주시 수안보면 일원")
+    period = st.text_input("🗓 축제 기간", value="2025. 4. 11 ~ 4. 13")
 
     st.session_state["festival_name"] = festival_name
     st.session_state["festival_location"] = location
     st.session_state["festival_period"] = period
-    st.session_state["festival_days"] = days
 
-# ✅ 항목별 시사점 생성
+# ✅ 항목별 GPT 시사점 생성
 def generate_section_summary(local_2024, tourist_2024, local_2025, tourist_2025, section_id):
     total_2024 = local_2024 + tourist_2024
     total_2025 = local_2025 + tourist_2025
@@ -41,17 +39,19 @@ def generate_section_summary(local_2024, tourist_2024, local_2025, tourist_2025,
     tourist_diff = tourist_2025 - tourist_2024
     total_diff = total_2025 - total_2024
 
-    festival_name = st.session_state.get("festival_name", "본 축제")
+    examples = load_insight_examples(section_id)
+    name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "축제 기간")
     location = st.session_state.get("festival_location", "")
 
-    examples = load_insight_examples(section_id)
     prompt = f"""
-아래는 유사 항목의 시사점 예시입니다:
+다음은 {name}({period}, {location})에 대한 분석입니다.
+
+아래는 유사 항목 시사점 예시입니다:
 
 {examples}
 
-다음은 {festival_name}({period}, {location})에 대한 방문객 분석입니다. 아래 데이터를 참고해 2~4문장으로 시사점을 작성해주세요:
+다음 데이터를 기반으로 2~4문장 시사점을 작성해주세요:
 
 - 2024년: 현지인 {local_2024:,}명 / 외지인 {tourist_2024:,}명 / 전체 {total_2024:,}명
 - 2025년: 현지인 {local_2025:,}명 / 외지인 {tourist_2025:,}명 / 전체 {total_2025:,}명
@@ -72,23 +72,23 @@ def generate_section_summary(local_2024, tourist_2024, local_2025, tourist_2025,
 def generate_final_text(purpose):
     examples = load_insight_examples(purpose)
     combined = "\n".join(st.session_state.get("summary_parts", []))
-    festival_name = st.session_state.get("festival_name", "본 축제")
+    name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "축제 기간")
     location = st.session_state.get("festival_location", "")
 
     prompt = f"""
-아래는 {purpose.replace('_', ' ')} 예시입니다:
+다음은 {name}({period}, {location})에 대한 전체 분석 내용을 바탕으로 {purpose.replace('_', ' ')}을 작성해주세요.
 
+[예시]
 {examples}
 
-{festival_name}({period}, {location})에 대한 전체 분석 요약을 참고하여, {purpose.replace('_', ' ')}을(를) 4~6문단으로 작성해주세요:
-
+[분석요약]
 {combined}
 """
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "너는 축제 보고서 작성 전문가야."},
+            {"role": "system", "content": "너는 지방행정 보고서를 작성하는 전문가야."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.5,
@@ -98,7 +98,7 @@ def generate_final_text(purpose):
 
 # ✅ 1번 분석기
 def analyze_summary():
-    st.subheader("📌 1. 축제 기간 방문객 현황 (총괄)")
+    st.subheader("📊 1. 축제 방문객 현황 분석")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -116,7 +116,7 @@ def analyze_summary():
         total_2025 = local_2025 + tourist_2025
 
         row_2024 = {
-            "연도": "2024년 (4.12~4.14)",
+            "연도": "2024년",
             "현지인 방문객수": f"{local_2024:,}명 (일평균: {local_2024 // days_2024:,}명)",
             "외지인 방문객수": f"{tourist_2024:,}명 (일평균: {tourist_2024 // days_2024:,}명)",
             "전체 관광객 수": f"{total_2024:,}명 (일평균: {total_2024 // days_2024:,}명)",
@@ -124,7 +124,7 @@ def analyze_summary():
         }
 
         row_2025 = {
-            "연도": "2025년 (4.11~4.13)",
+            "연도": "2025년",
             "현지인 방문객수": f"{local_2025:,}명 (일평균: {local_2025 // days_2025:,}명)",
             "외지인 방문객수": f"{tourist_2025:,}명 (일평균: {tourist_2025 // days_2025:,}명)",
             "전체 관광객 수": f"{total_2025:,}명 (일평균: {total_2025 // days_2025:,}명)",
@@ -146,6 +146,7 @@ def analyze_summary():
             st.subheader("🧠 GPT 시사점")
             st.write(summary)
 
+            # 누적 저장
             if "summary_parts" not in st.session_state:
                 st.session_state.summary_parts = []
             st.session_state.summary_parts.append(summary)
@@ -154,7 +155,7 @@ def analyze_summary():
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")
 
-    # 🏁 기본정보 입력 먼저 실행
+    # 기본정보 입력 먼저
     festival_basic_info()
 
     selected = st.selectbox("📂 분석 항목 선택", [

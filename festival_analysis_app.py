@@ -8,48 +8,99 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 
-# ✅ OpenAI API 키 설정 (Streamlit Secrets에 저장된 값 사용)
+# ✅ OpenAI API 설정
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+# ✅ 시사점 예시 로딩
+def load_insight_examples(section_id):
+    try:
+        with open(f"data/insights/{section_id}.txt", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
 
-# ✅ 시사점 생성 함수 (ChatGPT API 호출)
-def generate_insights(local_2024, tourist_2024, local_2025, tourist_2025):
+# ✅ 축제 기본정보 입력
+def festival_basic_info():
+    st.subheader("🎪 축제 기본정보 입력")
+
+    festival_name = st.text_input("축제명", value="2025년 수안보온천제")
+    location = st.text_input("축제 장소", value="충주시 수안보면 일원")
+    period = st.text_input("축제 기간", value="2025. 4. 11 ~ 4. 13")
+    days = st.number_input("축제 일수", min_value=1, value=3)
+
+    st.session_state["festival_name"] = festival_name
+    st.session_state["festival_location"] = location
+    st.session_state["festival_period"] = period
+    st.session_state["festival_days"] = days
+
+# ✅ 항목별 시사점 생성
+def generate_section_summary(local_2024, tourist_2024, local_2025, tourist_2025, section_id):
     total_2024 = local_2024 + tourist_2024
     total_2025 = local_2025 + tourist_2025
-
     local_diff = local_2025 - local_2024
     tourist_diff = tourist_2025 - tourist_2024
     total_diff = total_2025 - total_2024
 
+    festival_name = st.session_state.get("festival_name", "본 축제")
+    period = st.session_state.get("festival_period", "축제 기간")
+    location = st.session_state.get("festival_location", "")
+
+    examples = load_insight_examples(section_id)
     prompt = f"""
-    다음은 충주시의 축제 방문객 데이터입니다. 이를 바탕으로 행정기관 보도자료 스타일의 시사점을 3~5문장으로 작성해주세요.
+아래는 유사 항목의 시사점 예시입니다:
 
-    - 2024년: 현지인 {local_2024:,}명, 외지인 {tourist_2024:,}명, 전체 {total_2024:,}명
-    - 2025년: 현지인 {local_2025:,}명, 외지인 {tourist_2025:,}명, 전체 {total_2025:,}명
-    - 전년대비: 현지인 {local_diff:+,}명, 외지인 {tourist_diff:+,}명, 전체 {total_diff:+,}명
+{examples}
 
-    시사점은 수치를 해석하며, 긍정적/부정적 측면을 함께 고려하고 행정적 해석이 담기도록 해주세요.
-    """
+다음은 {festival_name}({period}, {location})에 대한 방문객 분석입니다. 아래 데이터를 참고해 2~4문장으로 시사점을 작성해주세요:
 
+- 2024년: 현지인 {local_2024:,}명 / 외지인 {tourist_2024:,}명 / 전체 {total_2024:,}명
+- 2025년: 현지인 {local_2025:,}명 / 외지인 {tourist_2025:,}명 / 전체 {total_2025:,}명
+- 전년대비: 현지인 {local_diff:+,}명 / 외지인 {tourist_diff:+,}명 / 전체 {total_diff:+,}명
+"""
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "너는 축제 데이터 분석에 특화된 지방행정 보고서 작성 전문가야."},
+            {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.4,
+        max_tokens=600
+    )
+    return response.choices[0].message.content
+
+# ✅ 분석요약 or 종합의견 생성
+def generate_final_text(purpose):
+    examples = load_insight_examples(purpose)
+    combined = "\n".join(st.session_state.get("summary_parts", []))
+    festival_name = st.session_state.get("festival_name", "본 축제")
+    period = st.session_state.get("festival_period", "축제 기간")
+    location = st.session_state.get("festival_location", "")
+
+    prompt = f"""
+아래는 {purpose.replace('_', ' ')} 예시입니다:
+
+{examples}
+
+{festival_name}({period}, {location})에 대한 전체 분석 요약을 참고하여, {purpose.replace('_', ' ')}을(를) 4~6문단으로 작성해주세요:
+
+{combined}
+"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "너는 축제 보고서 작성 전문가야."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.5,
-        max_tokens=500
+        max_tokens=1500
     )
-
     return response.choices[0].message.content
 
-
-# ✅ 1번 항목: 축제 방문객 현황 분석 함수
+# ✅ 1번 분석기
 def analyze_summary():
     st.subheader("📌 1. 축제 기간 방문객 현황 (총괄)")
 
     col1, col2 = st.columns(2)
-
     with col1:
         local_2024 = st.number_input("2024년 현지인 방문객 수", min_value=0, step=100)
         tourist_2024 = st.number_input("2024년 외지인 방문객 수", min_value=0, step=100)
@@ -88,37 +139,40 @@ def analyze_summary():
             "비고": ""
         }
 
-        result_df = pd.DataFrame([row_2024, row_2025, row_diff])
-        st.subheader("📊 분석 결과표")
-        st.dataframe(result_df, use_container_width=True)
+        st.dataframe(pd.DataFrame([row_2024, row_2025, row_diff]), use_container_width=True)
 
-        # ✅ 시사점 도출
-        with st.spinner("🤖 ChatGPT가 시사점을 작성 중입니다..."):
-            insight = generate_insights(local_2024, tourist_2024, local_2025, tourist_2025)
+        with st.spinner("🤖 GPT 시사점 생성 중..."):
+            summary = generate_section_summary(local_2024, tourist_2024, local_2025, tourist_2025, "1_summary")
             st.subheader("🧠 GPT 시사점")
-            st.write(insight)
+            st.write(summary)
 
+            if "summary_parts" not in st.session_state:
+                st.session_state.summary_parts = []
+            st.session_state.summary_parts.append(summary)
 
-# ✅ 전체 분석기 앱 (1~6번 항목 선택 UI 포함)
+# ✅ 전체 분석기
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")
 
-    st.markdown("아래에서 분석하고자 하는 항목을 선택하세요. 각 항목은 수치 입력 또는 엑셀 업로드를 기반으로 자동 분석되며, GPT를 통해 시사점까지 도출됩니다.")
+    # 🏁 기본정보 입력 먼저 실행
+    festival_basic_info()
 
-    selected_section = st.selectbox("📂 분석 항목 선택", [
+    selected = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 기간 방문객 현황(총괄)",
-        "2. 축제 일자별 방문객 수 (준비중)",
-        "3. 시간대별 관광객 존재 현황 (준비중)",
-        "4. 전·중·후 일평균 방문객 현황 (준비중)",
-        "5. 연령별 현황 (준비중)",
-        "6-1. 외지인 거주지 (시도별) (준비중)",
-        "6-2. 외지인 거주지 (시군별) (준비중)",
-        "6-3. 방문 후 이동지역 (준비중)"
+        "📘 분석결과(요약) 작성",
+        "📙 종합의견 작성"
     ])
 
-    if selected_section.startswith("1."):
+    if selected.startswith("1."):
         analyze_summary()
-    else:
-        st.info("⏳ 해당 항목은 추후 개발 예정입니다.")
 
+    elif selected == "📘 분석결과(요약) 작성":
+        if st.button("📌 분석결과 요약 생성"):
+            text = generate_final_text("summary_overview")
+            st.write(text)
+
+    elif selected == "📙 종합의견 작성":
+        if st.button("📌 종합의견 생성"):
+            text = generate_final_text("final_opinion")
+            st.write(text)
 

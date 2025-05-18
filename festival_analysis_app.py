@@ -118,7 +118,7 @@ def analyze_summary():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
-# ✅ 2번 분석기 (캔버스 반영됨)
+# ✅ 2번 분석기: 축제 일자별 방문객 수 분석 (전년도 + 올해 + 결과 테이블 포함)
 def analyze_daily_visitors():
     st.subheader("📊 2. 축제 일자별 방문객 수 분석")
     st.markdown("전년도 및 올해 현지인/외지인의 일자별 방문객 수를 입력하세요.")
@@ -131,6 +131,7 @@ def analyze_daily_visitors():
         return
 
     days = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+    day_labels = [day.strftime("%Y.%m.%d") for day in days]
 
     prev_local = {}
     prev_tourist = {}
@@ -138,7 +139,7 @@ def analyze_daily_visitors():
     curr_tourist = {}
 
     for i, day in enumerate(days):
-        st.markdown(f"### 📅 {i+1}일차 ({day.strftime('%Y.%m.%d')})")
+        st.markdown(f"### 📅 {i+1}일차 ({day_labels[i]})")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             prev_local[day] = st.number_input("전년도 현지인", key=f"prev_local_{i}", min_value=0)
@@ -153,6 +154,11 @@ def analyze_daily_visitors():
         summary_lines = []
         total_prev = 0
         total_curr = 0
+
+        total_by_day = []
+        curr_local_row = []
+        curr_tourist_row = []
+        curr_total_row = []
 
         for i, day in enumerate(days):
             pl = prev_local[day]
@@ -169,6 +175,38 @@ def analyze_daily_visitors():
                 summary_line = f"{i+1}일차 - 전년도: 현지인 {pl:,}명 / 외지인 {pt:,}명 / 전체 {t_prev:,}명 | {summary_line}"
             summary_lines.append(summary_line)
 
+            total_by_day.append(t_curr)
+            curr_local_row.append(cl)
+            curr_tourist_row.append(ct)
+            curr_total_row.append(t_curr)
+
+        # ✅ 1. 날짜별 전체 방문객수 + 전체 대비 구성비
+        st.markdown("### 📅 날짜별 전체 방문객 구성비")
+        percent_by_day = [f"{(v/total_curr):.2%}" for v in total_by_day]
+        df_day = pd.DataFrame({
+            "날짜": day_labels,
+            "전체 방문객 수": total_by_day,
+            "전체 대비 구성비": percent_by_day
+        })
+        st.dataframe(df_day, use_container_width=True)
+
+        # ✅ 2. 현지인/외지인 일자별 구성 + 전체 합계 + 비율
+        st.markdown("### 👥 구분별 일자별 방문객 수 및 비율")
+        total_local = sum(curr_local_row)
+        total_tourist = sum(curr_tourist_row)
+        total_all = total_local + total_tourist
+        local_ratio = f"{total_local / total_all:.2%}"
+        tourist_ratio = f"{total_tourist / total_all:.2%}"
+
+        df_type = pd.DataFrame({
+            "구분": ["현지인", "외지인", "전체"],
+            **{label: [curr_local_row[i], curr_tourist_row[i], curr_total_row[i]] for i, label in enumerate(day_labels)},
+            "합계": [total_local, total_tourist, total_all],
+            "전체 대비 비율": [local_ratio, tourist_ratio, "100.00%"]
+        }).set_index("구분")
+        st.dataframe(df_type, use_container_width=True)
+
+        # ✅ 3. GPT 시사점
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             examples = load_insight_examples("2_daily")
             prompt = f"""
@@ -191,6 +229,7 @@ def analyze_daily_visitors():
             )
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
+
 
 # ✅ 전체 분석기 실행 함수
 def festival_analysis_app():

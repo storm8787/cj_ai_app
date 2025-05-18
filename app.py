@@ -14,7 +14,7 @@ st.set_page_config(
 
 from press_release_app import press_release_app
 from excel_merger import excel_merger
-from festival_analysis_app import festival_analysis_app
+from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메인 함수 불러오기
 
 
 def main():

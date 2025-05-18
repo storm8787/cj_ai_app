@@ -256,9 +256,3 @@ def festival_analysis_app():
             text = generate_final_text("final_opinion")
             st.write(text)
 
-
-# In[ ]:
-
-
-"
-

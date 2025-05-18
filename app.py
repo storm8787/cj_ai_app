@@ -25,9 +25,7 @@ def main():
         "(업무자동화) 엑셀 취합기"
     ]
     admin_features = [
-        "(관리자) 빅데이터 분석기"
-        "(관리자) 테스트 페이지",
-        "(관리자) 데이터 초기화"
+        "(관리자) 빅데이터 분석기"        
     ]
 
     # ✅ 선택 상태 유지
@@ -65,13 +63,7 @@ def main():
     elif st.session_state.selected_app == "(업무자동화) 엑셀 취합기":
         excel_merger()
     elif st.session_state.selected_app == "(관리자) 빅데이터 분석기":
-        festival_analysis_app()
-    elif st.session_state.selected_app == "(관리자) 테스트 페이지":
-        st.title("👨‍💻 관리자용 테스트 페이지")
-        st.write("관리자 전용 기능입니다.")
-    elif st.session_state.selected_app == "(관리자) 데이터 초기화":
-        st.title("🗑 데이터 초기화")
-        st.warning("이 기능은 관리자만 사용할 수 있습니다.")
+        festival_analysis_app()    
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[3]:
 
 
 import streamlit as st
@@ -235,12 +235,16 @@ def festival_analysis_app():
 
     selected = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 기간 방문객 현황(총괄)",
+        "2. 축제일자별 방문객 수",
         "📘 분석결과(요약) 작성",
         "📙 종합의견 작성"
     ])
 
     if selected.startswith("1."):
         analyze_summary()
+
+    elif selected.startswith("2."):
+        analyze_daily_visitors()  # ✅ 이 줄 추가
 
     elif selected == "📘 분석결과(요약) 작성":
         if st.button("📌 분석결과 요약 생성"):
@@ -251,4 +255,10 @@ def festival_analysis_app():
         if st.button("📌 종합의견 생성"):
             text = generate_final_text("final_opinion")
             st.write(text)
+
+
+# In[ ]:
+
+
+"
 

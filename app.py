@@ -15,6 +15,8 @@ st.set_page_config(
 from press_release_app import press_release_app
 from excel_merger import excel_merger
 from calendar_app import calendar_app
+from festival_analysis_app import festival_analysis_app
+
 
 def main():
     st.sidebar.title("🧰 기능 선택")

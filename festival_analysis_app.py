@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-def bigdata_analyzer_app():
+def festival_analysis_app():
     st.title("📊 축제 빅데이터 분석기")
     st.info("축제 방문객 데이터를 업로드하면, 자동으로 현지인/외지인 구분과 증감률 등을 분석합니다.")
 

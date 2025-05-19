@@ -23,7 +23,6 @@ def load_summary_reference():
 
 # ✅ 1번 분석기
 def analyze_summary():
-    st.subheader("✅ 분석기 정상 호출됨")  # 이거 안 뜨면 호출 자체가 안 된 것
     st.subheader("📊 1. 축제 방문객 현황 분석")
 
     col1, col2 = st.columns(2)

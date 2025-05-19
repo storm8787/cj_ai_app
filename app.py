@@ -52,14 +52,14 @@ def main():
             # ✅ 나가기 버튼
             if st.button("🚪 관리자 모드 나가기"):
                 st.session_state.admin_mode = False
-                st.experimental_rerun()  # 반드시 필요
+                st.rerun()  # 반드시 필요
         else:
             # ✅ 비밀번호 입력창 (비활성 상태일 때만 노출)
             password = st.text_input("비밀번호를 입력하세요", type="password")
             if password == "wjdqh5313!":
                 st.session_state.admin_mode = True
                 st.success("✅ 관리자 모드 활성화됨")
-                st.experimental_rerun()
+                st.rerun()
             elif password:
                 st.error("❌ 비밀번호가 틀렸습니다")
 

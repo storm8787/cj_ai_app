@@ -252,7 +252,7 @@ def analyze_time_distribution():
         return
 
     df = pd.read_excel(uploaded_file)
-    df = df.dropna(how="all")  # 전체 비어 있는 행 제거
+    df = df.dropna(how="all")
 
     time_groups = [
         ("06~09시", ["06시 관광객", "07시 관광객", "08시 관광객"]),
@@ -263,77 +263,76 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    rows = []
-    ratios = []
+    local_df = df[df.iloc[:, 0] == "현지인"].iloc[::-1].reset_index(drop=True)
+    tourist_df = df[df.iloc[:, 0] == "외지인"].iloc[::-1].reset_index(drop=True)
+    n_days = len(local_df)
 
-    # 역순 재정렬: 현지인 1~N일차 → 외지인 1~N일차
-    half = len(df) // 2
+    def process_group(group_df, label):
+        rows = []
+        for i in range(n_days):
+            row = group_df.iloc[i]
+            data_row = {"구분": label, "날짜": f"{i+1}일차"}
+            for group_name, cols in time_groups:
+                value = sum([
+                    int(str(row[c]).replace(",", "").replace("명", ""))
+                    if pd.notnull(row[c]) and str(row[c]).strip() else 0
+                    for c in cols
+                ])
+                data_row[group_name] = f"{value:,}명"
+            rows.append(data_row)
 
-    # ✅ 현지인/외지인 데이터 나누기
-    local_df = df[df.iloc[:, 0] == "현지인"].reset_index(drop=True)
-    tourist_df = df[df.iloc[:, 0] == "외지인"].reset_index(drop=True)
+        # 증감률
+        diff_rows = []
+        for i in range(n_days):
+            diff_row = {"구분": "", "날짜": ""}
+            if i == 0:
+                for group_name, _ in time_groups:
+                    diff_row[group_name] = "-"
+            else:
+                for group_name, cols in time_groups:
+                    curr = sum([
+                        int(str(group_df.iloc[i][c]).replace(",", "").replace("명", ""))
+                        if pd.notnull(group_df.iloc[i][c]) and str(group_df.iloc[i][c]).strip() else 0
+                        for c in cols
+                    ])
+                    prev = sum([
+                        int(str(group_df.iloc[i-1][c]).replace(",", "").replace("명", ""))
+                        if pd.notnull(group_df.iloc[i-1][c]) and str(group_df.iloc[i-1][c]).strip() else 0
+                        for c in cols
+                    ])
+                    diff = ((curr - prev) / prev * 100) if prev > 0 else 0
+                    diff_row[group_name] = f"{diff:+.2f}%"
+            diff_rows.append(diff_row)
+        return rows + diff_rows
 
-    # ✅ 반복 범위를 안전하게 설정
-    min_len = min(len(local_df), len(tourist_df))
+    local_rows = process_group(local_df, "현지인")
+    tourist_rows = process_group(tourist_df, "외지인")
 
-    for i in range(min_len):
-        row_l = local_df.iloc[i]
-        row_t = tourist_df.iloc[i]
+    result_df = pd.DataFrame(local_rows + tourist_rows)
+    st.dataframe(result_df, use_container_width=True)
 
-        local_counts = []
-        tourist_counts = []
-
-        for group_name, period_labels in time_groups:
-            local_sum = sum([
-                int(str(row_l[col]).replace("명", "").replace(",", ""))
-                if pd.notnull(row_l[col]) and str(row_l[col]).strip() != "" else 0
-                for col in period_labels
-            ])
-            tourist_sum = sum([
-                int(str(row_t[col]).replace("명", "").replace(",", ""))
-                if pd.notnull(row_t[col]) and str(row_t[col]).strip() != "" else 0
-                for col in period_labels
-            ])
-            local_counts.append(local_sum)
-            tourist_counts.append(tourist_sum)
-
-        rows.append((group_name, "현지인", local_counts))
-        rows.append((group_name, "외지인", tourist_counts))
-
-        total = [l + t for l, t in zip(local_counts, tourist_counts)]
-        local_ratios = [f"{l/t:.2%}" if t > 0 else "-" for l, t in zip(local_counts, total)]
-        tourist_ratios = [f"{t/t2:.2%}" if t2 > 0 else "-" for t, t2 in zip(tourist_counts, total)]
-        ratios.append((group_name, "현지인", local_ratios))
-        ratios.append((group_name, "외지인", tourist_ratios))
-
-    # 결과표 구성
-    day_labels = [f"{i+1}일차" for i in range(len(local_df))]
-    result_data = []
-    for row in rows:
-        data = {"구분": row[1], "시간대": row[0]}
-        data.update({day: f"{cnt:,}명" for day, cnt in zip(day_labels, row[2])})
-        result_data.append(data)
-
-    for r in ratios:
-        data = {"구분": "", "시간대": ""}
-        data.update({day: rate for day, rate in zip(day_labels, r[2])})
-        result_data.append(data)
-
-    st.subheader("📊 시간대별 관광객 현황")
-    st.dataframe(pd.DataFrame(result_data), use_container_width=True)
-
-    # GPT 시사점
+    # GPT 시사점 도출
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
         lines = []
-        for group_name, _, values in rows:
-            total = [v for v in values]
-            lines.append(f"{group_name} : {', '.join([f'{v:,}명' for v in total])}")
+        for group_name, cols in time_groups:
+            l_total = sum([
+                int(str(local_df.iloc[-1][c]).replace(",", "").replace("명", ""))
+                if pd.notnull(local_df.iloc[-1][c]) and str(local_df.iloc[-1][c]).strip() else 0
+                for c in cols
+            ])
+            t_total = sum([
+                int(str(tourist_df.iloc[-1][c]).replace(",", "").replace("명", ""))
+                if pd.notnull(tourist_df.iloc[-1][c]) and str(tourist_df.iloc[-1][c]).strip() else 0
+                for c in cols
+            ])
+            lines.append(f"{group_name}: 현지인 {l_total:,}명 / 외지인 {t_total:,}명")
+
         prompt = f"""
 [유사 시사점 예시]
 {examples}
 
-[시간대별 관광객 수]
+[시간대별 관광객 수 (마지막 일자 기준)]
 {chr(10).join(lines)}
 
 위 데이터를 참고해 시사점을 3~5문장으로 행정 보고서 스타일로 작성해주세요.

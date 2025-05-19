@@ -243,6 +243,81 @@ def analyze_daily_visitors():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
+# ✅ 3번 분석기 - 시간대별 관광객 분석기
+def analyze_time_distribution():
+    st.subheader("📊 3. 시간대별 관광객 존재 현황 분석")
+    uploaded_file = st.file_uploader("📂 시간대별 관광객 데이터를 포함한 엑셀 파일 업로드", type=["xlsx"])
+
+    if uploaded_file is None:
+        st.info("데이터 파일을 업로드해주세요.")
+        return
+
+    df = pd.read_excel(uploaded_file)
+
+    # 시간대 묶음
+    time_groups = {
+        "06~09시": ["06시 관광객", "07시 관광객", "08시 관광객"],
+        "09~12시": ["09시 관광객", "10시 관광객", "11시 관광객"],
+        "12~15시": ["12시 관광객", "13시 관광객", "14시 관광객"],
+        "15~18시": ["15시 관광객", "16시 관광객", "17시 관광객"],
+        "18~21시": ["18시 관광객", "19시 관광객", "20시 관광객"],
+        "21~24시": ["21시 관광객", "22시 관광객", "23시 관광객"],
+    }
+
+    group_results = []
+
+    for group in df["구분"].unique():
+        sub_df = df[df["구분"] == group].copy()
+        day_labels = [f"{i+1}일차" for i in range(len(sub_df))]
+
+        rows = []
+        percent_rows = []
+
+        for i, (_, row) in enumerate(sub_df.iterrows()):
+            totals = []
+            for gname, cols in time_groups.items():
+                totals.append(sum([row[col] for col in cols]))
+
+            total_sum = sum(totals)
+            percent = [f"{val / total_sum:.2%}" for val in totals]
+
+            rows.append([group, day_labels[i]] + [f"{val:,}명" for val in totals])
+            percent_rows.append(["", ""] + percent)
+
+        group_results.append((group, rows, percent_rows))
+
+    # 출력
+    for group, values, percents in group_results:
+        st.markdown(f"### ✅ {group}")
+        col_names = ["구분", "날짜"] + list(time_groups.keys())
+        df1 = pd.DataFrame(values, columns=col_names)
+        df2 = pd.DataFrame(percents, columns=col_names)
+        st.dataframe(pd.concat([df1, df2], ignore_index=True), use_container_width=True)
+
+    # GPT 시사점 도출
+    with st.spinner("🤖 GPT 시사점 생성 중..."):
+        examples = load_insight_examples("3_time")
+        prompt = f"""
+다음은 시간대별 관광객 수 현황입니다. 시간대 구간은 아래와 같습니다:
+- 06~09시, 09~12시, 12~15시, 15~18시, 18~21시, 21~24시
+
+아래 데이터는 현지인 및 외지인의 각 날짜별 시간대 관광객 수 및 전체 대비 구성비입니다.
+
+{chr(10).join([str(r) for _, v, p in group_results for r in v])}
+
+이를 바탕으로 특징을 요약한 시사점을 3~5문장으로 작성해주세요.
+"""
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 지방정부 관광 데이터 분석 전문가야."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=800
+        )
+        st.subheader("🧠 GPT 시사점")
+        st.write(response.choices[0].message.content)
 
 
 # ✅ 전체 분석기 실행 함수
@@ -253,11 +328,14 @@ def festival_analysis_app():
 
     selected = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 방문객 현황 분석",
-        "2. 축제 일자별 방문객 수 분석"
+        "2. 축제 일자별 방문객 수 분석",
+        "3. 시간대별 관광객 존재 현황"
     ])
 
     if selected.startswith("1"):
         analyze_summary()
     elif selected.startswith("2"):
         analyze_daily_visitors()
+    elif selected.startswith("3"):
+        analyze_time_distribution()
 

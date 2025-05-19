@@ -268,15 +268,17 @@ def analyze_time_distribution():
 
     # 역순 재정렬: 현지인 1~N일차 → 외지인 1~N일차
     half = len(df) // 2
-    local_df = df.iloc[1:half+1][::-1].reset_index(drop=True)
-    tourist_df = df.iloc[half+1:][::-1].reset_index(drop=True)
 
-    for group_name, period_labels in time_groups:
-        local_counts = []
-        tourist_counts = []
-        for i in range(len(local_df)):
-            row_l = local_df.iloc[i]
-            row_t = tourist_df.iloc[i]
+    # ✅ 현지인/외지인 데이터 나누기
+    local_df = df[df.iloc[:, 0] == "현지인"].reset_index(drop=True)
+    tourist_df = df[df.iloc[:, 0] == "외지인"].reset_index(drop=True)
+
+    # ✅ 반복 범위를 안전하게 설정
+    min_len = min(len(local_df), len(tourist_df))
+
+    for i in range(min_len):
+        row_l = local_df.iloc[i]
+        row_t = tourist_df.iloc[i]
 
             local_sum = sum([
                 int(str(row_l[col]).replace("명", "").replace(",", ""))

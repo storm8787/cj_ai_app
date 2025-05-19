@@ -6,79 +6,72 @@
 
 import streamlit as st
 import pandas as pd
-import os
 from openai import OpenAI
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ 시사점 예시 불러오기
-def load_insight_examples(section_id):
-    try:
-        path = os.path.join("press_release_app", "data", "insights", f"{section_id}.txt")
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return ""
+# ✅ 연령대 고정 목록
+age_groups = [
+    "10세미만", "10대", "20대", "30대", "40대", "50대", "60대", "70대이상"
+]
 
-# ✅ 6번 분석기: 연령별 성별 방문객 분석
+# ✅ 분석기 시작
 def analyze_gender_by_age():
-    st.subheader("📊 6. 연령별 성별 방문객 분석")
+    st.subheader("📊 6. 연령별 성별 방문객 분석 (직접 입력 방식)")
 
-    uploaded_file = st.file_uploader("📂 연령별 성별 방문객 엑셀 업로드", type=["xlsx"])
-    if not uploaded_file:
+    data = []
+
+    with st.form("age_gender_form"):
+        st.markdown("#### 👉 연령대별 성별 방문객 수 입력")
+
+        for age in age_groups:
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                male_local = st.number_input(f"{age} - 남성(현지인)", min_value=0, step=1, key=f"{age}_ml")
+            with col2:
+                male_tourist = st.number_input(f"{age} - 남성(외지인)", min_value=0, step=1, key=f"{age}_mt")
+            with col3:
+                female_local = st.number_input(f"{age} - 여성(현지인)", min_value=0, step=1, key=f"{age}_fl")
+            with col4:
+                female_tourist = st.number_input(f"{age} - 여성(외지인)", min_value=0, step=1, key=f"{age}_ft")
+            data.append((age, male_local, male_tourist, female_local, female_tourist))
+
+        submitted = st.form_submit_button("🚀 분석 실행")
+
+    if not submitted:
         return
 
-    # ✅ 엑셀 로딩
-    try:
-        df = pd.read_excel(uploaded_file)
-    except Exception:
-        st.error("❌ 엑셀 파일을 불러오는 데 문제가 발생했습니다.")
-        return
+    # ✅ 데이터프레임 생성 및 계산
+    df = pd.DataFrame(data, columns=["연령구분", "남성_현지", "남성_외지", "여성_현지", "여성_외지"])
+    df["남자"] = df["남성_현지"] + df["남성_외지"]
+    df["여자"] = df["여성_현지"] + df["여성_외지"]
 
-    # ✅ 필수 컬럼 확인
-    required_cols = {"연령대", "구분", "남성", "여성"}
-    if not required_cols.issubset(df.columns):
-        st.error("❌ 엑셀 파일에 '연령대', '구분', '남성', '여성' 컬럼이 필요합니다.")
-        return
+    total_male = df["남자"].sum()
+    total_female = df["여자"].sum()
 
-    # ✅ 수치 정제
-    df["남성"] = df["남성"].apply(lambda x: int(str(x).replace(",", "")) if pd.notnull(x) else 0)
-    df["여성"] = df["여성"].apply(lambda x: int(str(x).replace(",", "")) if pd.notnull(x) else 0)
+    df["남자비율"] = (df["남자"] / total_male * 100).round(2)
+    df["여자비율"] = (df["여자"] / total_female * 100).round(2)
 
-    # ✅ 연령대별 성별 합산
-    grouped = df.groupby("연령대")[["남성", "여성"]].sum().reset_index()
-
-    # ✅ 전체 합산
-    total_male = grouped["남성"].sum()
-    total_female = grouped["여성"].sum()
-
-    # ✅ 비율 계산
-    grouped["남자비율"] = (grouped["남성"] / total_male * 100).round(2)
-    grouped["여자비율"] = (grouped["여성"] / total_female * 100).round(2)
-
-    st.dataframe(grouped, use_container_width=True)
+    result_df = df[["연령구분", "남자", "여자", "남자비율", "여자비율"]]
+    st.dataframe(result_df, use_container_width=True)
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
-        #reference = load_insight_examples("6_gender")
 
         summary = "\n".join([
-            f"- {row['연령대']}: 남성 {row['남성']:,}명 / 여성 {row['여성']:,}명"
-            for _, row in grouped.iterrows()
+            f"- {row['연령구분']}: 남성 {row['남자']:,}명 / 여성 {row['여자']:,}명"
+            for _, row in result_df.iterrows()
         ])
 
-        prompt = f"""다음은 {name}({period}, {location}) 축제의 연령별 성별 방문객 분석입니다.
+        prompt = f"""다음은 {name}({period}, {location}) 축제의 연령대별 성별 방문객 직접 입력 데이터를 기반으로 한 분석입니다.
 
 [연령대별 성별 방문객 수 요약]
 {summary}
 
-[참고자료]
-{reference}
-
-위 데이터를 바탕으로, 연령대별 남녀 방문자의 특징과 시사점을 3~5문장으로 간결히 작성해주세요.
+이 데이터를 바탕으로, 연령대별 남녀 방문자의 특징 및 주요 시사점을 3~5문장으로 간결하게 정리해주세요.
 """
 
         response = client.chat.completions.create(

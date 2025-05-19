@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
 import streamlit as st
@@ -51,7 +51,8 @@ def festival_analysis_app():
         "1. 축제 방문객 현황(총괄)",
         "2. 축제 일자별 방문객 수",
         "3. 시간대별 관광객 존재 현황",
-        "4. 축제 전·중·후 방문객 현황"
+        "4. 축제 전·중·후 방문객 현황",
+        "5. 연령별 방문객 현황"        
     ])
 
     # ✅ 항목별 실행
@@ -67,11 +68,17 @@ def festival_analysis_app():
     elif selected_analysis == "4. 축제 전·중·후 방문객 현황":
         from festival.analyze_before_after import analyze_before_after
         analyze_before_after()
-    #elif selected_analysis == "5. 연령별 방문객 분석":
-    #    from festival.analyze_age_group import analyze_age_group
-    #    analyze_age_group()
+    elif selected_analysis == "5. 연령별 방문객 현황":
+        from festival.analyze_age_group import analyze_age_group
+        analyze_age_group()
     #elif selected_analysis == "6. 외지인 이동지역 분석":
     #    from festival.analyze_mobility import analyze_mobility
     #    analyze_mobility()
+
+
+
+# In[ ]:
+
+
 
 

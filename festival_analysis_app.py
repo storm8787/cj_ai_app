@@ -263,8 +263,10 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # ✅ 현지인과 외지인 구분하여 DataFrame 생성 (역순 정렬)
+    # 엑셀에서 현지인 1일차가 맨 아래 있다고 가정
     local_df = df[df.iloc[:, 0] == "현지인"].iloc[::-1].reset_index(drop=True)
+
+    # 엑셀에서 외지인 1일차도 맨 아래 있다고 가정
     tourist_df = df[df.iloc[:, 0] == "외지인"].iloc[::-1].reset_index(drop=True)
 
     n_days = len(local_df)

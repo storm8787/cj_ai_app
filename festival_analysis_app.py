@@ -8,6 +8,7 @@ import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
 from openai import OpenAI
+from datetime import datetime
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -249,7 +250,6 @@ def extract_day_number(text):
     except:
         return 0
 
-# ✅ 3번 분석기:  시간대별 관광객 존재현황 분석 (표 + GPT 시사점)
 def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
@@ -270,35 +270,37 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # ✅ 현지인과 외지인 구분 및 날짜 정렬 (4일차 → 1일차 순서로 되어 있는 엑셀 전용 처리)
-    def extract_day_number(text):
-        # "2025년 04월 13일(일)" → 13
-        import re
-        match = re.search(r"(\d{1,2})일", str(text))
-        return int(match.group(1)) if match else 0
+    from datetime import datetime
+
+    # ✅ 날짜 파싱 함수: "2025년 04월 13일(일)" → datetime
+    def extract_date(text):
+        try:
+            return datetime.strptime(str(text).split("(")[0].strip(), "%Y년 %m월 %d일")
+        except:
+            return None
 
     # ✅ 현지인과 외지인 분리
     local_df = df[df.iloc[:, 0] == "현지인"].copy()
     tourist_df = df[df.iloc[:, 0] == "외지인"].copy()
 
-    # ✅ 날짜 숫자 컬럼 만들기
-    local_df["날짜번호"] = local_df.iloc[:, 1].apply(extract_day_number)
-    tourist_df["날짜번호"] = tourist_df.iloc[:, 1].apply(extract_day_number)
+    local_df["날짜객체"] = local_df.iloc[:, 1].apply(extract_date)
+    tourist_df["날짜객체"] = tourist_df.iloc[:, 1].apply(extract_date)
 
-    # ✅ 날짜 오름차순 정렬 → 1일차부터 올라가도록
-    local_df = local_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
-    tourist_df = tourist_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
+    # ✅ 전체 날짜 기준으로 1일차~N일차 정의
+    all_dates = pd.concat([local_df["날짜객체"], tourist_df["날짜객체"]]).dropna().drop_duplicates().sort_values().reset_index(drop=True)
+    date_to_label = {date: f"{i+1}일차" for i, date in enumerate(all_dates)}
 
-    # ✅ 1일차, 2일차... 라벨 생성
-    n_days = len(local_df)
-    day_labels = [f"{i+1}일차" for i in range(n_days)]
+    local_df["날짜라벨"] = local_df["날짜객체"].map(date_to_label)
+    tourist_df["날짜라벨"] = tourist_df["날짜객체"].map(date_to_label)
+
+    local_df = local_df.sort_values("날짜객체").reset_index(drop=True)
+    tourist_df = tourist_df.sort_values("날짜객체").reset_index(drop=True)
 
     result_rows = []
 
-    # ✅ 시간대 합계 생성
-    def process_group(df_group):
+    def process_group(df_group, label):
         group_data = []
-        for _, row in df_group.iterrows():
+        for idx, row in df_group.iterrows():
             day_data = {}
             for group_name, cols in time_groups:
                 total = sum([
@@ -306,60 +308,54 @@ def analyze_time_distribution():
                     for col in cols
                 ])
                 day_data[group_name] = total
-            group_data.append(day_data)
+            group_data.append((label, df_group.iloc[idx]["날짜라벨"], day_data))
         return group_data
 
-    local_data = process_group(local_df)
-    tourist_data = process_group(tourist_df)
+    local_data = process_group(local_df, "현지인")
+    tourist_data = process_group(tourist_df, "외지인")
 
-    # ✅ 방문객 수 행 생성
-    def make_visitor_rows(group_data, label):
+    # ✅ 방문객 수 테이블
+    def make_visitor_rows(group_data):
         rows = []
-        for i, day in enumerate(day_labels):
-            row = {"구분": label, "날짜": day}
+        for label, day_label, data in group_data:
+            row = {"구분": label, "날짜": day_label}
             for group_name in time_groups:
                 col = group_name[0]
-                row[col] = f"{group_data[i][col]:,}명"
+                row[col] = f"{data[col]:,}명"
             rows.append(row)
         return rows
 
-    result_rows.extend(make_visitor_rows(local_data, "현지인"))
-    result_rows.extend(make_visitor_rows(tourist_data, "외지인"))
+    result_rows.extend(make_visitor_rows(local_data))
+    result_rows.extend(make_visitor_rows(tourist_data))
 
-    # ✅ 빈 행
-    result_rows.append({"구분": "", "날짜": ""})
-
-    # ✅ 비율 행 생성
-    def make_ratio_rows(group_data, label):
-        rows = []
-        for i, day in enumerate(day_labels):
+    # ✅ 비율 테이블 (시간대별 비중)
+    def make_ratio_rows(group_data):
+        rows = [{"구분": "", "날짜": ""}]  # 공백 행
+        for label, day_label, data in group_data:
             row = {"구분": label, "날짜": ""}
-            total = sum(group_data[i].values())
+            total = sum(data.values())
             for group_name in time_groups:
                 col = group_name[0]
-                ratio = group_data[i][col] / total if total > 0 else 0
+                ratio = data[col] / total if total > 0 else 0
                 row[col] = f"{ratio:.2%}"
             rows.append(row)
         return rows
 
-    result_rows.extend(make_ratio_rows(local_data, "현지인"))
-    result_rows.extend(make_ratio_rows(tourist_data, "외지인"))
+    result_rows.append({})  # 구분용 공백
+    result_rows.extend(make_ratio_rows(local_data))
+    result_rows.extend(make_ratio_rows(tourist_data))
 
-    # ✅ 출력
-    st.subheader("📊 시간대별 관광객 현황 (방문객 수 + 비율)")
+    # ✅ 결과 출력
+    st.subheader("📊 시간대별 관광객 현황")
     st.dataframe(pd.DataFrame(result_rows), use_container_width=True)
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
         lines = []
-        for i, group_name in enumerate([g[0] for g in time_groups]):
-            local_line = f"{group_name} - 현지인: " + ", ".join(
-                f"{d[group_name]:,}명" for d in local_data
-            )
-            tourist_line = f"{group_name} - 외지인: " + ", ".join(
-                f"{d[group_name]:,}명" for d in tourist_data
-            )
+        for group_name, _ in time_groups:
+            local_line = f"{group_name} - 현지인: " + ", ".join(f"{data[group_name]:,}명" for _, _, data in local_data)
+            tourist_line = f"{group_name} - 외지인: " + ", ".join(f"{data[group_name]:,}명" for _, _, data in tourist_data)
             lines.extend([local_line, tourist_line])
         prompt = f"""
 [유사 시사점 예시]
@@ -381,7 +377,6 @@ def analyze_time_distribution():
         )
         st.subheader("🧠 GPT 시사점")
         st.write(response.choices[0].message.content)
-
 
 # ✅ 전체 분석기 실행 함수
 def festival_analysis_app():

@@ -41,23 +41,28 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.markdown(" ")
 
-    # ✅ 관리자 모드 UI는 맨 아래에 배치
     with st.sidebar.expander("🔐 관리자 모드", expanded=False):
-        password = st.text_input("비밀번호를 입력하세요", type="password", key="admin_pw")
-        if password == "wjdqh5313!":
-            st.session_state.admin_mode = True
+        if "admin_mode" not in st.session_state:
+            st.session_state.admin_mode = False
+
+        # ✅ 관리자 모드일 때
+        if st.session_state.admin_mode:
             st.success("✅ 관리자 모드 활성화됨")
 
-            # ✅ 관리자 모드 나가기 버튼 추가
+            # ✅ 나가기 버튼
             if st.button("🚪 관리자 모드 나가기"):
                 st.session_state.admin_mode = False
-                st.success("👋 관리자 모드에서 나갔습니다")
-                st.rerun()  # 상태 반영을 위해 즉시 rerun
-        elif password:
-            st.session_state.admin_mode = False
-            st.error("❌ 비밀번호가 틀렸습니다")
+                st.experimental_rerun()  # 반드시 필요
         else:
-            st.session_state.admin_mode = False
+            # ✅ 비밀번호 입력창 (비활성 상태일 때만 노출)
+            password = st.text_input("비밀번호를 입력하세요", type="password")
+            if password == "wjdqh5313!":
+                st.session_state.admin_mode = True
+                st.success("✅ 관리자 모드 활성화됨")
+                st.experimental_rerun()
+            elif password:
+                st.error("❌ 비밀번호가 틀렸습니다")
+
 
     # ✅ 관리자 모드일 경우 기능 추가 노출
     if st.session_state.get("admin_mode", False):

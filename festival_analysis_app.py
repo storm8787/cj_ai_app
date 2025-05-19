@@ -20,6 +20,25 @@ def load_insight_examples(section_id):
     except FileNotFoundError:
         return ""
 
+# ✅ 공통 정보 입력부
+def festival_basic_info():
+    st.subheader("📌 축제 기본정보 입력")
+
+    festival_name = st.text_input("🎪 축제명")
+    location = st.text_input("📍 축제 장소")
+    start_date = st.date_input("🗓 축제 시작일")
+    end_date = st.date_input("🏁 축제 종료일")
+
+    period = f"{start_date.strftime('%Y.%m.%d')} ~ {end_date.strftime('%Y.%m.%d')}"
+    days = (end_date - start_date).days + 1
+
+    st.session_state["festival_name"] = festival_name
+    st.session_state["festival_location"] = location
+    st.session_state["festival_period"] = period
+    st.session_state["festival_days"] = days
+    st.session_state["festival_start_date"] = start_date
+    st.session_state["festival_end_date"] = end_date
+
 # ✅ 전체 분석기 실행 함수
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")

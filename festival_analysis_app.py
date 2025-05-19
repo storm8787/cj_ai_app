@@ -50,7 +50,8 @@ def festival_analysis_app():
     selected_analysis = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 방문객 현황(총괄)",
         "2. 축제 일자별 방문객 수",
-        "3. 시간대별 관광객 존재 현황"
+        "3. 시간대별 관광객 존재 현황",
+        "4. 축제 전·중·후 방문객 현황"
     ])
 
     # ✅ 항목별 실행
@@ -63,7 +64,7 @@ def festival_analysis_app():
     elif selected_analysis == "3. 시간대별 관광객 존재 현황":
         from festival.analyze_time_distribution import analyze_time_distribution
         analyze_time_distribution()
-    elif selected_analysis == "4. 축제 전·중·후 방문객 분석":
+    elif selected_analysis == "4. 축제 전·중·후 방문객 현황":
         from festival.analyze_before_after import analyze_before_after
         analyze_before_after()
     elif selected_analysis == "5. 연령별 방문객 분석":

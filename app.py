@@ -47,6 +47,12 @@ def main():
         if password == "wjdqh5313!":
             st.session_state.admin_mode = True
             st.success("✅ 관리자 모드 활성화됨")
+
+            # ✅ 관리자 모드 나가기 버튼 추가
+            if st.button("🚪 관리자 모드 나가기"):
+                st.session_state.admin_mode = False
+                st.success("👋 관리자 모드에서 나갔습니다")
+                st.rerun()  # 상태 반영을 위해 즉시 rerun
         elif password:
             st.session_state.admin_mode = False
             st.error("❌ 비밀번호가 틀렸습니다")

@@ -244,11 +244,13 @@ def analyze_daily_visitors():
             st.write(response.choices[0].message.content)
 
 # ✅ 3번 분석기 - 시간대별 관광객 분석기
-def analyze_time_distribution(uploaded_file):
+def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재 현황 분석")
 
-    if uploaded_file is None:
-        st.warning("⚠️ 분석을 위해 엑셀 파일을 업로드해주세요.")
+    uploaded_file = st.file_uploader("📂 시간대별 관광객 데이터 업로드 (.xlsx)", type=["xlsx"], key="time_file")
+
+    if not uploaded_file:
+        st.info("분석을 시작하려면 파일을 업로드하세요.")
         return
 
     # ✅ 엑셀 읽기

@@ -280,6 +280,10 @@ def analyze_time_distribution():
         row_l = local_df.iloc[i]
         row_t = tourist_df.iloc[i]
 
+        local_counts = []
+        tourist_counts = []
+
+        for group_name, period_labels in time_groups:
             local_sum = sum([
                 int(str(row_l[col]).replace("명", "").replace(",", ""))
                 if pd.notnull(row_l[col]) and str(row_l[col]).strip() != "" else 0

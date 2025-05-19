@@ -243,6 +243,13 @@ def analyze_daily_visitors():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
+def extract_day_number(text):
+    try:
+        return int(str(text).strip().replace("일차", ""))
+    except:
+        return 0
+
+# ✅ 3번 분석기:  시간대별 관광객 존재현황 분석 (표 + GPT 시사점)
 def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
@@ -263,21 +270,28 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # ✅ 날짜 텍스트에서 숫자 추출하여 정렬
-    def sort_by_day_number(df_sub):
-        df_sorted = df_sub.copy()
-        df_sorted["정렬기준"] = df_sorted.iloc[:, 1].astype(str).str.extract(r"(\d+)").astype(int)
-        return df_sorted.sort_values("정렬기준").drop(columns=["정렬기준"]).reset_index(drop=True)
+    def extract_day_number(text):
+        try:
+            return int(str(text).strip().replace("일차", ""))
+        except:
+            return 0
 
-    # ✅ 현지인과 외지인 구분하여 정렬
-    local_df = sort_by_day_number(df[df.iloc[:, 0] == "현지인"])
-    tourist_df = sort_by_day_number(df[df.iloc[:, 0] == "외지인"])
+    # ✅ 현지인과 외지인 구분 및 정렬
+    local_df = df[df.iloc[:, 0] == "현지인"].copy()
+    tourist_df = df[df.iloc[:, 0] == "외지인"].copy()
+
+    local_df["날짜번호"] = local_df.iloc[:, 1].apply(extract_day_number)
+    tourist_df["날짜번호"] = tourist_df.iloc[:, 1].apply(extract_day_number)
+
+    local_df = local_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
+    tourist_df = tourist_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
 
     n_days = len(local_df)
     day_labels = [f"{i+1}일차" for i in range(n_days)]
 
     result_rows = []
 
+    # ✅ 시간대 합계 생성
     def process_group(df_group):
         group_data = []
         for _, row in df_group.iterrows():
@@ -294,7 +308,7 @@ def analyze_time_distribution():
     local_data = process_group(local_df)
     tourist_data = process_group(tourist_df)
 
-    # ✅ 방문객 수 테이블
+    # ✅ 방문객 수 행 생성
     def make_visitor_rows(group_data, label):
         rows = []
         for i, day in enumerate(day_labels):
@@ -308,9 +322,10 @@ def analyze_time_distribution():
     result_rows.extend(make_visitor_rows(local_data, "현지인"))
     result_rows.extend(make_visitor_rows(tourist_data, "외지인"))
 
-    result_rows.append({"구분": "", "날짜": ""})  # 빈 행
+    # ✅ 빈 행
+    result_rows.append({"구분": "", "날짜": ""})
 
-    # ✅ 비율 계산 (각 일자의 시간대별 비중)
+    # ✅ 비율 행 생성
     def make_ratio_rows(group_data, label):
         rows = []
         for i, day in enumerate(day_labels):
@@ -326,8 +341,8 @@ def analyze_time_distribution():
     result_rows.extend(make_ratio_rows(local_data, "현지인"))
     result_rows.extend(make_ratio_rows(tourist_data, "외지인"))
 
-    # ✅ 결과표 출력
-    st.subheader("📊 시간대별 관광객 현황")
+    # ✅ 출력
+    st.subheader("📊 시간대별 관광객 현황 (방문객 수 + 비율)")
     st.dataframe(pd.DataFrame(result_rows), use_container_width=True)
 
     # ✅ GPT 시사점 생성
@@ -342,7 +357,6 @@ def analyze_time_distribution():
                 f"{d[group_name]:,}명" for d in tourist_data
             )
             lines.extend([local_line, tourist_line])
-
         prompt = f"""
 [유사 시사점 예시]
 {examples}

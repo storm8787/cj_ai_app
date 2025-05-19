@@ -292,7 +292,12 @@ def analyze_time_distribution():
 
         # ✅ 구성비율 계산
         for i, row in enumerate(summary_rows):
-            counts = [int(row[col].replace("명", "").replace(",", "")) for col in period_labels]
+            counts = [
+                int(str(row[col]).replace("명", "").replace(",", ""))
+                if pd.notnull(row[col]) else 0
+                for col in period_labels
+            ]
+
             total = sum(counts)
             ratio_row = {
                 "구분": "",

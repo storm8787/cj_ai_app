@@ -23,6 +23,7 @@ def load_insight_examples(section_id):
 # ✅ 5번 분석기: 연령별 방문객 분석
 def analyze_age_group():
     st.subheader("📊 5. 연령별 방문객 분석")
+    st.write("✅ 최신 analyze_age_group() 실행됨")  # 확인용 출력
 
     uploaded_file = st.file_uploader("📂 연령대별 방문객 엑셀 파일 업로드", type=["xlsx"])
     if not uploaded_file:
@@ -42,19 +43,21 @@ def analyze_age_group():
     df[age_columns] = df[age_columns].applymap(lambda x: int(str(x).replace("명", "").replace(",", "")) if pd.notnull(x) else 0)
     df["합계"] = df[age_columns].sum(axis=1)
 
-    # ✅ 소계 및 합계 추가
-    local_df = df[df["구분"] == "현지인"]
-    tourist_df = df[df["구분"] == "외지인"]
+    # ✅ 현지인/외지인 분리
+    local_df = df[df["구분"] == "현지인"].copy()
+    tourist_df = df[df["구분"] == "외지인"].copy()
 
+    # ✅ 소계 계산
     local_sum = local_df[age_columns + ["합계"]].sum().astype(int)
     tourist_sum = tourist_df[age_columns + ["합계"]].sum().astype(int)
     total_sum = local_sum + tourist_sum
 
+    # ✅ 소계/합계 행 생성
     local_sum_row = pd.DataFrame([["현지인", "소계"] + local_sum.tolist()], columns=df.columns)
     tourist_sum_row = pd.DataFrame([["외지인", "소계"] + tourist_sum.tolist()], columns=df.columns)
     total_sum_row = pd.DataFrame([["합계", ""] + total_sum.tolist()], columns=df.columns)
 
-    # ✅ 최종 출력 테이블 구성
+    # ✅ 최종 테이블 구성
     final_df = pd.concat([local_df, local_sum_row, tourist_df, tourist_sum_row, total_sum_row], ignore_index=True)
     st.dataframe(final_df, use_container_width=True)
 
@@ -78,7 +81,7 @@ def analyze_age_group():
 [참고자료]
 {reference}
 
-위 데이터를 참고하여 연령대별 주요 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
+위 데이터를 참고하여, 연령대별 방문 패턴과 주요 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
 """
 
         response = client.chat.completions.create(

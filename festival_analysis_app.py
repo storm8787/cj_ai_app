@@ -243,93 +243,106 @@ def analyze_daily_visitors():
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
 
-# ✅ 3번 분석기 - 시간대별 관광객 분석기
 def analyze_time_distribution():
-    st.subheader("📊 3. 시간대별 관광객 존재 현황 분석")
+    st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
+    st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
-    uploaded_file = st.file_uploader("📂 시간대별 관광객 데이터 업로드 (.xlsx)", type=["xlsx"], key="time_file")
-
+    uploaded_file = st.file_uploader("📂 엑셀 파일 업로드", type=["xlsx"])
     if not uploaded_file:
-        st.info("분석을 시작하려면 파일을 업로드하세요.")
         return
 
-    # ✅ 엑셀 읽기
     df = pd.read_excel(uploaded_file)
+    df = df.dropna(how="all")  # 전체 비어 있는 행 제거
 
-    # ✅ 시간대 컬럼 정의
-    hour_columns = [col for col in df.columns if "시" in col]
-    period_labels = ["06~09시", "09~12시", "12~15시", "15~18시", "18~21시", "21~24시"]
-    period_slices = [(6, 9), (9, 12), (12, 15), (15, 18), (18, 21), (21, 24)]
+    time_groups = [
+        ("06~09시", ["06시 관광객", "07시 관광객", "08시 관광객"]),
+        ("09~12시", ["09시 관광객", "10시 관광객", "11시 관광객"]),
+        ("12~15시", ["12시 관광객", "13시 관광객", "14시 관광객"]),
+        ("15~18시", ["15시 관광객", "16시 관광객", "17시 관광객"]),
+        ("18~21시", ["18시 관광객", "19시 관광객", "20시 관광객"]),
+        ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
+    ]
 
-    # ✅ 축제 일수 계산
-    days_per_group = sum(df["구분"] == "현지인")
-    local_df = df[df["구분"] == "현지인"].iloc[::-1].reset_index(drop=True)
-    tourist_df = df[df["구분"] == "외지인"].iloc[::-1].reset_index(drop=True)
+    rows = []
+    ratios = []
 
-    results = []
+    # 역순 재정렬: 현지인 1~N일차 → 외지인 1~N일차
+    half = len(df) // 2
+    local_df = df.iloc[1:half+1][::-1].reset_index(drop=True)
+    tourist_df = df.iloc[half+1:][::-1].reset_index(drop=True)
 
-    for label, group_df in zip(["현지인", "외지인"], [local_df, tourist_df]):
-        st.markdown(f"### 👥 {label}")
-        summary_rows = []
+    for group_name, period_labels in time_groups:
+        local_counts = []
+        tourist_counts = []
+        for i in range(len(local_df)):
+            row_l = local_df.iloc[i]
+            row_t = tourist_df.iloc[i]
 
-        for idx in range(days_per_group):
-            row = group_df.iloc[idx]
-            day = f"{idx+1}일차"
-
-            period_counts = []
-            for start, end in period_slices:
-                total = 0
-                for h in range(start, end):
-                    col = f"{h:02d}시 관광객"
-                    total += row.get(col, 0)
-                period_counts.append(total)
-
-            summary_rows.append({
-                "구분": label,
-                "날짜": day,
-                **dict(zip(period_labels, [f"{c:,}명" for c in period_counts]))
-            })
-
-        # ✅ 구성비율 계산
-        for i, row in enumerate(summary_rows):
-            counts = [
-                int(str(row[col]).replace("명", "").replace(",", ""))
-                if pd.notnull(row[col]) else 0
+            local_sum = sum([
+                int(str(row_l[col]).replace("명", "").replace(",", ""))
+                if pd.notnull(row_l[col]) and str(row_l[col]).strip() != "" else 0
                 for col in period_labels
-            ]
+            ])
+            tourist_sum = sum([
+                int(str(row_t[col]).replace("명", "").replace(",", ""))
+                if pd.notnull(row_t[col]) and str(row_t[col]).strip() != "" else 0
+                for col in period_labels
+            ])
+            local_counts.append(local_sum)
+            tourist_counts.append(tourist_sum)
 
-            total = sum(counts)
-            ratio_row = {
-                "구분": "",
-                "날짜": "",
-                **dict(zip(period_labels, [f"{(c / total * 100):.2f}%" for c in counts]))
-            }
-            summary_rows.insert(2 * i + 1, ratio_row)
+        rows.append((group_name, "현지인", local_counts))
+        rows.append((group_name, "외지인", tourist_counts))
 
-        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True)
+        total = [l + t for l, t in zip(local_counts, tourist_counts)]
+        local_ratios = [f"{l/t:.2%}" if t > 0 else "-" for l, t in zip(local_counts, total)]
+        tourist_ratios = [f"{t/t2:.2%}" if t2 > 0 else "-" for t, t2 in zip(tourist_counts, total)]
+        ratios.append((group_name, "현지인", local_ratios))
+        ratios.append((group_name, "외지인", tourist_ratios))
 
-    # ✅ GPT 시사점 도출
+    # 결과표 구성
+    day_labels = [f"{i+1}일차" for i in range(len(local_df))]
+    result_data = []
+    for row in rows:
+        data = {"구분": row[1], "시간대": row[0]}
+        data.update({day: f"{cnt:,}명" for day, cnt in zip(day_labels, row[2])})
+        result_data.append(data)
+
+    for r in ratios:
+        data = {"구분": "", "시간대": ""}
+        data.update({day: rate for day, rate in zip(day_labels, r[2])})
+        result_data.append(data)
+
+    st.subheader("📊 시간대별 관광객 현황")
+    st.dataframe(pd.DataFrame(result_data), use_container_width=True)
+
+    # GPT 시사점
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
+        lines = []
+        for group_name, _, values in rows:
+            total = [v for v in values]
+            lines.append(f"{group_name} : {', '.join([f'{v:,}명' for v in total])}")
         prompt = f"""
-다음은 시간대별 관광객 분포를 요약한 표입니다. 각 시간대 구성비율을 참고해 관광 흐름의 특징과 변화 양상을 3~5문장으로 시사점 형식으로 요약해주세요.
-
-[시사점 예시]
+[유사 시사점 예시]
 {examples}
+
+[시간대별 관광객 수]
+{chr(10).join(lines)}
+
+위 데이터를 참고해 시사점을 3~5문장으로 행정 보고서 스타일로 작성해주세요.
 """
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 시간대별 관광 흐름을 분석하는 지방정부 전문가야."},
+                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.5,
-            max_tokens=700
+            max_tokens=800
         )
         st.subheader("🧠 GPT 시사점")
         st.write(response.choices[0].message.content)
-
-
 
 # ✅ 전체 분석기 실행 함수
 def festival_analysis_app():

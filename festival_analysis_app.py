@@ -250,9 +250,7 @@ def extract_day_number(text):
     except:
         return 0
 
-import streamlit as st
-import pandas as pd
-
+# ✅ 3번 분석기: 시간대별 관광객 존재현황 분석(표 + GPT 시사점)
 def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
@@ -326,29 +324,37 @@ def analyze_time_distribution():
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
         lines = []
-        for group_name, _ in time_groups:
-            local_vals = [
-                int(str(local_df.iloc[i][cols[0]]).replace(",", "").replace("명", "")) if pd.notnull(local_df.iloc[i][cols[0]]) else 0
-                for i in range(len(local_df))
-                for cols in [dict(time_groups)[group_name]]
-            ]
-            tourist_vals = [
-                int(str(tourist_df.iloc[i][cols[0]]).replace(",", "").replace("명", "")) if pd.notnull(tourist_df.iloc[i][cols[0]]) else 0
-                for i in range(len(tourist_df))
-                for cols in [dict(time_groups)[group_name]]
-            ]
+
+        for group_name, cols in time_groups:
+            local_vals = []
+            tourist_vals = []
+
+            for i in range(len(local_df)):
+                subtotal_local = sum([
+                    int(str(local_df.iloc[i][col]).replace(",", "").replace("명", "")) if pd.notnull(local_df.iloc[i][col]) else 0
+                    for col in cols
+                ])
+                local_vals.append(subtotal_local)
+
+            for i in range(len(tourist_df)):
+                subtotal_tourist = sum([
+                    int(str(tourist_df.iloc[i][col]).replace(",", "").replace("명", "")) if pd.notnull(tourist_df.iloc[i][col]) else 0
+                    for col in cols
+                ])
+                tourist_vals.append(subtotal_tourist)
+
             lines.append(f"{group_name} - 현지인: " + ", ".join(f"{v:,}명" for v in local_vals))
-            lines.append(f"{group_name} - 외지인: " + ", ".join(f"{v:,}명" for v in tourist_vals))
+        lines.append(f"{group_name} - 외지인: " + ", ".join(f"{v:,}명" for v in tourist_vals))
 
         prompt = f"""
-[유사 시사점 예시]
-{examples}
+    [유사 시사점 예시]
+    {examples}
 
-[시간대별 관광객 수]
-{chr(10).join(lines)}
+    [시간대별 관광객 수]
+    {chr(10).join(lines)}
 
-위 데이터를 참고하여 시간대별 특성과 변화 양상을 행정 보고서 스타일로 3~5문장 작성해주세요.
-"""
+    위 데이터를 참고하여 시간대별 특성과 변화 양상을 행정 보고서 스타일로 3~5문장 작성해주세요.
+    """
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[

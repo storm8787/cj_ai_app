@@ -73,7 +73,7 @@ def festival_analysis_app():
         from festival.analyze_age_group import analyze_age_group
         analyze_age_group()
     elif selected_analysis == "6. 연령별, 남여 방문객 현황":
-        from festival.analyze_mobility import analyze_mobility
+        from festival.analyze_gender_by_age import analyze_gender_by_age
         analyze_gender_by_age()
 
 

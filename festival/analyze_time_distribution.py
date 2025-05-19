@@ -91,6 +91,9 @@ def analyze_time_distribution():
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
+        name = st.session_state.get("festival_name", "본 축제")
+        period = st.session_state.get("festival_period", "")
+        location = st.session_state.get("festival_location", "")
         examples = load_daily_reference()
         lines = []
 

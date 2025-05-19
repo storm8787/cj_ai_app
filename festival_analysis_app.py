@@ -348,18 +348,22 @@ def analyze_time_distribution():
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")
 
+    # ✅ 축제 기본정보 입력
     festival_basic_info()
 
+    # ✅ 분석 항목 선택
     selected = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 방문객 현황 분석",
         "2. 축제 일자별 방문객 수 분석",
-        "3. 시간대별 관광객 존재 현황"
+        "3. 시간대별 관광객 존재현황 분석"
     ])
 
+    # ✅ 항목별 실행
     if selected.startswith("1"):
         analyze_summary()
     elif selected.startswith("2"):
         analyze_daily_visitors()
     elif selected.startswith("3"):
         analyze_time_distribution()
+
 

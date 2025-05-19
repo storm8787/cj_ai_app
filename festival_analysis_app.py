@@ -263,14 +263,14 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # 엑셀에서 현지인 1일차가 맨 아래 있다고 가정
-    local_df = df[df.iloc[:, 0] == "현지인"].iloc[::-1].reset_index(drop=True)
+    # ✅ 날짜 기준으로 오름차순 정렬
+    local_df = df[df.iloc[:, 0] == "현지인"].sort_values(by=df.columns[1]).reset_index(drop=True)
+    tourist_df = df[df.iloc[:, 0] == "외지인"].sort_values(by=df.columns[1]).reset_index(drop=True)
 
-    # 엑셀에서 외지인 1일차도 맨 아래 있다고 가정
-    tourist_df = df[df.iloc[:, 0] == "외지인"].iloc[::-1].reset_index(drop=True)
-
+    # ✅ 일자 수 맞춰서 1일차~N일차 라벨 생성
     n_days = len(local_df)
     day_labels = [f"{i+1}일차" for i in range(n_days)]
+
 
     result_rows = []
 

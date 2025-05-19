@@ -273,9 +273,9 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # ✅ 현지인/외지인 분리 및 1일차부터 라벨링 (역순정렬 기준)
-    local_df = df[df.iloc[:, 0] == "현지인"].copy().iloc[::-1].reset_index(drop=True)
-    tourist_df = df[df.iloc[:, 0] == "외지인"].copy().iloc[::-1].reset_index(drop=True)
+    # ✅ 현지인/외지인 나누고 순서 그대로 라벨링
+    local_df = df[df.iloc[:, 0] == "현지인"].copy().reset_index(drop=True)
+    tourist_df = df[df.iloc[:, 0] == "외지인"].copy().reset_index(drop=True)
 
     local_df["날짜라벨"] = [f"{i+1}일차" for i in range(len(local_df))]
     tourist_df["날짜라벨"] = [f"{i+1}일차" for i in range(len(tourist_df))]
@@ -312,13 +312,13 @@ def analyze_time_distribution():
             rows.append(ratio_row)
         return rows
 
-    # ✅ 방문객 수 및 비율 계산
+    # ✅ 데이터 정리
     result_rows.extend(process_group(local_df, "현지인"))
     result_rows.extend(process_group(tourist_df, "외지인"))
     result_rows.extend(process_ratio(local_df, "현지인"))
     result_rows.extend(process_ratio(tourist_df, "외지인"))
 
-    # ✅ 출력
+    # ✅ 결과 출력
     st.subheader("📊 시간대별 관광객 현황")
     st.dataframe(pd.DataFrame(result_rows), use_container_width=True)
 
@@ -328,14 +328,16 @@ def analyze_time_distribution():
         lines = []
         for group_name, _ in time_groups:
             local_vals = [
-                int(str(local_df.iloc[i][cols[0]]).replace(",", "").replace("명", "")) if pd.notnull(local_df.iloc[i][cols[0]]) else 0
-                for i in range(len(local_df))
-                for cols in [dict(time_groups)[group_name]]
+                sum([
+                    int(str(row[col]).replace(",", "").replace("명", "")) if pd.notnull(row[col]) else 0
+                    for col in _
+                ]) for _, row in zip([dict(time_groups)[group_name]] * len(local_df), local_df.itertuples(index=False))
             ]
             tourist_vals = [
-                int(str(tourist_df.iloc[i][cols[0]]).replace(",", "").replace("명", "")) if pd.notnull(tourist_df.iloc[i][cols[0]]) else 0
-                for i in range(len(tourist_df))
-                for cols in [dict(time_groups)[group_name]]
+                sum([
+                    int(str(row[col]).replace(",", "").replace("명", "")) if pd.notnull(row[col]) else 0
+                    for col in _
+                ]) for _, row in zip([dict(time_groups)[group_name]] * len(tourist_df), tourist_df.itertuples(index=False))
             ]
             lines.append(f"{group_name} - 현지인: " + ", ".join(f"{v:,}명" for v in local_vals))
             lines.append(f"{group_name} - 외지인: " + ", ".join(f"{v:,}명" for v in tourist_vals))
@@ -360,6 +362,7 @@ def analyze_time_distribution():
         )
         st.subheader("🧠 GPT 시사점")
         st.write(response.choices[0].message.content)
+
 
 
 # ✅ 전체 분석기 실행 함수

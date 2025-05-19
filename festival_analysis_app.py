@@ -244,80 +244,84 @@ def analyze_daily_visitors():
             st.write(response.choices[0].message.content)
 
 # ✅ 3번 분석기 - 시간대별 관광객 분석기
-def analyze_time_distribution():
+def analyze_time_distribution(uploaded_file):
     st.subheader("📊 3. 시간대별 관광객 존재 현황 분석")
-    uploaded_file = st.file_uploader("📂 시간대별 관광객 데이터를 포함한 엑셀 파일 업로드", type=["xlsx"])
 
     if uploaded_file is None:
-        st.info("데이터 파일을 업로드해주세요.")
+        st.warning("⚠️ 분석을 위해 엑셀 파일을 업로드해주세요.")
         return
 
+    # ✅ 엑셀 읽기
     df = pd.read_excel(uploaded_file)
 
-    # 시간대 묶음
-    time_groups = {
-        "06~09시": ["06시 관광객", "07시 관광객", "08시 관광객"],
-        "09~12시": ["09시 관광객", "10시 관광객", "11시 관광객"],
-        "12~15시": ["12시 관광객", "13시 관광객", "14시 관광객"],
-        "15~18시": ["15시 관광객", "16시 관광객", "17시 관광객"],
-        "18~21시": ["18시 관광객", "19시 관광객", "20시 관광객"],
-        "21~24시": ["21시 관광객", "22시 관광객", "23시 관광객"],
-    }
+    # ✅ 시간대 컬럼 정의
+    hour_columns = [col for col in df.columns if "시" in col]
+    period_labels = ["06~09시", "09~12시", "12~15시", "15~18시", "18~21시", "21~24시"]
+    period_slices = [(6, 9), (9, 12), (12, 15), (15, 18), (18, 21), (21, 24)]
 
-    group_results = []
+    # ✅ 축제 일수 계산
+    days_per_group = sum(df["구분"] == "현지인")
+    local_df = df[df["구분"] == "현지인"].iloc[::-1].reset_index(drop=True)
+    tourist_df = df[df["구분"] == "외지인"].iloc[::-1].reset_index(drop=True)
 
-    for group in df["구분"].unique():
-        sub_df = df[df["구분"] == group].copy()
-        day_labels = [f"{i+1}일차" for i in range(len(sub_df))]
+    results = []
 
-        rows = []
-        percent_rows = []
+    for label, group_df in zip(["현지인", "외지인"], [local_df, tourist_df]):
+        st.markdown(f"### 👥 {label}")
+        summary_rows = []
 
-        for i, (_, row) in enumerate(sub_df.iterrows()):
-            totals = []
-            for gname, cols in time_groups.items():
-                totals.append(sum([row[col] for col in cols]))
+        for idx in range(days_per_group):
+            row = group_df.iloc[idx]
+            day = f"{idx+1}일차"
 
-            total_sum = sum(totals)
-            percent = [f"{val / total_sum:.2%}" for val in totals]
+            period_counts = []
+            for start, end in period_slices:
+                total = 0
+                for h in range(start, end):
+                    col = f"{h:02d}시 관광객"
+                    total += row.get(col, 0)
+                period_counts.append(total)
 
-            rows.append([group, day_labels[i]] + [f"{val:,}명" for val in totals])
-            percent_rows.append(["", ""] + percent)
+            summary_rows.append({
+                "구분": label,
+                "날짜": day,
+                **dict(zip(period_labels, [f"{c:,}명" for c in period_counts]))
+            })
 
-        group_results.append((group, rows, percent_rows))
+        # ✅ 구성비율 계산
+        for i, row in enumerate(summary_rows):
+            counts = [int(row[col].replace("명", "").replace(",", "")) for col in period_labels]
+            total = sum(counts)
+            ratio_row = {
+                "구분": "",
+                "날짜": "",
+                **dict(zip(period_labels, [f"{(c / total * 100):.2f}%" for c in counts]))
+            }
+            summary_rows.insert(2 * i + 1, ratio_row)
 
-    # 출력
-    for group, values, percents in group_results:
-        st.markdown(f"### ✅ {group}")
-        col_names = ["구분", "날짜"] + list(time_groups.keys())
-        df1 = pd.DataFrame(values, columns=col_names)
-        df2 = pd.DataFrame(percents, columns=col_names)
-        st.dataframe(pd.concat([df1, df2], ignore_index=True), use_container_width=True)
+        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True)
 
-    # GPT 시사점 도출
+    # ✅ GPT 시사점 도출
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
         prompt = f"""
-다음은 시간대별 관광객 수 현황입니다. 시간대 구간은 아래와 같습니다:
-- 06~09시, 09~12시, 12~15시, 15~18시, 18~21시, 21~24시
+다음은 시간대별 관광객 분포를 요약한 표입니다. 각 시간대 구성비율을 참고해 관광 흐름의 특징과 변화 양상을 3~5문장으로 시사점 형식으로 요약해주세요.
 
-아래 데이터는 현지인 및 외지인의 각 날짜별 시간대 관광객 수 및 전체 대비 구성비입니다.
-
-{chr(10).join([str(r) for _, v, p in group_results for r in v])}
-
-이를 바탕으로 특징을 요약한 시사점을 3~5문장으로 작성해주세요.
+[시사점 예시]
+{examples}
 """
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 관광 데이터 분석 전문가야."},
+                {"role": "system", "content": "너는 시간대별 관광 흐름을 분석하는 지방정부 전문가야."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.5,
-            max_tokens=800
+            max_tokens=700
         )
         st.subheader("🧠 GPT 시사점")
         st.write(response.choices[0].message.content)
+
 
 
 # ✅ 전체 분석기 실행 함수

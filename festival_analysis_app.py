@@ -47,7 +47,7 @@ def festival_analysis_app():
     festival_basic_info()
 
     # ✅ 분석 항목 선택
-    selected = st.selectbox("📂 분석 항목 선택", [
+    selected_analysis = st.selectbox("📂 분석 항목 선택", [
         "1. 축제 방문객 현황 분석",
         "2. 축제 일자별 방문객 수 분석",
         "3. 시간대별 관광객 존재현황 분석"

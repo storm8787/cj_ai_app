@@ -67,11 +67,11 @@ def festival_analysis_app():
     elif selected_analysis == "4. 축제 전·중·후 방문객 현황":
         from festival.analyze_before_after import analyze_before_after
         analyze_before_after()
-    elif selected_analysis == "5. 연령별 방문객 분석":
-        from festival.analyze_age_group import analyze_age_group
-        analyze_age_group()
-    elif selected_analysis == "6. 외지인 이동지역 분석":
-        from festival.analyze_mobility import analyze_mobility
-        analyze_mobility()
+    #elif selected_analysis == "5. 연령별 방문객 분석":
+    #    from festival.analyze_age_group import analyze_age_group
+    #    analyze_age_group()
+    #elif selected_analysis == "6. 외지인 이동지역 분석":
+    #    from festival.analyze_mobility import analyze_mobility
+    #    analyze_mobility()
 
 

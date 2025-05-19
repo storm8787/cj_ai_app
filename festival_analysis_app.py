@@ -276,15 +276,9 @@ def analyze_time_distribution():
         except:
             return 0
 
-    # ✅ 현지인과 외지인 구분 및 정렬
-    local_df = df[df.iloc[:, 0] == "현지인"].copy()
-    tourist_df = df[df.iloc[:, 0] == "외지인"].copy()
-
-    local_df["날짜번호"] = local_df.iloc[:, 1].apply(extract_day_number)
-    tourist_df["날짜번호"] = tourist_df.iloc[:, 1].apply(extract_day_number)
-
-    local_df = local_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
-    tourist_df = tourist_df.sort_values("날짜번호").drop(columns="날짜번호").reset_index(drop=True)
+    # ✅ 현지인과 외지인 구분 및 역순 정렬 (엑셀이 4일차 → 1일차 순으로 되어 있다는 전제)
+    local_df = df[df.iloc[:, 0] == "현지인"].iloc[::-1].reset_index(drop=True)
+    tourist_df = df[df.iloc[:, 0] == "외지인"].iloc[::-1].reset_index(drop=True)
 
     n_days = len(local_df)
     day_labels = [f"{i+1}일차" for i in range(n_days)]

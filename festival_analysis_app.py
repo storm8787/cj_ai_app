@@ -318,22 +318,7 @@ def analyze_time_distribution():
     result_rows.extend(make_ratio_rows(local_data, "현지인"))
     result_rows.extend(make_ratio_rows(tourist_data, "외지인"))
 
-    # ✅ 전일대비 증감률 계산
-    def make_diff_rows(group_data, label):
-        rows = [{"구분": "", "날짜": ""}]  # 공백 행
-        for i in range(1, len(group_data)):
-            row = {"구분": label, "날짜": ""}
-            for group_name in time_groups:
-                col = group_name[0]
-                prev = group_data[i - 1][col]
-                curr = group_data[i][col]
-                if prev == 0:
-                    diff = "-"
-                else:
-                    diff = f"{(curr - prev) / prev:.2%}"
-                row[col] = diff
-            rows.append(row)
-        return rows
+    
 
     result_rows.extend(make_diff_rows(local_data, "현지인"))
     result_rows.extend(make_diff_rows(tourist_data, "외지인"))

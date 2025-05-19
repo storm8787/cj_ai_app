@@ -46,12 +46,12 @@ def analyze_gender_by_age():
     df["남자"] = df["남성_현지"] + df["남성_외지"]
     df["여자"] = df["여성_현지"] + df["여성_외지"]
 
-    total_male = df["남자"].sum()
-    total_female = df["여자"].sum()
-    total = total_male + total_female
+   # 총합 기준으로 비율 계산 (남녀 각각이 아닌 전체 기준)
+    grand_total = df["남자"].sum() + df["여자"].sum()
 
-    df["남자비율"] = (df["남자"] / total * 100).round(2)
-    df["여자비율"] = (df["여자"] / total * 100).round(2)
+    df["남자비율"] = (df["남자"] / grand_total * 100).round(2)
+    df["여자비율"] = (df["여자"] / grand_total * 100).round(2)
+
 
     result_df = df[["연령구분", "남자", "여자", "남자비율", "여자비율"]]
     st.dataframe(result_df, use_container_width=True)

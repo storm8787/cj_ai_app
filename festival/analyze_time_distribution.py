@@ -91,7 +91,7 @@ def analyze_time_distribution():
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
-        examples = load_insight_examples("3_time")
+        examples = load_daily_reference()
         lines = []
 
         for group_name, cols in time_groups:

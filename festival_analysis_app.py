@@ -263,20 +263,24 @@ def analyze_time_distribution():
         ("21~24시", ["21시 관광객", "22시 관광객", "23시 관광객"]),
     ]
 
-    # ✅ 날짜 기준으로 오름차순 정렬
-    local_df = df[df.iloc[:, 0] == "현지인"].sort_values(by=df.columns[1]).reset_index(drop=True)
-    tourist_df = df[df.iloc[:, 0] == "외지인"].sort_values(by=df.columns[1]).reset_index(drop=True)
+    # ✅ 날짜 텍스트에서 숫자 추출하여 정렬
+    def sort_by_day_number(df_sub):
+        df_sorted = df_sub.copy()
+        df_sorted["정렬기준"] = df_sorted.iloc[:, 1].astype(str).str.extract(r"(\d+)").astype(int)
+        return df_sorted.sort_values("정렬기준").drop(columns=["정렬기준"]).reset_index(drop=True)
 
-    # ✅ 일자 수 맞춰서 1일차~N일차 라벨 생성
+    # ✅ 현지인과 외지인 구분하여 정렬
+    local_df = sort_by_day_number(df[df.iloc[:, 0] == "현지인"])
+    tourist_df = sort_by_day_number(df[df.iloc[:, 0] == "외지인"])
+
     n_days = len(local_df)
     day_labels = [f"{i+1}일차" for i in range(n_days)]
 
-
     result_rows = []
 
-    def process_group(df_group, label):
+    def process_group(df_group):
         group_data = []
-        for idx, row in df_group.iterrows():
+        for _, row in df_group.iterrows():
             day_data = {}
             for group_name, cols in time_groups:
                 total = sum([
@@ -287,8 +291,8 @@ def analyze_time_distribution():
             group_data.append(day_data)
         return group_data
 
-    local_data = process_group(local_df, "현지인")
-    tourist_data = process_group(tourist_df, "외지인")
+    local_data = process_group(local_df)
+    tourist_data = process_group(tourist_df)
 
     # ✅ 방문객 수 테이블
     def make_visitor_rows(group_data, label):
@@ -304,9 +308,11 @@ def analyze_time_distribution():
     result_rows.extend(make_visitor_rows(local_data, "현지인"))
     result_rows.extend(make_visitor_rows(tourist_data, "외지인"))
 
+    result_rows.append({"구분": "", "날짜": ""})  # 빈 행
+
     # ✅ 비율 계산 (각 일자의 시간대별 비중)
     def make_ratio_rows(group_data, label):
-        rows = [{"구분": "", "날짜": ""}]  # 공백 행
+        rows = []
         for i, day in enumerate(day_labels):
             row = {"구분": label, "날짜": ""}
             total = sum(group_data[i].values())
@@ -320,16 +326,11 @@ def analyze_time_distribution():
     result_rows.extend(make_ratio_rows(local_data, "현지인"))
     result_rows.extend(make_ratio_rows(tourist_data, "외지인"))
 
-    
-
-    result_rows.extend(make_diff_rows(local_data, "현지인"))
-    result_rows.extend(make_diff_rows(tourist_data, "외지인"))
-
-    # ✅ 출력
-    st.subheader("📊 시간대별 관광객 현황 (방문객 수 + 비율 + 전일대비 증감률)")
+    # ✅ 결과표 출력
+    st.subheader("📊 시간대별 관광객 현황")
     st.dataframe(pd.DataFrame(result_rows), use_container_width=True)
 
-    # ✅ 시사점 생성
+    # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         examples = load_insight_examples("3_time")
         lines = []
@@ -341,6 +342,7 @@ def analyze_time_distribution():
                 f"{d[group_name]:,}명" for d in tourist_data
             )
             lines.extend([local_line, tourist_line])
+
         prompt = f"""
 [유사 시사점 예시]
 {examples}
@@ -361,6 +363,7 @@ def analyze_time_distribution():
         )
         st.subheader("🧠 GPT 시사점")
         st.write(response.choices[0].message.content)
+
 
 # ✅ 전체 분석기 실행 함수
 def festival_analysis_app():

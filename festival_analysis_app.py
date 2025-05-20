@@ -78,7 +78,8 @@ def festival_analysis_app():
         analyze_gender_by_age()
     elif selected_analysis == "7-1. 시도별 방문객 현황":
         from festival.analyze_visitor_by_province import analyze_visitor_by_province
-        analyze_visitor_by_province()
+        #analyze_visitor_by_province()
+        analyze_gender_by_age()
 
 
 

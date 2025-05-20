@@ -19,8 +19,8 @@ def load_insight_examples(section_id):
     except FileNotFoundError:
         return ""
 
-from festival.analyze_summary_overview import analyze_summary_overview
-from festival.analyze_final_opinion import analyze_final_opinion
+#from festival.analyze_summary_overview import analyze_summary_overview
+#from festival.analyze_final_opinion import analyze_final_opinion
 
 def analyze_summary_and_opinion():
     st.subheader("📊 8. 분석결과 요약 및 종합의견")

@@ -25,7 +25,6 @@ def analyze_summary_and_opinion():
     st.subheader("📊 8. 분석결과 요약 및 종합의견")
 
     col1, col2 = st.columns(2)
-
     with col1:
         gpt_summary = st.button("📝 분석결과(요약) 생성 및 보기")
     with col2:
@@ -47,7 +46,8 @@ def analyze_summary_overview(gpt_generate=False):
 
     if "summary_daily_table" in st.session_state:
         summary_lines.append("\n📌 [2. 일자별 방문객]")
-        for _, row in st.session_state["summary_daily_table"].iterrows():
+        df = st.session_state["summary_daily_table"]
+        for _, row in df.iterrows():
             summary_lines.append(f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,} / 외지인 {row['외지인 방문객']:,} / 전체 {row['전체 방문객']:,}")
 
     if "summary_time_distribution" in st.session_state:
@@ -62,53 +62,63 @@ def analyze_summary_overview(gpt_generate=False):
         summary_lines.append("\n📌 [5. 연령대별 방문객]")
         summary_lines.append(st.session_state["summary_age_group_text"])
 
-    if "summary_gender_by_age_df" in st.session_state:
-        summary_lines.append("\n📌 [6. 연령별 성별 방문객]")
-        df = st.session_state["summary_gender_by_age_df"]
-        for _, row in df.iterrows():
-            summary_lines.append(f"- {row['연령구분']}: 남자 {row['남자']}명 ({row['남자비율']}%), 여자 {row['여자']}명 ({row['여자비율']}%)")
-
+    # ✅ (요약용) 시도별 외지인 방문객 – 상위 5개만
     if "summary_visitor_by_province_sido" in st.session_state:
-        summary_lines.append("\n📌 [7-1. 시도별 외지인 방문객]")
+        summary_lines.append("\n📌 [7-1. 시도별 외지인 방문객 상위 5]")
         df = st.session_state["summary_visitor_by_province_sido"]
+        df = df[df["시도_2"].notnull() & (df["시도_2"] != "합계")].head(5)
         for _, row in df.iterrows():
-            if row["시도_2"] not in ["", "합계", None]:
-                summary_lines.append(f"- {row['시도_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
+            summary_lines.append(f"- {row['시도_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
 
+    # ✅ (요약용) 시군구별 외지인 방문객 – 상위 5개만
     if "summary_visitor_by_province_gungu" in st.session_state:
-        summary_lines.append("\n📌 [7-2. 시군구별 외지인 방문객]")
+        summary_lines.append("\n📌 [7-2. 시군구별 외지인 방문객 상위 5]")
         df = st.session_state["summary_visitor_by_province_gungu"]
+        df = df[df["full_region_2"].notnull() & (df["full_region_2"] != "합계")].head(5)
         for _, row in df.iterrows():
-            if row["full_region_2"] not in ["", "합계", "기타", None]:
-                summary_lines.append(f"- {row['full_region_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
+            summary_lines.append(f"- {row['full_region_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
 
+    # ✅ (요약용) 24시간 이후 지역 – 상위 5개만
     if "summary_visitor_after_24h_grouped" in st.session_state:
-        summary_lines.append("\n📌 [7-3. 외지인 24시간 이후 지역]")
+        summary_lines.append("\n📌 [7-3. 외지인 24시간 이후 지역 상위 5]")
         df = st.session_state["summary_visitor_after_24h_grouped"]
+        df = df.sort_values(by="관광객수", ascending=False).head(5)
         for _, row in df.iterrows():
             summary_lines.append(f"- {row['full_region']}: {row['관광객수']:,}명 ({row['비율']:.2f}%)")
 
-    # 표시
+    # ✅ 요약 출력
     st.markdown("### 🧾 분석결과 요약")
     st.text("\n".join(summary_lines))
 
-    # GPT 요약 생성
+    # ✅ GPT 요약 생성
     if gpt_generate:
         reference = load_insight_examples("summary_overview")
-        prompt = f"""다음은 {name}({period}, {location}) 축제의 데이터 기반 분석결과입니다.
 
+        prompt = f\"\"\"📌 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {name}({period}, {location}) 축제의 방문객과 매출현황을 분석한 결과임
+
+분석 개요:
 {chr(10).join(summary_lines)}
 
 [참고자료]
 {reference}
 
-위 내용을 바탕으로 방문객 수, 성격, 체류, 소비 등 주요 지표 중심으로 분석결과를 공공보고서 스타일로 5~7문장으로 작성해주세요.
-"""
+아래 형식에 맞춰 5~7문장으로 행정 보고서 스타일의 분석결과를 작성하세요.
+
+❍ 총 관광객 수, 전년 대비 증감  
+  - 현지인과 외지인 각각 수치 및 증감 포함  
+❍ 일평균 관광객 증감 / 일반 시기 대비 변화율 포함  
+❍ 연령대, 요일, 시간대별 특징  
+❍ 체류형 관광객의 비율 및 연계관광 시사점  
+❍ 전반적 평가: 방문객 흐름, 프로그램 특성, 기후 등 종합적 해석
+
+이 형식을 엄격히 따르세요.
+\"\"\"
+
         with st.spinner("GPT가 분석결과 요약 중..."):
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "너는 축제 데이터를 정리하는 지방행정 전문가야."},
+                    {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,
@@ -117,7 +127,7 @@ def analyze_summary_overview(gpt_generate=False):
             st.subheader("🧾 GPT 분석결과 요약")
             st.write(response.choices[0].message.content)
 
-        # 종합의견에서도 활용할 수 있도록 session_state 저장
+        # ✅ 종합의견용으로 저장
         st.session_state["final_summary_text"] = "\n".join(summary_lines)
 
 # ✅ 종합의견
@@ -126,20 +136,28 @@ def analyze_final_opinion(gpt_generate=False):
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
 
-    # GPT 종합의견 생성
+    # ✅ summary가 없으면 경고
+    if gpt_generate and "final_summary_text" not in st.session_state:
+        st.warning("⚠️ 먼저 '분석결과 요약 생성' 버튼을 눌러주세요.")
+        return
+
     if gpt_generate:
-        summary_lines = st.session_state.get("final_summary_text", "")
+        summary_lines = st.session_state["final_summary_text"]
         reference = load_insight_examples("final_opinion")
 
-        prompt = f"""다음은 {name}({period}, {location}) 축제의 요약 분석 결과입니다.
+        prompt = f\"\"\"다음은 {name}({period}, {location}) 축제의 분석 요약입니다.
 
 {summary_lines}
 
 [참고자료]
 {reference}
 
-위 내용을 바탕으로 정책적 시사점 중심의 종합적인 의견을 5~7문장으로 작성해주세요.
-"""
+위 내용을 바탕으로 정책적 시사점 중심의 종합 의견을 5~7문장으로 작성해주세요.
+❍ 방문객 특성과 동향 분석  
+❍ 지역 경제/소비/체류 기여도 해석  
+❍ 관광 전략/운영 프로그램 개선 방향 제시 포함
+\"\"\"
+
         with st.spinner("GPT가 종합의견을 작성 중입니다..."):
             response = client.chat.completions.create(
                 model="gpt-4o",

@@ -11,7 +11,6 @@ from openai import OpenAI
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ 시사점 예시 불러오기
 def load_insight_examples(section_id):
     try:
         path = f"press_release_app/data/insights/{section_id}.txt"
@@ -20,16 +19,15 @@ def load_insight_examples(section_id):
     except FileNotFoundError:
         return ""
 
-# ✅ 분석결과 요약 + 종합의견
 def analyze_summary_and_opinion():
-    st.subheader("🧾 8. 분석결과 요약")
+    st.subheader("📊 8. 분석결과 요약 및 종합의견")
 
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
     summary_lines = []
 
-    # ✅ 세션 기반 데이터 모으기
+    # ✅ [분석결과 요약] 세션 기반으로 각 항목 출력
     if "summary_total_text" in st.session_state:
         summary_lines.append("📌 [1. 방문객 총괄]")
         summary_lines.append(st.session_state["summary_total_text"])
@@ -77,15 +75,14 @@ def analyze_summary_and_opinion():
         for _, row in df.iterrows():
             summary_lines.append(f"- {row['full_region']}: {row['관광객수']:,}명 ({row['비율']:.2f}%)")
 
-    # ✅ 분석결과 요약 출력
+    # ✅ 분석결과(요약) 출력
+    st.markdown("### 🧾 분석결과 요약")
     summary_text = "\n".join(summary_lines)
-    st.session_state["summary_overview"] = summary_text
-    st.markdown("### 📌 분석결과 요약")
     st.text(summary_text)
 
-    # ✅ 종합의견은 별도 버튼
+    # ✅ 종합의견 GPT 생성
     st.markdown("---")
-    st.subheader("🧠 9. 종합의견")
+    st.markdown("### 💬 종합의견 (GPT 자동작성)")
 
     if st.button("🚀 종합의견 생성하기"):
         reference = load_insight_examples("final_opinion")
@@ -96,8 +93,10 @@ def analyze_summary_and_opinion():
 [참고자료]
 {reference}
 
-위 요약내용을 기반으로, 축제 방문객의 분포와 주요 특징을 통합적으로 설명하고, 정책적 시사점을 포함한 종합의견을 5~7문장으로 작성해주세요.
+위 요약내용을 기반으로, 축제 방문객의 분포와 주요 특징을 통합적으로 설명하고,
+정책적 시사점을 포함한 종합의견을 5~7문장으로 작성해주세요.
 """
+
         with st.spinner("🤖 GPT가 종합의견을 작성 중입니다..."):
             response = client.chat.completions.create(
                 model="gpt-4o",
@@ -108,8 +107,6 @@ def analyze_summary_and_opinion():
                 temperature=0.5,
                 max_tokens=800
             )
-            result = response.choices[0].message.content
-            st.session_state["final_opinion"] = result
-            st.markdown("### 🧠 종합의견 결과")
-            st.write(result)
+            st.markdown("#### 🧠 종합의견")
+            st.write(response.choices[0].message.content)
 

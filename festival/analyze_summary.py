@@ -31,13 +31,19 @@ def analyze_summary():
 
     col1, col2 = st.columns(2)
     with col1:
-        local_prev = st.number_input("전년도 현지인 방문객 수", min_value=0, step=100, value=get_value("local_prev"))
-        tourist_prev = st.number_input("전년도 외지인 방문객 수", min_value=0, step=100, value=get_value("tourist_prev"))
+        local_prev = st.number_input("전년도 현지인 방문객 수", min_value=0, step=100, key="local_prev")
+        tourist_prev = st.number_input("전년도 외지인 방문객 수", min_value=0, step=100, key="tourist_prev")
     with col2:
-        local_curr = st.number_input("올해 현지인 방문객 수", min_value=0, step=100, value=get_value("local_curr"))
-        tourist_curr = st.number_input("올해 외지인 방문객 수", min_value=0, step=100, value=get_value("tourist_curr"))
+        local_curr = st.number_input("올해 현지인 방문객 수", min_value=0, step=100, key="local_curr")
+        tourist_curr = st.number_input("올해 외지인 방문객 수", min_value=0, step=100, key="tourist_curr")
 
     if st.button("🚀 분석 실행", key="total_btn"):
+        # ✅ 값은 session_state에서 자동으로 관리되므로 별도 저장 필요 없음
+        local_prev = st.session_state["local_prev"]
+        tourist_prev = st.session_state["tourist_prev"]
+        local_curr = st.session_state["local_curr"]
+        tourist_curr = st.session_state["tourist_curr"]
+        
         days = st.session_state.get("festival_days", 3)
         total_prev = local_prev + tourist_prev
         total_curr = local_curr + tourist_curr

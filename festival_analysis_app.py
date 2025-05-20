@@ -39,57 +39,55 @@ def festival_basic_info():
     st.session_state["festival_start_date"] = start_date
     st.session_state["festival_end_date"] = end_date
 
-# ✅ 전체 분석기 실행 함수
+# ✅ 통합 분석기 실행 함수 (탭 기반)
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")
 
-    # ✅ 축제 기본정보 입력
+    # 1. 공통정보 입력
     festival_basic_info()
 
-    # ✅ 분석 항목 선택
-    selected_analysis = st.selectbox("📂 분석 항목 선택", [
-        "1. 축제 방문객 현황(총괄)",
-        "2. 축제 일자별 방문객 수",
-        "3. 시간대별 관광객 존재 현황",
-        "4. 축제 전·중·후 방문객 현황",
-        "5. 연령별 방문객 현황",
-        "6. 연령별, 남여 방문객 현황",
-        "7-1. 시도 및 시군구별 방문객 현황",
-        "7-2. 외지인 24시간 이후지역 현황",
-        "8. 분석결과(요약) 작성 및 종합의견"
+    # 2. 분석기별 탭 구성
+    tabs = st.tabs([
+        "1. 방문객 현황",
+        "2. 일자별 방문객",
+        "3. 시간대별 관광객",
+        "4. 전·중·후 분석",
+        "5. 연령별 방문객",
+        "6. 성별 연령",
+        "7-1. 시도·시군구별",
+        "7-2. 24시간 이후지역",
+        "8. 요약 및 종합의견"
     ])
 
-    # ✅ 항목별 실행
-    if selected_analysis == "1. 축제 방문객 현황(총괄)":
+    # ✅ 각 탭에서 분석기 실행
+    with tabs[0]:
         from festival.analyze_summary import analyze_summary
         analyze_summary()
-    elif selected_analysis == "2. 축제 일자별 방문객 수":
+    with tabs[1]:
         from festival.analyze_daily_visitor import analyze_daily_visitor
         analyze_daily_visitor()
-    elif selected_analysis == "3. 시간대별 관광객 존재 현황":
+    with tabs[2]:
         from festival.analyze_time_distribution import analyze_time_distribution
         analyze_time_distribution()
-    elif selected_analysis == "4. 축제 전·중·후 방문객 현황":
+    with tabs[3]:
         from festival.analyze_before_after import analyze_before_after
         analyze_before_after()
-    elif selected_analysis == "5. 연령별 방문객 현황":
+    with tabs[4]:
         from festival.analyze_age_group import analyze_age_group
         analyze_age_group()
-    elif selected_analysis == "6. 연령별, 남여 방문객 현황":
+    with tabs[5]:
         from festival.analyze_gender_by_age import analyze_gender_by_age
         analyze_gender_by_age()
-    elif selected_analysis == "7-1. 시도 및 시군구별 방문객 현황":
+    with tabs[6]:
         from festival.analyze_visitor_by_province import analyze_visitor_by_province
         analyze_visitor_by_province()
-        #analyze_gender_by_age()
-    elif selected_analysis == "7-2. 외지인 24시간 이후지역 현황":
+    with tabs[7]:
         from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
         analyze_visitor_after_24h()
-    elif selected_analysis == "8. 분석결과(요약) 작성 및 종합의견":
+    with tabs[8]:
         from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
-        analyze_summary_and_opinion()     
-        
-        
+        analyze_summary_and_opinion()
+
 
 
 # In[ ]:

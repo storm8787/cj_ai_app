@@ -95,7 +95,8 @@ def analyze_visitor_after_24h():
     ], ignore_index=True)
     final_df["비율"] = final_df["비율"].round(2).astype(str) + "%"
 
-    # ✅ 2열 분할 및 충돌 방지
+
+    # 2열 분할
     mid = len(final_df) // 2 + len(final_df) % 2
     left = final_df.iloc[:mid].reset_index(drop=True)
     right = final_df.iloc[mid:].reset_index(drop=True)

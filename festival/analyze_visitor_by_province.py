@@ -55,20 +55,25 @@ def analyze_visitor_by_province():
     right = grouped.iloc[midpoint:].reset_index(drop=True)
     result_df = pd.concat([left, right], axis=1)
 
-    # ✅ 컬럼 이름 기준으로 합계 행 생성 (에러 방지용)
-    expected_columns = result_df.columns.tolist()
-    total_row_data = {}
-    for col in expected_columns:
-        if "시도" in col:
-            total_row_data[col] = "합계"
-        elif "관광객수" in col:
-            total_row_data[col] = grouped["관광객수"].sum()
-        elif "비율" in col:
-            total_row_data[col] = "100.00%"
-        else:
-            total_row_data[col] = ""
+    # ✅ 결과 DataFrame 구조 복제
+    empty_row = pd.DataFrame(columns=result_df.columns)
 
-    total_row_df = pd.DataFrame([total_row_data])
+    # ✅ 딕셔너리 형태로 값 채우기
+    last_row_values = {}
+    for col in result_df.columns:
+        if "시도" in col:
+            last_row_values[col] = "합계"
+        elif "관광객수" in col:
+            last_row_values[col] = grouped["관광객수"].sum()
+        elif "비율" in col:
+            last_row_values[col] = "100.00%"
+        else:
+            last_row_values[col] = ""
+
+    # ✅ DataFrame으로 변환, result_df와 동일한 구조로 보장
+    total_row_df = pd.DataFrame([last_row_values], columns=result_df.columns)
+
+    # ✅ 안전하게 붙이기
     result_df = pd.concat([result_df, total_row_df], ignore_index=True)
 
     # ✅ 출력

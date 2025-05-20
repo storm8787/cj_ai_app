@@ -36,8 +36,6 @@ def analyze_summary_and_opinion():
             analyze_final_opinion()
 
 def analyze_summary_overview():
-    st.subheader("🧾 8-1. 분석결과 요약")
-
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
@@ -109,8 +107,6 @@ def analyze_summary_overview():
             st.write(response.choices[0].message.content)
 
 def analyze_final_opinion():
-    st.subheader("💬 8-2. 종합의견 (정책적 시사점)")
-
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")

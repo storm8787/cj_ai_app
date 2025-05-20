@@ -29,13 +29,13 @@ def analyze_summary_and_opinion():
 
     with col1:
         if st.button("📝 분석결과(요약) 보기"):
-            analyze_summary_overview()
+            analyze_summary_overview(analyze_summary_overview(gpt_generate=True))
 
     with col2:
         if st.button("💡 종합의견(GPT 생성) 보기"):
             analyze_final_opinion()
 
-def analyze_summary_overview():
+def analyze_summary_overview(gpt_generate=False):
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
@@ -82,9 +82,16 @@ def analyze_summary_overview():
             summary_lines.append(f"- {row['full_region']}: {row['관광객수']:,}명 ({row['비율']:.2f}%)")
 
     # GPT 요약 생성
-    if st.button("🧠 분석결과 요약 생성"):
+    if gpt_generate:
         reference = load_insight_examples("summary_overview")
-        prompt = f"""다음은 {name}({period}, {location}) 축제의 데이터 기반 분석결과입니다.
+        prompt = f"""..."""  # 위 prompt 그대로 사용
+        with st.spinner("GPT가 분석결과 요약 중..."):
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                ...
+            )
+            st.subheader("🧾 GPT 분석결과 요약")
+            st.write(response.choices[0].message.content)
 
 {chr(10).join(summary_lines)}
 

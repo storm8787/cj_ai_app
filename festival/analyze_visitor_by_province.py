@@ -7,6 +7,18 @@
 import streamlit as st
 import pandas as pd
 import io
+from openai import OpenAI
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# ✅ 시사점 예시 불러오기
+def load_insight_examples(section_id):
+    try:
+        path = os.path.join("press_release_app", "data", "insights", f"{section_id}.txt")
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
 
 def analyze_visitor_by_province():
     st.subheader("📊 7-1. 시도 및 시군구별 외지인 방문객 거주지 분석기")
@@ -145,4 +157,71 @@ def analyze_visitor_by_province():
 
     # ✅ 시군구 분석 결과 출력
     st.dataframe(result_gungu, use_container_width=True)
+
+    # ✅ GPT 시사점 생성 (시도 + 시군구 각각)
+    with st.spinner("🤖 GPT 시사점 생성 중..."):
+        name = st.session_state.get("festival_name", "본 축제")
+        period = st.session_state.get("festival_period", "")
+        location = st.session_state.get("festival_location", "")
+        reference = load_insight_examples("7-1_visitor")
+
+        # ✅ [1] 시도별 요약 텍스트
+        grouped_summary = "\n".join([
+            f"- {row['시도']}: {int(row['관광객수']):,}명 ({row['비율']})"
+            for _, row in grouped.iterrows()
+        ])
+
+        grouped_prompt = f"""다음은 {name}({period}, {location}) 축제의 시도별 외지인 방문객 분석입니다.
+
+[시도별 외지인 방문객 수 요약]
+{grouped_summary}
+
+[참고자료]
+{reference}
+
+위 데이터를 바탕으로, 시도별 분포와 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
+"""
+
+        grouped_response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": grouped_prompt}
+            ],
+            temperature=0.5,
+            max_tokens=700
+        )
+
+        st.subheader("🧠 GPT 시사점 (시도 기준)")
+        st.write(grouped_response.choices[0].message.content)
+
+        # ✅ [2] 시군구별 요약 텍스트
+        gungu_summary = "\n".join([
+            f"- {row['시군구']}: {int(row['관광객수']):,}명 ({row['비율']})"
+            for _, row in gungu_final.iterrows() if row["시군구"] not in ["기타", "합계"]
+        ])
+
+        gungu_prompt = f"""다음은 {name}({period}, {location}) 축제의 시군구별 외지인 방문객 분석입니다.
+
+[시군구별 외지인 방문객 수 요약]
+{gungu_summary}
+
+[참고자료]
+{reference}
+
+위 데이터를 바탕으로, 주요 시군구 방문 분포와 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
+"""
+
+        gungu_response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": gungu_prompt}
+            ],
+            temperature=0.5,
+            max_tokens=700
+        )
+
+        st.subheader("🧠 GPT 시사점 (시군구 기준)")
+        st.write(gungu_response.choices[0].message.content)
 

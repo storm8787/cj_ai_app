@@ -69,7 +69,10 @@ def analyze_visitor_after_24h():
     df["시군구"] = df["시군구"].apply(merge_sigungu)
 
     # ✅ 시군구 기준 그룹화
-    grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
+    #grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
+    # ✅ 시도 + 시군구 합쳐서 새로운 분석용 컬럼 생성
+    df["full_region"] = df["시도"].str.strip() + " " + df["시군구"].str.strip()
+    grouped = df.groupby("full_region", as_index=False)["관광객수"].sum()
     grouped["비율"] = (grouped["관광객수"] / total_visitors * 100)
 
     # ✅ 상위 20개 + 기타 + 합계
@@ -112,9 +115,10 @@ def analyze_visitor_after_24h():
         reference = load_insight_examples("7-2_after")
 
         summary = "\n".join([
-            f"- {row['시군구']}: {int(row['관광객수']):,}명 ({row['비율']})"
-            for _, row in final_df.iterrows() if row["시군구"] not in ["기타", "합계"]
+            f"- {row['full_region']}: {int(row['관광객수']):,}명 ({row['비율']:.2f}%)"
+            for _, row in grouped.iterrows()
         ])
+
 
         prompt = f"""다음은 {name}({period}, {location}) 축제 방문객의 '24시간 이후 이동지역' 분석입니다.
 

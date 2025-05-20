@@ -24,31 +24,34 @@ def load_insight_examples(section_id):
 def analyze_age_group():
     st.subheader("📊 5. 연령별 방문객 분석")
 
-    # ✅ 템플릿 경로 설정
     template_path = "data/templates/5_template.xlsx"
-
-    # ✅ 폴더 없으면 생성
     os.makedirs(os.path.dirname(template_path), exist_ok=True)
 
-    # ✅ 템플릿 파일 없으면 자동 생성
     if not os.path.exists(template_path):
         columns = ["구분", "날짜", "10대미만", "10대", "20대", "30대", "40대", "50대", "60대", "70대이상"]
         rows = []
         for group in ["현지인", "외지인"]:
-            for i in range(3, 0, -1):  # 3일차 ~ 1일차
+            for i in range(3, 0, -1):
                 row = [group, f"{i}일차"] + [0] * (len(columns) - 2)
                 rows.append(row)
         df = pd.DataFrame(rows, columns=columns)
         df.to_excel(template_path, index=False)
 
-    # ✅ 다운로드 버튼
-    with open(template_path, "rb") as f:
-        st.download_button(
-            label="📥 템플릿 다운로드: 연령별 방문객 분석",
-            data=f,
-            file_name="5_template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    # ✅ 파일 존재 여부 확인 로그
+    st.write("📁 템플릿 파일 존재?", os.path.exists(template_path))
+    st.write("📄 템플릿 경로:", template_path)
+
+    # ✅ 다운로드 버튼 with 에러 핸들링
+    try:
+        with open(template_path, "rb") as f:
+            st.download_button(
+                label="📥 템플릿 다운로드: 연령별 방문객 분석",
+                data=f,
+                file_name="5_template.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+    except Exception as e:
+        st.error(f"❌ 다운로드 버튼 오류: {e}")
 
     uploaded_file = st.file_uploader("📂 연령대별 방문객 엑셀 파일 업로드", type=["xlsx"])
     if not uploaded_file:

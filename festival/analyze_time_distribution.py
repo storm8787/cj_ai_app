@@ -111,9 +111,15 @@ def analyze_time_distribution():
     result_rows.extend(process_ratio(local_df, "현지인"))
     result_rows.extend(process_ratio(tourist_df, "외지인"))
 
+    # ✅ 분석 결과 DataFrame 생성
+    final_df = pd.DataFrame(result_rows)
+
     # ✅ 출력
     st.subheader("📊 시간대별 관광객 현황")
     st.dataframe(pd.DataFrame(result_rows), use_container_width=True)
+
+    # ✅ 8번 분석기에서 재활용할 수 있도록 저장
+    st.session_state["summary_time_distribution_df"] = final_df.copy()
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):

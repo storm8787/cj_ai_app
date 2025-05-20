@@ -73,39 +73,40 @@ def generate_excel_with_errors(df, error_cells):
     final_output.seek(0)
     return final_output
 
-st.title("📑 공공데이터 표준 간이 검증기 (CSV 전용)")
+def data_validator_app():
+    st.title("📑 공공데이터 표준 간이 검증기 (CSV 전용)")
 
-uploaded_file = st.file_uploader("✅ CSV 파일을 업로드하세요", type=["csv"])
+    uploaded_file = st.file_uploader("✅ CSV 파일을 업로드하세요", type=["csv"])
 
-if uploaded_file:
-    try:
-        df = pd.read_csv(uploaded_file, encoding="utf-8", dtype=str)
-    except UnicodeDecodeError:
-        df = pd.read_csv(uploaded_file, encoding="cp949", dtype=str)
+    if uploaded_file:
+        try:
+            df = pd.read_csv(uploaded_file, encoding="utf-8", dtype=str)
+        except UnicodeDecodeError:
+            df = pd.read_csv(uploaded_file, encoding="cp949", dtype=str)
 
-    df.fillna("", inplace=True)
-    st.success("✅ 파일 업로드 성공")
+        df.fillna("", inplace=True)
+        st.success("✅ 파일 업로드 성공")
 
-    if st.button("🔍 검증 실행"):
-        error_cells = run_validation(df)
-        st.subheader("📋 검증 결과 미리보기")
+        if st.button("🔍 검증 실행"):
+            error_cells = run_validation(df)
+            st.subheader("📋 검증 결과 미리보기")
 
-        if error_cells:
-            preview_df = df.copy()
-            for row, col in error_cells:
-                preview_df.at[row - 2, col] += " ⚠️"
+            if error_cells:
+                preview_df = df.copy()
+                for row, col in error_cells:
+                    preview_df.at[row - 2, col] += " ⚠️"
 
-            st.dataframe(preview_df, use_container_width=True)
+                st.dataframe(preview_df, use_container_width=True)
 
-            excel_with_errors = generate_excel_with_errors(df, error_cells)
-            st.download_button(
-                label="📥 오류 표시된 엑셀 다운로드",
-                data=excel_with_errors.getvalue(),
-                file_name="검증결과_노란색표시.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        else:
-            st.success("🎉 형식 오류나 특수문자 문제 없이 정상입니다!")
-else:
-    st.info("좌측 또는 위에서 CSV 파일을 업로드해주세요.")
+                excel_with_errors = generate_excel_with_errors(df, error_cells)
+                st.download_button(
+                    label="📥 오류 표시된 엑셀 다운로드",
+                    data=excel_with_errors.getvalue(),
+                    file_name="검증결과_노란색표시.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            else:
+                st.success("🎉 형식 오류나 특수문자 문제 없이 정상입니다!")
+    else:
+        st.info("좌측 또는 위에서 CSV 파일을 업로드해주세요.")
 

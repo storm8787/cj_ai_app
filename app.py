@@ -15,6 +15,7 @@ st.set_page_config(
 from press_release_app import press_release_app
 from excel_merger import excel_merger
 from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메인 함수 불러오기
+from data_validator_app import data_validator_app
 
 
 def main():
@@ -23,7 +24,8 @@ def main():
     # ✅ 기본 기능 목록
     basic_features = [
         "(생성형AI) 보도자료 생성기",
-        "(생성형AI) 빅데이터 분석기",        
+        "(생성형AI) 빅데이터 분석기",
+        "(생성형AI) 공공데이터 검증기",
         "(업무자동화) 엑셀 취합기"
     ]
     admin_features = [
@@ -76,6 +78,8 @@ def main():
         excel_merger()
     elif st.session_state.selected_app == "(생성형AI) 빅데이터 분석기":
         festival_analysis_app()    
+    elif st.session_state.selected_app == "(생성형AI) 공공데이터 검증기":
+        data_validator_app()    
 
 if __name__ == "__main__":
     main()

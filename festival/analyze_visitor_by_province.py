@@ -91,6 +91,21 @@ def analyze_visitor_by_province():
 
     st.markdown("### 🏙️ 7-2. 시군구별 외지인 방문객 현황")
 
+    # ✅ 구 단위를 시로 병합할 시 리스트
+    merge_target_cities = [
+        "청주시", "수원시", "안양시", "천안시", "용인시",
+        "성남시", "고양시", "부천시", "안산시"
+    ]
+
+    def merge_sigungu(name):
+        for city in merge_target_cities:
+            if name.startswith(city):
+                return city
+        return name
+
+    # ✅ 병합 적용
+    df["시군구"] = df["시군구"].apply(merge_sigungu)
+
     # ✅ 시군구 기준으로 그룹화
     gungu_grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
     gungu_grouped["비율"] = (gungu_grouped["관광객수"] / total_visitors * 100)

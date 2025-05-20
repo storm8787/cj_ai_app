@@ -11,6 +11,7 @@ from openai import OpenAI
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+# ✅ 시사점 예시 불러오기
 def load_insight_examples(section_id):
     try:
         path = f"press_release_app/data/insights/{section_id}.txt"
@@ -19,79 +20,82 @@ def load_insight_examples(section_id):
     except FileNotFoundError:
         return ""
 
-#from festival.analyze_summary_overview import analyze_summary_overview
-#from festival.analyze_final_opinion import analyze_final_opinion
-
+# ✅ 8. 분석결과 요약 및 종합의견
 def analyze_summary_and_opinion():
     st.subheader("📊 8. 분석결과 요약 및 종합의견")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("📝 분석결과(요약) 보기"):
-            analyze_summary_overview(analyze_summary_overview(gpt_generate=True))
-
+        gpt_summary = st.button("📝 분석결과(요약) 생성 및 보기")
     with col2:
-        if st.button("💡 종합의견(GPT 생성) 보기"):
-            analyze_final_opinion()
+        gpt_opinion = st.button("💡 종합의견(GPT 생성) 보기")
 
+    analyze_summary_overview(gpt_generate=gpt_summary)
+    analyze_final_opinion(gpt_generate=gpt_opinion)
+
+# ✅ 분석결과 요약
 def analyze_summary_overview(gpt_generate=False):
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
     summary_lines = []
 
-    # 세션에서 요약 내용 가져오기 (1~7번 분석기 데이터 기반)
     if "summary_total_text" in st.session_state:
         summary_lines.append("📌 [1. 방문객 총괄]")
         summary_lines.append(st.session_state["summary_total_text"])
+
     if "summary_daily_table" in st.session_state:
         summary_lines.append("\n📌 [2. 일자별 방문객]")
         for _, row in st.session_state["summary_daily_table"].iterrows():
             summary_lines.append(f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,} / 외지인 {row['외지인 방문객']:,} / 전체 {row['전체 방문객']:,}")
+
     if "summary_time_distribution" in st.session_state:
         summary_lines.append("\n📌 [3. 시간대별 관광객 분포]")
         summary_lines.append(st.session_state["summary_time_distribution"])
+
     if "summary_before_after" in st.session_state:
         summary_lines.append("\n📌 [4. 축제 전·중·후 방문객]")
         summary_lines.append(st.session_state["summary_before_after"])
+
     if "summary_age_group_text" in st.session_state:
         summary_lines.append("\n📌 [5. 연령대별 방문객]")
         summary_lines.append(st.session_state["summary_age_group_text"])
+
     if "summary_gender_by_age_df" in st.session_state:
         summary_lines.append("\n📌 [6. 연령별 성별 방문객]")
         df = st.session_state["summary_gender_by_age_df"]
         for _, row in df.iterrows():
             summary_lines.append(f"- {row['연령구분']}: 남자 {row['남자']}명 ({row['남자비율']}%), 여자 {row['여자']}명 ({row['여자비율']}%)")
+
     if "summary_visitor_by_province_sido" in st.session_state:
         summary_lines.append("\n📌 [7-1. 시도별 외지인 방문객]")
         df = st.session_state["summary_visitor_by_province_sido"]
         for _, row in df.iterrows():
             if row["시도_2"] not in ["", "합계", None]:
                 summary_lines.append(f"- {row['시도_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
+
     if "summary_visitor_by_province_gungu" in st.session_state:
         summary_lines.append("\n📌 [7-2. 시군구별 외지인 방문객]")
         df = st.session_state["summary_visitor_by_province_gungu"]
         for _, row in df.iterrows():
             if row["full_region_2"] not in ["", "합계", "기타", None]:
                 summary_lines.append(f"- {row['full_region_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
+
     if "summary_visitor_after_24h_grouped" in st.session_state:
         summary_lines.append("\n📌 [7-3. 외지인 24시간 이후 지역]")
         df = st.session_state["summary_visitor_after_24h_grouped"]
         for _, row in df.iterrows():
             summary_lines.append(f"- {row['full_region']}: {row['관광객수']:,}명 ({row['비율']:.2f}%)")
 
+    # 표시
+    st.markdown("### 🧾 분석결과 요약")
+    st.text("\n".join(summary_lines))
+
     # GPT 요약 생성
     if gpt_generate:
         reference = load_insight_examples("summary_overview")
-        prompt = f"""..."""  # 위 prompt 그대로 사용
-        with st.spinner("GPT가 분석결과 요약 중..."):
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                ...
-            )
-            st.subheader("🧾 GPT 분석결과 요약")
-            st.write(response.choices[0].message.content)
+        prompt = f"""다음은 {name}({period}, {location}) 축제의 데이터 기반 분석결과입니다.
 
 {chr(10).join(summary_lines)}
 
@@ -113,13 +117,17 @@ def analyze_summary_overview(gpt_generate=False):
             st.subheader("🧾 GPT 분석결과 요약")
             st.write(response.choices[0].message.content)
 
-def analyze_final_opinion():
+        # 종합의견에서도 활용할 수 있도록 session_state 저장
+        st.session_state["final_summary_text"] = "\n".join(summary_lines)
+
+# ✅ 종합의견
+def analyze_final_opinion(gpt_generate=False):
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
-    
+
     # GPT 종합의견 생성
-    if st.button("🧠 종합의견 생성"):
+    if gpt_generate:
         summary_lines = st.session_state.get("final_summary_text", "")
         reference = load_insight_examples("final_opinion")
 

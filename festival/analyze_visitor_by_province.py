@@ -146,7 +146,7 @@ def analyze_visitor_by_province():
 
         # ✅ 시도 기준 요약
         summary_sido = "\n".join([
-            f"- {row['시도']}: {int(row['관광객수']):,}명 ({float(row['비율'].replace('%','')):.2f}%)"
+            f"- {row['시도']}: {int(row['관광객수']):,}명 ({row['비율']})"
             for _, row in grouped.iterrows()
         ])
 

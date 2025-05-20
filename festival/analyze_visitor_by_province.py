@@ -59,16 +59,17 @@ def analyze_visitor_by_province():
     right = grouped.iloc[midpoint:].reset_index(drop=True)
     result_df = pd.concat([left, right], axis=1)
 
-    # ✅ 합계 행 추가 (좌우 열수 맞춰서)
-    total_row = pd.DataFrame([{
+    # ✅ 합계 행을 result_df의 열 수에 맞게 생성
+    total_row = {
         "시도": "합계",
         "관광객수": grouped["관광객수"].sum(),
         "비율": "100.00%"
-    }])
-    while total_row.shape[1] < result_df.shape[1]:
-        total_row[f"빈열{total_row.shape[1]}"] = ""
+    }
+    for i in range(len(total_row), result_df.shape[1]):
+        total_row[f"빈열{i}"] = ""
 
-    result_df = pd.concat([result_df, total_row], ignore_index=True)
+    total_row_df = pd.DataFrame([total_row])
+    result_df = pd.concat([result_df, total_row_df], ignore_index=True)
 
     # ✅ 출력
     st.markdown("#### 📋 시도별 분석 결과")

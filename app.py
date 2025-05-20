@@ -23,6 +23,7 @@ def main():
     # ✅ 기본 기능 목록
     basic_features = [
         "(생성형AI) 보도자료 생성기",
+        "(생성형AI) 빅데이터 분석기",        
         "(업무자동화) 엑셀 취합기"
     ]
     admin_features = [
@@ -73,7 +74,7 @@ def main():
         press_release_app()
     elif st.session_state.selected_app == "(업무자동화) 엑셀 취합기":
         excel_merger()
-    elif st.session_state.selected_app == "(관리자) 빅데이터 분석기":
+    elif st.session_state.selected_app == "(생성형AI) 빅데이터 분석기":
         festival_analysis_app()    
 
 if __name__ == "__main__":

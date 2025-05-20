@@ -53,6 +53,11 @@ def analyze_visitor_by_province():
     midpoint = len(grouped) // 2 + len(grouped) % 2
     left = grouped.iloc[:midpoint].reset_index(drop=True)
     right = grouped.iloc[midpoint:].reset_index(drop=True)
+
+    # ✅ 접미어 붙이기 (컬럼명 중복 방지)
+    left.columns = [f"{col}_1" for col in left.columns]
+    right.columns = [f"{col}_2" for col in right.columns]
+    
     result_df = pd.concat([left, right], axis=1)
 
     # ✅ 결과 DataFrame 구조 복제

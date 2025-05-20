@@ -25,7 +25,9 @@ def analyze_time_distribution():
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
     # ✅ 템플릿 다운로드 버튼 추가 (경로: press_release_app/data/templates)
-    template_path = os.path.join("press_release_app", "data", "templates", "3_template.xlsx")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(base_dir, "..", "data", "templates", "3_template.xlsx")
+    template_path = os.path.abspath(template_path)
 
     if os.path.exists(template_path):
         with open(template_path, "rb") as f:
@@ -36,7 +38,7 @@ def analyze_time_distribution():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
     else:
-        st.error("❌ 템플릿 파일이 존재하지 않습니다.")
+        st.error(f"❌ 템플릿 파일이 존재하지 않습니다.\n경로: {template_path}")
 
 
     uploaded_file = st.file_uploader("📂 엑셀 파일 업로드", type=["xlsx"])

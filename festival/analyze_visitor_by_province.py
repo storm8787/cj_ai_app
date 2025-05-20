@@ -75,10 +75,10 @@ def analyze_visitor_by_province():
 
     # ✅ 합계 행 추가
     total_row = {
-        "시도_1": "합계",
-        "관광객수_1": grouped["관광객수"].sum(),
-        "비율_1": "100.00%",
-        "시도_2": "", "관광객수_2": "", "비율_2": ""
+        "시도_1": "", "관광객수_1": "", "비율_1": ""
+        "시도_2": "합계",
+        "관광객수_2": int(grouped["관광객수"].sum()),
+        "비율_2": "100.00%"        
     }
     result_df = pd.concat([result_df, pd.DataFrame([total_row])], ignore_index=True)
 

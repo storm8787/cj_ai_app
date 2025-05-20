@@ -51,6 +51,11 @@ def analyze_daily_visitor():
         local_sum = sum(local_counts)
         tourist_sum = sum(tourist_counts)
 
+        # ✅ 8번에서 자동 활용할 수 있도록 세션에 저장
+        st.session_state["summary_total_visitors"] = total_sum
+        st.session_state["summary_local_visitors"] = local_sum
+        st.session_state["summary_tourist_visitors"] = tourist_sum
+
         df = pd.DataFrame({
             "날짜": [d.strftime("%Y-%m-%d") for d in date_range],
             "현지인 방문객": local_counts,

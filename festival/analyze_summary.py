@@ -38,6 +38,11 @@ def analyze_summary():
         total_prev = local_prev + tourist_prev
         total_curr = local_curr + tourist_curr
 
+        # ✅ 8번 페이지에서 사용될 요약 데이터 저장
+        st.session_state["summary_total_visitors"] = total_curr
+        st.session_state["summary_local_visitors"] = local_curr
+        st.session_state["summary_tourist_visitors"] = tourist_curr
+
         rows = []
 
         if total_prev > 0:

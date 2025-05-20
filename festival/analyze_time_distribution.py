@@ -25,7 +25,7 @@ def analyze_time_distribution():
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
     # ✅ 템플릿 파일 다운로드 안내
-    template_path = os.path.join("press_release_app", "templates", "시간대별_관광객_존재현황_템플릿.xlsx")
+    template_path = os.path.join("press_release_app", "templates", "3_template.xlsx")
 
     st.markdown("📎 [시간대별 관광객 템플릿 다운로드](./3_template.xlsx)")
     st.info("✅ 위 템플릿 파일을 다운로드하여 데이터를 입력한 뒤, 아래에서 업로드해주세요.")

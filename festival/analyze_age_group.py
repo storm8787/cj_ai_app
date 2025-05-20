@@ -116,6 +116,9 @@ def analyze_age_group():
 
     st.dataframe(final_df, use_container_width=True)
 
+    # ✅ 8번에서 활용할 수 있도록 결과 테이블 저장
+    st.session_state["summary_age_group_df"] = final_df.copy()
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

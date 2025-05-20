@@ -87,8 +87,7 @@ def festival_analysis_app():
         analyze_visitor_after_24h()
     elif selected_analysis == "8. 분석결과(요약) 작성 및 종합의견":
         from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
-        #analyze_summary_and_opinion()
-        analyze_visitor_after_24h()
+        analyze_summary_and_opinion()     
         
         
 

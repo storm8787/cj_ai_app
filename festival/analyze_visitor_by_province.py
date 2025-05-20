@@ -11,13 +11,11 @@ import io
 def analyze_visitor_by_province():
     st.subheader("📊 7-1. 시도별 외지인 방문객 거주지 분석기")
 
-    # ✅ 템플릿 생성
+    # ✅ 템플릿 다운로드 제공
     template_df = pd.DataFrame(columns=["시도", "시군구", "관광객수(%)"])
     buffer = io.BytesIO()
     template_df.to_excel(buffer, index=False)
     buffer.seek(0)
-
-    # ✅ 템플릿 다운로드 버튼
     st.download_button(
         label="📥 7-1 템플릿 다운로드",
         data=buffer,
@@ -25,7 +23,7 @@ def analyze_visitor_by_province():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    # ✅ 기준 외지인 방문객 수 입력
+    # ✅ 기준 방문객 수 입력
     total_visitors = st.number_input("🔢 기준 외지인 방문객 수를 입력하세요", min_value=1, step=1)
 
     # ✅ 파일 업로드
@@ -33,7 +31,7 @@ def analyze_visitor_by_province():
     if not uploaded_file or total_visitors <= 0:
         return
 
-    # ✅ 데이터 읽기 및 유효성 검사
+    # ✅ 데이터 로드 및 유효성 확인
     df = pd.read_excel(uploaded_file).dropna(how="all")
     df.columns = [col.strip() for col in df.columns]
 
@@ -42,33 +40,35 @@ def analyze_visitor_by_province():
         st.error("❌ '시도', '시군구', '관광객수(%)' 컬럼이 포함된 파일을 업로드해주세요.")
         return
 
-    # ✅ 퍼센트 비율 → 숫자로 변환
+    # ✅ 비율 변환 및 관광객 수 계산
     df["비율"] = df["관광객수(%)"].astype(str).str.replace("%", "").astype(float) / 100
     df["관광객수"] = (df["비율"] * total_visitors).round().astype(int)
 
-    # ✅ 시도 기준 집계
+    # ✅ 시도 기준 그룹화
     grouped = df.groupby("시도", as_index=False)["관광객수"].sum()
     grouped["비율"] = (grouped["관광객수"] / total_visitors * 100).round(2).astype(str) + "%"
 
-    # ✅ 내림차순 정렬
+    # ✅ 정렬 후 2열 분할
     grouped = grouped.sort_values(by="관광객수", ascending=False).reset_index(drop=True)
-
-    # ✅ 2열 테이블로 분할
     midpoint = len(grouped) // 2 + len(grouped) % 2
     left = grouped.iloc[:midpoint].reset_index(drop=True)
     right = grouped.iloc[midpoint:].reset_index(drop=True)
     result_df = pd.concat([left, right], axis=1)
 
-    # ✅ 합계 행을 result_df의 열 수에 맞게 생성
-    total_row = {
-        "시도": "합계",
-        "관광객수": grouped["관광객수"].sum(),
-        "비율": "100.00%"
-    }
-    for i in range(len(total_row), result_df.shape[1]):
-        total_row[f"빈열{i}"] = ""
+    # ✅ 컬럼 이름 기준으로 합계 행 생성 (에러 방지용)
+    expected_columns = result_df.columns.tolist()
+    total_row_data = {}
+    for col in expected_columns:
+        if "시도" in col:
+            total_row_data[col] = "합계"
+        elif "관광객수" in col:
+            total_row_data[col] = grouped["관광객수"].sum()
+        elif "비율" in col:
+            total_row_data[col] = "100.00%"
+        else:
+            total_row_data[col] = ""
 
-    total_row_df = pd.DataFrame([total_row])
+    total_row_df = pd.DataFrame([total_row_data])
     result_df = pd.concat([result_df, total_row_df], ignore_index=True)
 
     # ✅ 출력

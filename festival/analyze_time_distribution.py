@@ -24,6 +24,9 @@ def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
+    # ✅ 템플릿 경로 정의 (함수 내에서 최상단에 선언)
+    template_path = "data/templates/3_template.xlsx"
+    
     # ✅ 템플릿 폴더가 없으면 생성
     os.makedirs("data/templates", exist_ok=True)
 

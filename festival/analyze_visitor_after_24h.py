@@ -79,12 +79,12 @@ def analyze_visitor_after_24h():
     top20 = grouped.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
     top20_total = top20["관광객수"].sum()
     others_row = {
-        "시군구": "기타",
+        "full_region": "기타",
         "관광객수": total_visitors - top20_total,
         "비율": 100 - top20["비율"].sum()
     }
     sum_row = {
-        "시군구": "합계",
+        "full_region": "합계",
         "관광객수": total_visitors,
         "비율": 100.0
     }
@@ -102,6 +102,9 @@ def analyze_visitor_after_24h():
     left.columns = [f"{col}_1" for col in left.columns]
     right.columns = [f"{col}_2" for col in right.columns]
     result_df = pd.concat([left, right], axis=1)
+
+    # ✅ 시군구 컬럼 제거
+    result_df = result_df.drop(columns=[col for col in result_df.columns if "시군구" in col])
 
     # ✅ 출력
     st.markdown("#### 📋 24시간 이후 이동지역 분석 결과")

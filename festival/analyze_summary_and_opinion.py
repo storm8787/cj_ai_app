@@ -22,7 +22,7 @@ def load_insight_examples(section_id):
 
 # ✅ 8. 분석결과 요약 및 종합의견
 def analyze_summary_and_opinion():
-    st.subheader("📊 8. 분석결과 요약 및 종합의견")
+    #st.subheader("📊 8. 분석결과 요약 및 종합의견")
 
     col1, col2 = st.columns(2)
     with col1:

@@ -24,6 +24,9 @@ def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
+    # ✅ 템플릿 폴더가 없으면 생성
+    os.makedirs("data/templates", exist_ok=True)
+
     df = pd.DataFrame({
         "구분": ["현지인", "현지인", "현지인", "외지인", "외지인", "외지인"],
         "날짜": ["3일차", "2일차", "1일차", "3일차", "2일차", "1일차"],

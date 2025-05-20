@@ -24,6 +24,8 @@ def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
+    st.write("현재 실행 위치:", os.getcwd())
+
     if os.path.exists("3_template.xlsx"):
         with open("3_template.xlsx", "rb") as f:
             st.download_button(

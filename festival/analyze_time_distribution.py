@@ -24,10 +24,10 @@ def analyze_time_distribution():
     st.subheader("📊 3. 시간대별 관광객 존재현황 분석")
     st.markdown("시간대별 관광객 데이터를 포함한 엑셀 파일을 업로드하세요.")
 
-    # ✅ 템플릿 다운로드 버튼 추가 (경로: press_release_app/data/templates)
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    template_path = os.path.join(base_dir, "..", "data", "templates", "3_template.xlsx")
-    template_path = os.path.abspath(template_path)
+    # 현재 파일 기준으로 templates 폴더까지 이동
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # festival 폴더 위치
+    template_path = os.path.abspath(os.path.join(base_dir, "..", "data", "templates", "3_template.xlsx"))
+
 
     if os.path.exists(template_path):
         with open(template_path, "rb") as f:

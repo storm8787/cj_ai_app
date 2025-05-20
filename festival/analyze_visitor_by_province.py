@@ -9,7 +9,7 @@ import pandas as pd
 import io
 
 def analyze_visitor_by_province():
-    st.subheader("📊 7-1. 시도별 외지인 방문객 거주지 분석기")
+    st.subheader("📊 7-1. 시도 및 시군구별 외지인 방문객 거주지 분석기")
 
     # ✅ 템플릿 다운로드 제공
     template_df = pd.DataFrame(columns=["시도", "시군구", "관광객수(%)"])
@@ -84,4 +84,50 @@ def analyze_visitor_by_province():
     # ✅ 출력
     st.markdown("#### 📋 시도별 분석 결과")
     st.dataframe(result_df, use_container_width=True)
+
+# -------------------------
+# ✅ 7-2. 시군구별 방문객 분석
+# -------------------------
+
+    st.markdown("### 🏙️ 7-2. 시군구별 외지인 방문객 현황")
+
+    # ✅ 시군구 기준으로 그룹화
+    gungu_grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
+    gungu_grouped["비율"] = (gungu_grouped["관광객수"] / total_visitors * 100)
+
+    # ✅ 상위 20개 추출
+    top20 = gungu_grouped.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
+
+    # ✅ 기타 계산
+    top20_total = top20["관광객수"].sum()
+    others_row = {
+        "시군구": "기타",
+        "관광객수": total_visitors - top20_total,
+        "비율": 100 - top20["비율"].sum()
+    }
+    gungu_final = pd.concat([
+        top20,
+        pd.DataFrame([others_row]),
+        pd.DataFrame([{
+            "시군구": "합계",
+            "관광객수": total_visitors,
+            "비율": 100.0
+        }])
+    ], ignore_index=True)
+
+    # ✅ 비율 포맷팅
+    gungu_final["비율"] = gungu_final["비율"].round(2).astype(str) + "%"
+
+    # ✅ 2열 분할
+    mid = len(gungu_final) // 2 + len(gungu_final) % 2
+    left = gungu_final.iloc[:mid].reset_index(drop=True)
+    right = gungu_final.iloc[mid:].reset_index(drop=True)
+
+    # ✅ 접미어로 열 충돌 방지
+    left.columns = [f"{col}_1" for col in left.columns]
+    right.columns = [f"{col}_2" for col in right.columns]
+    result_gungu = pd.concat([left, right], axis=1)
+
+    # ✅ 시군구 분석 결과 출력
+    st.dataframe(result_gungu, use_container_width=True)
 

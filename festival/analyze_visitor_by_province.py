@@ -7,8 +7,8 @@
 import streamlit as st
 import pandas as pd
 import io
-from openai import OpenAI
 import os
+from openai import OpenAI
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -24,7 +24,7 @@ def load_insight_examples(section_id):
 def analyze_visitor_by_province():
     st.subheader("📊 7-1. 시도 및 시군구별 외지인 방문객 거주지 분석기")
 
-    # ✅ 템플릿 다운로드 제공
+    # ✅ 템플릿 다운로드
     template_df = pd.DataFrame(columns=["시도", "시군구", "관광객수(%)"])
     buffer = io.BytesIO()
     template_df.to_excel(buffer, index=False)
@@ -44,64 +44,45 @@ def analyze_visitor_by_province():
     if not uploaded_file or total_visitors <= 0:
         return
 
-    # ✅ 데이터 로드 및 유효성 확인
+    # ✅ 데이터 로드 및 유효성 검사
     df = pd.read_excel(uploaded_file).dropna(how="all")
     df.columns = [col.strip() for col in df.columns]
-
     expected_cols = ["시도", "시군구", "관광객수(%)"]
     if not all(col in df.columns for col in expected_cols):
         st.error("❌ '시도', '시군구', '관광객수(%)' 컬럼이 포함된 파일을 업로드해주세요.")
         return
 
-    # ✅ 비율 변환 및 관광객 수 계산
+    # ✅ 관광객 수 계산
     df["비율"] = df["관광객수(%)"].astype(str).str.replace("%", "").astype(float) / 100
     df["관광객수"] = (df["비율"] * total_visitors).round().astype(int)
 
-    # ✅ 시도 기준 그룹화
+    # ✅ 시도별 그룹화 및 2열 출력
     grouped = df.groupby("시도", as_index=False)["관광객수"].sum()
-    grouped["비율"] = (grouped["관광객수"] / total_visitors * 100).round(2).astype(str) + "%"
+    grouped["비율"] = (grouped["관광객수"] / total_visitors * 100)
 
-    # ✅ 정렬 후 2열 분할
-    grouped = grouped.sort_values(by="관광객수", ascending=False).reset_index(drop=True)
-    midpoint = len(grouped) // 2 + len(grouped) % 2
-    left = grouped.iloc[:midpoint].reset_index(drop=True)
-    right = grouped.iloc[midpoint:].reset_index(drop=True)
-
-    # ✅ 접미어 붙이기 (컬럼명 중복 방지)
+    left = grouped.iloc[:len(grouped)//2 + len(grouped)%2].reset_index(drop=True)
+    right = grouped.iloc[len(grouped)//2 + len(grouped)%2:].reset_index(drop=True)
+    left["비율"] = left["비율"].round(2).astype(str) + "%"
+    right["비율"] = right["비율"].round(2).astype(str) + "%"
     left.columns = [f"{col}_1" for col in left.columns]
     right.columns = [f"{col}_2" for col in right.columns]
-    
     result_df = pd.concat([left, right], axis=1)
 
-    # ✅ 결과 DataFrame 구조 복제
-    empty_row = pd.DataFrame(columns=result_df.columns)
+    # ✅ 합계 행 추가
+    total_row = {
+        "시도_1": "합계",
+        "관광객수_1": grouped["관광객수"].sum(),
+        "비율_1": "100.00%",
+        "시도_2": "", "관광객수_2": "", "비율_2": ""
+    }
+    result_df = pd.concat([result_df, pd.DataFrame([total_row])], ignore_index=True)
 
-    # ✅ 딕셔너리 형태로 값 채우기
-    last_row_values = {}
-    for col in result_df.columns:
-        if "시도" in col:
-            last_row_values[col] = "합계"
-        elif "관광객수" in col:
-            last_row_values[col] = grouped["관광객수"].sum()
-        elif "비율" in col:
-            last_row_values[col] = "100.00%"
-        else:
-            last_row_values[col] = ""
-
-    # ✅ DataFrame으로 변환, result_df와 동일한 구조로 보장
-    total_row_df = pd.DataFrame([last_row_values], columns=result_df.columns)
-
-    # ✅ 안전하게 붙이기
-    result_df = pd.concat([result_df, total_row_df], ignore_index=True)
-
-    # ✅ 출력
     st.markdown("#### 📋 시도별 분석 결과")
     st.dataframe(result_df, use_container_width=True)
 
-# -------------------------
-# ✅ 7-2. 시군구별 방문객 분석
-# -------------------------
-
+    # -------------------------
+    # ✅ 시군구별 외지인 방문객 분석 (full_region 기준)
+    # -------------------------
     st.markdown("### 🏙️ 7-2. 시군구별 외지인 방문객 현황")
 
     # ✅ 구 단위를 시로 병합할 시 리스트
@@ -109,49 +90,40 @@ def analyze_visitor_by_province():
         "청주시", "수원시", "안양시", "천안시", "용인시",
         "성남시", "고양시", "부천시", "안산시"
     ]
-
     def merge_sigungu(name):
         for city in merge_target_cities:
             if name.startswith(city):
                 return city
         return name
-
-    # ✅ 병합 적용
     df["시군구"] = df["시군구"].apply(merge_sigungu)
+    df["full_region"] = df["시도"].str.strip() + " " + df["시군구"].str.strip()
 
-    # ✅ 시군구 기준으로 그룹화
-    gungu_grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
-    gungu_grouped["비율"] = (gungu_grouped["관광객수"] / total_visitors * 100)
+    # ✅ full_region 기준 그룹화
+    grouped_gungu = df.groupby("full_region", as_index=False)["관광객수"].sum()
+    grouped_gungu["비율"] = (grouped_gungu["관광객수"] / total_visitors * 100)
 
-    # ✅ 상위 20개 추출
-    top20 = gungu_grouped.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
-
-    # ✅ 기타 계산
+    # ✅ 상위 20개 + 기타 + 합계
+    top20 = grouped_gungu.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
     top20_total = top20["관광객수"].sum()
     others_row = {
-        "시군구": "기타",
+        "full_region": "기타",
         "관광객수": total_visitors - top20_total,
         "비율": 100 - top20["비율"].sum()
     }
-    gungu_final = pd.concat([
-        top20,
-        pd.DataFrame([others_row]),
-        pd.DataFrame([{
-            "시군구": "합계",
-            "관광객수": total_visitors,
-            "비율": 100.0
-        }])
-    ], ignore_index=True)
+    sum_row = {
+        "full_region": "합계",
+        "관광객수": total_visitors,
+        "비율": 100.0
+    }
 
-    # ✅ 비율 포맷팅
-    gungu_final["비율"] = gungu_final["비율"].round(2).astype(str) + "%"
+    # ✅ 분할 및 기타/합계 오른쪽 배치
+    left = top20.iloc[:10].reset_index(drop=True)
+    right = top20.iloc[10:].reset_index(drop=True)
+    right = pd.concat([right, pd.DataFrame([others_row, sum_row])], ignore_index=True)
 
-    # ✅ 2열 분할
-    mid = len(gungu_final) // 2 + len(gungu_final) % 2
-    left = gungu_final.iloc[:mid].reset_index(drop=True)
-    right = gungu_final.iloc[mid:].reset_index(drop=True)
-
-    # ✅ 접미어로 열 충돌 방지
+    # ✅ 포맷팅 및 접미어 처리
+    left["비율"] = left["비율"].round(2).astype(str) + "%"
+    right["비율"] = right["비율"].round(2).astype(str) + "%"
     left.columns = [f"{col}_1" for col in left.columns]
     right.columns = [f"{col}_2" for col in right.columns]
     result_gungu = pd.concat([left, right], axis=1)
@@ -159,70 +131,68 @@ def analyze_visitor_by_province():
     # ✅ 시군구 분석 결과 출력
     st.dataframe(result_gungu, use_container_width=True)
 
-    # ✅ GPT 시사점 생성 (시도 + 시군구 각각)
+    # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
         reference = load_insight_examples("7-1_visitor")
 
-        # ✅ [1] 시도별 요약 텍스트
-        grouped_summary = "\n".join([
-            f"- {row['시도']}: {int(row['관광객수']):,}명 ({row['비율']})"
+        # ✅ 시도 기준 요약
+        summary_sido = "\n".join([
+            f"- {row['시도']}: {int(row['관광객수']):,}명 ({float(row['비율'].replace('%','')):.2f}%)"
             for _, row in grouped.iterrows()
         ])
 
-        grouped_prompt = f"""다음은 {name}({period}, {location}) 축제의 시도별 외지인 방문객 분석입니다.
+        # ✅ 시군구 기준 요약
+        summary_gungu = "\n".join([
+            f"- {row['full_region']}: {int(row['관광객수']):,}명 ({row['비율']})"
+            for _, row in grouped_gungu.iterrows()
+        ])
+
+        # ✅ GPT 프롬프트 (시도)
+        prompt_sido = f"""다음은 {name}({period}, {location}) 축제의 시도별 외지인 방문객 분석입니다.
 
 [시도별 외지인 방문객 수 요약]
-{grouped_summary}
+{summary_sido}
 
 [참고자료]
 {reference}
 
 위 데이터를 바탕으로, 시도별 분포와 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
 """
-
-        grouped_response = client.chat.completions.create(
+        response_sido = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
-                {"role": "user", "content": grouped_prompt}
+                {"role": "system", "content": "너는 충주시 축제 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": prompt_sido}
             ],
             temperature=0.5,
             max_tokens=700
         )
-
         st.subheader("🧠 GPT 시사점 (시도 기준)")
-        st.write(grouped_response.choices[0].message.content)
+        st.write(response_sido.choices[0].message.content)
 
-        # ✅ [2] 시군구별 요약 텍스트
-        gungu_summary = "\n".join([
-            f"- {row['시군구']}: {int(row['관광객수']):,}명 ({row['비율']})"
-            for _, row in gungu_final.iterrows() if row["시군구"] not in ["기타", "합계"]
-        ])
-
-        gungu_prompt = f"""다음은 {name}({period}, {location}) 축제의 시군구별 외지인 방문객 분석입니다.
+        # ✅ GPT 프롬프트 (시군구)
+        prompt_gungu = f"""다음은 {name}({period}, {location}) 축제의 시군구별 외지인 방문객 분석입니다.
 
 [시군구별 외지인 방문객 수 요약]
-{gungu_summary}
+{summary_gungu}
 
 [참고자료]
 {reference}
 
-위 데이터를 바탕으로, 주요 시군구 방문 분포와 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
+위 데이터를 바탕으로, 시군구별 주요 방문 분포와 특징을 행정 보고서 스타일로 3~5문장 작성해주세요.
 """
-
-        gungu_response = client.chat.completions.create(
+        response_gungu = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
-                {"role": "user", "content": gungu_prompt}
+                {"role": "system", "content": "너는 충주시 축제 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": prompt_gungu}
             ],
             temperature=0.5,
             max_tokens=700
         )
-
         st.subheader("🧠 GPT 시사점 (시군구 기준)")
-        st.write(gungu_response.choices[0].message.content)
+        st.write(response_gungu.choices[0].message.content)
 

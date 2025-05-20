@@ -73,8 +73,6 @@ def generate_excel_with_errors(df, error_cells):
     final_output.seek(0)
     return final_output
 
-# === Streamlit 앱 시작 ===
-st.set_page_config(page_title="공공데이터 표준 검증기", layout="wide")
 st.title("📑 공공데이터 표준 간이 검증기 (CSV 전용)")
 
 uploaded_file = st.file_uploader("✅ CSV 파일을 업로드하세요", type=["csv"])

@@ -56,6 +56,8 @@ def analyze_before_after():
         ], columns=["구분", "축제 전 (5일)", "축제기간 (3일)", "증감률", "축제 후 (5일)"])
 
         st.dataframe(df, use_container_width=True)
+        # ✅ 8번에서 재사용 가능하도록 저장
+        st.session_state["summary_before_after_df"] = df.copy()
 
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):

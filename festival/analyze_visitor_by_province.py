@@ -65,8 +65,9 @@ def analyze_visitor_by_province():
     grouped["관광객수"] = grouped["관광객수"].astype(int)
 
 
-    left = grouped.iloc[:len(grouped)//2 + len(grouped)%2].reset_index(drop=True)
-    right = grouped.iloc[len(grouped)//2 + len(grouped)%2:].reset_index(drop=True)
+    mid = len(grouped) // 2  # 항상 floor
+    left = grouped.iloc[:mid].reset_index(drop=True)
+    right = grouped.iloc[mid:].reset_index(drop=True)
     left["비율"] = left["비율"].round(2).astype(str) + "%"
     right["비율"] = right["비율"].round(2).astype(str) + "%"
     left.columns = [f"{col}_1" for col in left.columns]
@@ -75,7 +76,7 @@ def analyze_visitor_by_province():
 
     # ✅ 합계 행 추가
     total_row = {
-        "시도_1": "", "관광객수_1": "", "비율_1": ""
+        "시도_1": "", "관광객수_1": "", "비율_1": "",
         "시도_2": "합계",
         "관광객수_2": int(grouped["관광객수"].sum()),
         "비율_2": "100.00%"        

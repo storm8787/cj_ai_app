@@ -55,7 +55,8 @@ def festival_analysis_app():
         "5. 연령별 방문객 현황",
         "6. 연령별, 남여 방문객 현황",
         "7-1. 시도 및 시군구별 방문객 현황",
-        "7-2. 외지인 24시간 이후지역 현황"
+        "7-2. 외지인 24시간 이후지역 현황",
+        "8. 분석결과(요약) 작성 및 종합의견"
     ])
 
     # ✅ 항목별 실행
@@ -84,6 +85,9 @@ def festival_analysis_app():
     elif selected_analysis == "7-2. 외지인 24시간 이후지역 현황":
         from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
         analyze_visitor_after_24h()
+    elif selected_analysis == "8. 분석결과(요약) 작성 및 종합의견":
+        from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
+        analyze_summary_and_opinion()
         
         
 

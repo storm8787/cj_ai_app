@@ -25,13 +25,17 @@ def load_summary_reference():
 def analyze_summary():
     st.subheader("📊 1. 축제 방문객 현황 분석")
 
+    # ✅ 기본값 설정
+    def get_value(key, default=0):
+        return st.session_state.get(key, default)
+
     col1, col2 = st.columns(2)
     with col1:
-        local_prev = st.number_input("전년도 현지인 방문객 수", min_value=0, step=100)
-        tourist_prev = st.number_input("전년도 외지인 방문객 수", min_value=0, step=100)
+        local_prev = st.number_input("전년도 현지인 방문객 수", min_value=0, step=100, value=get_value("local_prev"))
+        tourist_prev = st.number_input("전년도 외지인 방문객 수", min_value=0, step=100, value=get_value("tourist_prev"))
     with col2:
-        local_curr = st.number_input("올해 현지인 방문객 수", min_value=0, step=100)
-        tourist_curr = st.number_input("올해 외지인 방문객 수", min_value=0, step=100)
+        local_curr = st.number_input("올해 현지인 방문객 수", min_value=0, step=100, value=get_value("local_curr"))
+        tourist_curr = st.number_input("올해 외지인 방문객 수", min_value=0, step=100, value=get_value("tourist_curr"))
 
     if st.button("🚀 분석 실행", key="total_btn"):
         days = st.session_state.get("festival_days", 3)

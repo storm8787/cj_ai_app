@@ -37,10 +37,6 @@ def analyze_age_group():
         df = pd.DataFrame(rows, columns=columns)
         df.to_excel(template_path, index=False)
 
-    # ✅ 파일 존재 여부 확인 로그
-    st.write("📁 템플릿 파일 존재?", os.path.exists(template_path))
-    st.write("📄 템플릿 경로:", template_path)
-
     # ✅ 다운로드 버튼 with 에러 핸들링
     try:
         with open(template_path, "rb") as f:

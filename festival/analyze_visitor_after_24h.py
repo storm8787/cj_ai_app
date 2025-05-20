@@ -101,6 +101,10 @@ def analyze_visitor_after_24h():
     st.markdown("#### 📋 24시간 이후 이동지역 분석 결과")
     st.dataframe(result_df, use_container_width=True)
 
+    # ✅ 세션 저장 (8번에서 활용)
+    st.session_state["summary_visitor_after_24h"] = result_df.copy()
+    st.session_state["summary_visitor_after_24h_grouped"] = grouped.copy()
+    
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

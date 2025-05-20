@@ -60,6 +60,11 @@ def analyze_visitor_by_province():
     grouped = df.groupby("시도", as_index=False)["관광객수"].sum()
     grouped["비율"] = (grouped["관광객수"] / total_visitors * 100)
 
+    # 정렬 추가
+    grouped = grouped.sort_values(by="관광객수", ascending=False).reset_index(drop=True)
+    grouped["관광객수"] = grouped["관광객수"].astype(int)
+
+
     left = grouped.iloc[:len(grouped)//2 + len(grouped)%2].reset_index(drop=True)
     right = grouped.iloc[len(grouped)//2 + len(grouped)%2:].reset_index(drop=True)
     left["비율"] = left["비율"].round(2).astype(str) + "%"

@@ -38,6 +38,15 @@ def analyze_time_distribution():
     })
     df.to_excel("data/templates/3_template.xlsx", index=False)
 
+    # ✅ 템플릿 다운로드 버튼
+    with open(template_path, "rb") as f:
+        st.download_button(
+            label="📥 시간대별 관광객 템플릿 다운로드",
+            data=f,
+            file_name="3_template.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
     uploaded_file = st.file_uploader("📂 엑셀 파일 업로드", type=["xlsx"])
     if not uploaded_file:
         return

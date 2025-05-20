@@ -54,7 +54,8 @@ def festival_analysis_app():
         "4. 축제 전·중·후 방문객 현황",
         "5. 연령별 방문객 현황",
         "6. 연령별, 남여 방문객 현황",
-        "7-1. 시도 및 시군구별 방문객 현황"
+        "7-1. 시도 및 시군구별 방문객 현황",
+        "7-2. 외지인 24시간 이후지역 현황"
     ])
 
     # ✅ 항목별 실행
@@ -80,7 +81,9 @@ def festival_analysis_app():
         from festival.analyze_visitor_by_province import analyze_visitor_by_province
         analyze_visitor_by_province()
         #analyze_gender_by_age()
-
+    elif selected_analysis == "7-2. 외지인 24시간 이후지역 현황":
+        from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
+        analyze_visitor_after_24h()
 
 
 # In[ ]:

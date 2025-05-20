@@ -68,59 +68,34 @@ def analyze_visitor_after_24h():
         return name
     df["시군구"] = df["시군구"].apply(merge_sigungu)
 
-    # ✅ 시군구 기준 그룹화
-    #grouped = df.groupby("시군구", as_index=False)["관광객수"].sum()
-    # ✅ 시도 + 시군구 합쳐서 새로운 분석용 컬럼 생성
+    # ✅ 시도 + 시군구 병합
     df["full_region"] = df["시도"].str.strip() + " " + df["시군구"].str.strip()
 
+    # ✅ full_region 기준 그룹화
     grouped = df.groupby("full_region", as_index=False)["관광객수"].sum()
     grouped["비율"] = (grouped["관광객수"] / total_visitors * 100)
 
+    # ✅ 상위 20개 추출
     top20 = grouped.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
     top20_total = top20["관광객수"].sum()
 
-    # 기타/합계도 full_region 기준으로만 넣음
+    # ✅ 기타/합계 행 구성
     others_row = {"full_region": "기타", "관광객수": total_visitors - top20_total, "비율": 100 - top20["비율"].sum()}
     sum_row = {"full_region": "합계", "관광객수": total_visitors, "비율": 100.0}
 
-    final_df = pd.concat([top20, pd.DataFrame([others_row, sum_row])], ignore_index=True)
-    final_df["비율"] = final_df["비율"].round(2).astype(str) + "%"
+    # ✅ 왼쪽/오른쪽 분할 (기타/합계는 오른쪽에만 넣음)
+    left = top20.iloc[:10].reset_index(drop=True)
+    right = top20.iloc[10:].reset_index(drop=True)
+    right = pd.concat([right, pd.DataFrame([others_row, sum_row])], ignore_index=True)
 
+    # ✅ 비율 포맷팅
+    left["비율"] = left["비율"].round(2).astype(str) + "%"
+    right["비율"] = right["비율"].round(2).astype(str) + "%"
 
-    # ✅ 상위 20개 + 기타 + 합계
-    top20 = grouped.sort_values(by="관광객수", ascending=False).head(20).reset_index(drop=True)
-    top20_total = top20["관광객수"].sum()
-    others_row = {
-        "full_region": "기타",
-        "관광객수": total_visitors - top20_total,
-        "비율": 100 - top20["비율"].sum()
-    }
-    sum_row = {
-        "full_region": "합계",
-        "관광객수": total_visitors,
-        "비율": 100.0
-    }
-    final_df = pd.concat([
-        top20,
-        pd.DataFrame([others_row]),
-        pd.DataFrame([sum_row])
-    ], ignore_index=True)
-    final_df["비율"] = final_df["비율"].round(2).astype(str) + "%"
-
-
-    mid = len(final_df) // 2 + len(final_df) % 2
-    left = final_df.iloc[:mid].reset_index(drop=True)
-    right = final_df.iloc[mid:].reset_index(drop=True)
-
-    # 컬럼명 그대로 사용
+    # ✅ 컬럼명 접미어
     left.columns = [f"{col}_1" for col in left.columns]
     right.columns = [f"{col}_2" for col in right.columns]
-
     result_df = pd.concat([left, right], axis=1)
-
-
-    # ✅ 시군구 컬럼 제거
-    result_df = result_df.drop(columns=[col for col in result_df.columns if "시군구" in col])
 
     # ✅ 출력
     st.markdown("#### 📋 24시간 이후 이동지역 분석 결과")
@@ -137,7 +112,6 @@ def analyze_visitor_after_24h():
             f"- {row['full_region']}: {int(row['관광객수']):,}명 ({row['비율']:.2f}%)"
             for _, row in grouped.iterrows()
         ])
-
 
         prompt = f"""다음은 {name}({period}, {location}) 축제 방문객의 '24시간 이후 이동지역' 분석입니다.
 

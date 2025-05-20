@@ -29,6 +29,11 @@ def analyze_summary():
     def get_value(key, default=0):
         return st.session_state.get(key, default)
 
+    # ✅ 초기화
+    for k in ["local_prev", "tourist_prev", "local_curr", "tourist_curr"]:
+        if k not in st.session_state:
+            st.session_state[k] = 0
+
     col1, col2 = st.columns(2)
     with col1:
         local_prev = st.number_input("전년도 현지인 방문객 수", min_value=0, step=100, key="local_prev")

@@ -83,7 +83,9 @@ def festival_analysis_app():
         #analyze_gender_by_age()
     elif selected_analysis == "7-2. 외지인 24시간 이후지역 현황":
         from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
-        analyze_visitor_after_24h()
+        #nalyze_visitor_after_24h()
+        analyze_gender_by_age()
+        
 
 
 # In[ ]:

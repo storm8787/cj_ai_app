@@ -86,6 +86,9 @@ def analyze_visitor_by_province():
     st.markdown("#### 📋 시도별 분석 결과")
     st.dataframe(result_df, use_container_width=True)
 
+    # ✅ 저장
+    st.session_state["summary_visitor_by_province_sido"] = result_df.copy()
+
     # -------------------------
     # ✅ 시군구별 외지인 방문객 분석 (full_region 기준)
     # -------------------------
@@ -136,6 +139,8 @@ def analyze_visitor_by_province():
 
     # ✅ 시군구 분석 결과 출력
     st.dataframe(result_gungu, use_container_width=True)
+    # ✅ 저장
+    st.session_state["summary_visitor_by_province_gungu"] = result_gungu.copy()
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):

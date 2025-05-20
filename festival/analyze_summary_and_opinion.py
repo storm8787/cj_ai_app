@@ -94,7 +94,7 @@ def analyze_summary_overview(gpt_generate=False):
     if gpt_generate:
         reference = load_insight_examples("summary_overview")
 
-        prompt = f\"\"\"📌 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {name}({period}, {location}) 축제의 방문객과 매출현황을 분석한 결과임
+        prompt = f"""📌 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {name}({period}, {location}) 축제의 방문객과 매출현황을 분석한 결과임
 
 분석 개요:
 {chr(10).join(summary_lines)}
@@ -112,7 +112,7 @@ def analyze_summary_overview(gpt_generate=False):
 ❍ 전반적 평가: 방문객 흐름, 프로그램 특성, 기후 등 종합적 해석
 
 이 형식을 엄격히 따르세요.
-\"\"\"
+"""
 
         with st.spinner("GPT가 분석결과 요약 중..."):
             response = client.chat.completions.create(
@@ -145,7 +145,7 @@ def analyze_final_opinion(gpt_generate=False):
         summary_lines = st.session_state["final_summary_text"]
         reference = load_insight_examples("final_opinion")
 
-        prompt = f\"\"\"다음은 {name}({period}, {location}) 축제의 분석 요약입니다.
+        prompt = f"""다음은 {name}({period}, {location}) 축제의 분석 요약입니다.
 
 {summary_lines}
 
@@ -156,7 +156,7 @@ def analyze_final_opinion(gpt_generate=False):
 ❍ 방문객 특성과 동향 분석  
 ❍ 지역 경제/소비/체류 기여도 해석  
 ❍ 관광 전략/운영 프로그램 개선 방향 제시 포함
-\"\"\"
+"""
 
         with st.spinner("GPT가 종합의견을 작성 중입니다..."):
             response = client.chat.completions.create(

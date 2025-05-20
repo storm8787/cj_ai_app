@@ -56,6 +56,9 @@ def analyze_gender_by_age():
     result_df = df[["연령구분", "남자", "여자", "남자비율", "여자비율"]]
     st.dataframe(result_df, use_container_width=True)
 
+    # ✅ 8번 분석기에서 활용할 수 있도록 저장
+    st.session_state["summary_gender_by_age_df"] = result_df.copy()
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

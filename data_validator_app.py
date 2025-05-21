@@ -93,7 +93,7 @@ def validate_cell(val, col, meta, row_data):
     regex = meta_col.get("정규식")
     allowed = meta_col.get("허용값")
     description = meta_col.get("설명")
-    expression = metacol.get("표현형식")
+    expression = meta_col.get("표현형식")
 
     if regex:
         try:

@@ -14,9 +14,13 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
 import locale
+from openai import OpenAI
 
 # ✅ 한글 가나다 정렬을 위한 로케일 설정
 locale.setlocale(locale.LC_ALL, '')
+
+# ✅ GPT API 키 설정
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # ✅ 기준 디렉토리 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,8 +33,29 @@ def load_meta_dict(standard):
         return None
     with open(path, encoding="utf-8") as f:
         original_meta = json.load(f)
-    # ✅ 공백 제거해서 키 정리
     return {k.strip().replace(" ", ""): v for k, v in original_meta.items()}
+
+# ✅ GPT 기반 정규식 생성 함수
+def generate_regex_from_description(description, column_name):
+    prompt = f"""
+다음은 공공데이터의 컬럼에 대한 설명입니다.
+
+컬럼명: {column_name}
+설명: {description}
+
+이 설명을 참고하여 해당 컬럼의 유효성 검사를 위한 정규식을 생성해주세요.
+정규식만 한 줄로 출력하고, 따옴표 없이 반환하세요.
+"""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.warning(f"❗ 정규식 생성 실패: {e}")
+        return None
 
 # ✅ 셀 검증 함수
 def validate_cell(val, col, meta, row_data):
@@ -40,7 +65,6 @@ def validate_cell(val, col, meta, row_data):
 
     meta_col = meta.get(col)
     if not meta_col:
-        st.write(f"[DEBUG] '{col}' → 메타에 없음 ❌")  # ← 컬럼 누락 확인용 로그
         return errors
 
     required = meta_col.get("필수여부") == "필수"
@@ -59,17 +83,26 @@ def validate_cell(val, col, meta, row_data):
     allowed = meta_col.get("허용값")
     if allowed:
         allowed_clean = [v.strip().upper() for v in allowed]
-        st.write(f"[DEBUG] '{col}' → 입력값 '{val_clean}', 허용값: {allowed_clean}")
         if val_clean not in allowed_clean:
             errors.append("허용값 오류")
 
     regex = meta_col.get("정규식")
-    if regex and not re.fullmatch(regex, val_raw):
-        errors.append("형식 오류")
+    description = meta_col.get("설명")
+
+    if not regex and description:
+        regex = generate_regex_from_description(description, col)
+        meta_col["정규식"] = regex  # 캐싱
+
+    if regex:
+        try:
+            if not re.fullmatch(regex, val_raw):
+                errors.append("형식 오류")
+        except Exception as e:
+            errors.append(f"정규식 오류 ({e})")
 
     return errors
 
-# ✅ 검증 실행 함수
+# ✅ 전체 검증 실행 함수
 def run_meta_validation(df, meta):
     error_cells = []
     for i, row in df.iterrows():
@@ -97,9 +130,9 @@ def generate_excel_with_errors(df, error_cells):
     final_output.seek(0)
     return final_output
 
-# ✅ Streamlit 앱 본체
+# ✅ Streamlit 앱 실행
 def data_validator_app():
-    st.title("📑 공공데이터 정밀 검증기 (Meta 기반)")
+    st.title("📑 공공데이터 정밀 검증기 (GPT 기반 자동 정규식 생성 포함)")
 
     uploaded_file = st.file_uploader("📂 CSV 파일을 업로드하세요", type=["csv"])
 
@@ -107,7 +140,6 @@ def data_validator_app():
         st.error("❌ meta_dicts_final_clean 폴더가 존재하지 않습니다.")
         st.stop()
 
-    # ✅ 메타 목록 정렬
     meta_files = [f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json")]
     meta_files_sorted = sorted(meta_files, key=locale.strxfrm)
 
@@ -119,7 +151,6 @@ def data_validator_app():
             encoding = chardet.detect(raw_bytes)['encoding'] or 'utf-8'
             df = pd.read_csv(BytesIO(raw_bytes), encoding=encoding, dtype=str).fillna("")
 
-            # ✅ 컬럼 공백 제거 (meta 키와 정합성 맞추기)
             df.columns = [col.strip().replace(" ", "") for col in df.columns]
 
             st.success(f"✅ 파일 업로드 성공 (인코딩: {encoding})")

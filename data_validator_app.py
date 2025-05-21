@@ -4,7 +4,6 @@
 # In[ ]:
 
 
-# ✅ Streamlit용 메타 사전 기반 정밀 검증기 구조
 import streamlit as st
 import pandas as pd
 import json
@@ -15,17 +14,13 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
 import locale
-locale.setlocale(locale.LC_ALL, '')  # 현재 시스템 로케일로 설정
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 👉 현재 py 파일 기준
+# ✅ 한글 정렬을 위한 로케일 설정
+locale.setlocale(locale.LC_ALL, '')
+
+# ✅ 기준 경로
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
-
-standard = st.selectbox(
-    "검증 기준 표준을 선택하세요",
-    options=[f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json"),
-        key=locale.strxfrm  # ✅ 한글 가나다 정렬용
-    )
-)
 
 # ✅ 메타 사전 불러오기
 def load_meta_dict(standard):
@@ -35,17 +30,17 @@ def load_meta_dict(standard):
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
-# ✅ 셀 검증 함수 (공백 제거 및 대소문자 무시 처리 포함)
+# ✅ 셀 검증 함수
 def validate_cell(val, col, meta, row_data):
     errors = []
     val_raw = str(val).strip()
-    val_clean = val_raw.upper()  # 대소문자 무시
+    val_clean = val_raw.upper()
 
     meta_col = meta.get(col)
     if not meta_col:
         return errors
 
-    # 필수 여부 확인
+    # 필수 여부
     required = meta_col.get("필수여부") == "필수"
     조건부 = meta_col.get("조건부필수")
 
@@ -59,22 +54,21 @@ def validate_cell(val, col, meta, row_data):
                 errors.append("조건부 필수 누락")
         return errors
 
-    # 허용값 체크
+    # 허용값
     allowed = meta_col.get("허용값")
     if allowed:
         allowed_clean = [v.strip().upper() for v in allowed]
-        
         if val_clean not in allowed_clean:
             errors.append("허용값 오류")
 
-    # 정규식 체크
+    # 정규식
     regex = meta_col.get("정규식")
     if regex and not re.fullmatch(regex, val_raw):
         errors.append("형식 오류")
 
     return errors
 
-# ✅ 검증 실행 함수
+# ✅ 검증 실행
 def run_meta_validation(df, meta):
     error_cells = []
     for i, row in df.iterrows():
@@ -87,7 +81,6 @@ def run_meta_validation(df, meta):
     return error_cells
 
 # ✅ 엑셀 오류 셀 표시
-
 def generate_excel_with_errors(df, error_cells):
     output = BytesIO()
     df.to_excel(output, index=False)
@@ -103,20 +96,33 @@ def generate_excel_with_errors(df, error_cells):
     final_output.seek(0)
     return final_output
 
-# ✅ Streamlit 앱
-
+# ✅ Streamlit 앱 본체
 def data_validator_app():
     st.title("📑 공공데이터 정밀 검증기 (Meta 기반)")
 
-    uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
-    standard = st.selectbox("검증 기준 표준을 선택하세요", options=sorted([f.replace(".json", "") for f in os.listdir("meta_dicts_final_clean") if f.endswith(".json")]))
+    uploaded_file = st.file_uploader("📂 CSV 파일을 업로드하세요", type=["csv"])
+
+    # ✅ 파일 목록 정렬
+    if not os.path.exists(META_DIR):
+        st.error("❌ meta_dicts_final_clean 폴더가 존재하지 않습니다.")
+        st.stop()
+
+    meta_files = [f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json")]
+    meta_files_sorted = sorted(meta_files, key=locale.strxfrm)
+
+    standard = st.selectbox("검증 기준 표준을 선택하세요", options=meta_files_sorted)
 
     if uploaded_file and standard:
         try:
             raw_bytes = uploaded_file.read()
             encoding = chardet.detect(raw_bytes)['encoding'] or 'utf-8'
             df = pd.read_csv(BytesIO(raw_bytes), encoding=encoding, dtype=str).fillna("")
+
+            # ✅ 컬럼 공백 제거 (메타 키 정합성 보장)
+            df.columns = [col.strip().replace(" ", "") for col in df.columns]
+
             st.success(f"✅ 파일 업로드 성공 (인코딩: {encoding})")
+            st.dataframe(df)
 
             meta = load_meta_dict(standard)
             if not meta:
@@ -141,5 +147,5 @@ def data_validator_app():
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         except Exception as e:
-            st.error(f"파일 처리 오류: {e}")
+            st.error(f"❌ 파일 처리 오류: {e}")
 

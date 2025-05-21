@@ -33,17 +33,27 @@ def load_meta_dict(standard):
     return {k.strip().replace(" ", ""): v for k, v in original_meta.items()}
 
 # ✅ GPT 기반 정규식 생성 함수 (OpenAI SDK v1.x 방식)
-def generate_regex_from_description(description, column_name):
+def generate_regex_from_description(description,expression, column_name):
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
     prompt = f"""
-다음은 공공데이터의 컬럼에 대한 설명입니다.
+당신은 공공데이터 형식 검사를 위한 정규식을 생성하는 전문가입니다.
+
+다음은 공공데이터 표준 항목에 대한 정보입니다.
 
 컬럼명: {column_name}
 설명: {description}
+표현형식(예시): {expression}
 
-이 설명을 참고하여 해당 컬럼의 유효성 검사를 위한 정규식을 생성해주세요.
-정규식만 한 줄로 출력하고, 따옴표 없이 반환하세요.
+위 정보를 바탕으로, 이 컬럼의 유효성 검사를 위한 정규식을 생성해주세요.
+
+📌 작성 기준:
+- 설명 및 예시에서 유추 가능한 형식을 충실히 반영해주세요.
+- 값이 단일일 수도 있고, 복수일 경우 특정 구분자(예: '+', ',', '~')로 연결될 수 있습니다.
+- 한글, 숫자, 특수기호, 공백 등이 포함될 수 있으므로, 예시를 기반으로 판단해주세요.
+- 지나치게 엄격하지 않으면서, 잘못된 형식을 걸러낼 수 있는 범용 정규식을 생성해주세요.
+
+⚠️ 반드시 정규식만 한 줄로 출력해주세요. 따옴표나 설명 없이, 정규식만 주세요.
 """
 
     try:
@@ -83,6 +93,7 @@ def validate_cell(val, col, meta, row_data):
     regex = meta_col.get("정규식")
     allowed = meta_col.get("허용값")
     description = meta_col.get("설명")
+    expression = metacol.get("표현형식")
 
     if regex:
         try:
@@ -95,7 +106,7 @@ def validate_cell(val, col, meta, row_data):
         if val_clean not in allowed_clean:
             errors.append("허용값 오류")
     elif description:
-        regex = generate_regex_from_description(description, col)
+        regex = generate_regex_from_description(description, expression, col)
         meta_col["정규식"] = regex  # 캐싱
         try:
             if not re.fullmatch(regex, val_raw):

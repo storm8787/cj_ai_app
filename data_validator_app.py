@@ -57,7 +57,6 @@ def generate_regex_from_description(description, column_name):
         st.warning(f"❗ 정규식 생성 실패: {e}")
         return None
 
-# ✅ 셀 검증 함수
 def validate_cell(val, col, meta, row_data):
     errors = []
     val_raw = str(val).strip()
@@ -80,18 +79,10 @@ def validate_cell(val, col, meta, row_data):
                 errors.append("조건부 필수 누락")
         return errors
 
-    allowed = meta_col.get("허용값")
-    if allowed:
-        allowed_clean = [v.strip().upper() for v in allowed]
-        if val_clean not in allowed_clean:
-            errors.append("허용값 오류")
-
+    # ✅ 정규식 → 허용값 → GPT(description) 순서로 검증
     regex = meta_col.get("정규식")
+    allowed = meta_col.get("허용값")
     description = meta_col.get("설명")
-
-    if not regex and description:
-        regex = generate_regex_from_description(description, col)
-        meta_col["정규식"] = regex  # 캐싱
 
     if regex:
         try:
@@ -99,8 +90,21 @@ def validate_cell(val, col, meta, row_data):
                 errors.append("형식 오류")
         except Exception as e:
             errors.append(f"정규식 오류 ({e})")
+    elif allowed:
+        allowed_clean = [v.strip().upper() for v in allowed]
+        if val_clean not in allowed_clean:
+            errors.append("허용값 오류")
+    elif description:
+        regex = generate_regex_from_description(description, col)
+        meta_col["정규식"] = regex  # 캐싱
+        try:
+            if not re.fullmatch(regex, val_raw):
+                errors.append("형식 오류(GPT)")
+        except Exception as e:
+            errors.append(f"GPT 정규식 오류 ({e})")
 
     return errors
+
 
 # ✅ 전체 검증 실행 함수
 def run_meta_validation(df, meta):

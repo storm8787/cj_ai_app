@@ -63,6 +63,8 @@ def validate_cell(val, col, meta, row_data):
     allowed = meta_col.get("허용값")
     if allowed:
         allowed_clean = [v.strip().upper() for v in allowed]
+        st.write(f"[DEBUG] '{val_clean}' vs 허용값 {allowed_clean}")
+
         if val_clean not in allowed_clean:
             errors.append("허용값 오류")
 

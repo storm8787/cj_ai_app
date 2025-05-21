@@ -101,10 +101,10 @@ def festival_analysis_app():
         from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
         analyze_visitor_after_24h()
     with tabs[8]:
-        #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
-        #analyze_summary_and_opinion()
-        st.subheader("📊 8. 요약 및 종합의견")
-        st.info("🚧 이 기능은 현재 준비 중입니다. 다음 업데이트에서 제공될 예정입니다.")
+        from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
+        analyze_summary_and_opinion()
+        #st.subheader("📊 8. 요약 및 종합의견")
+        #st.info("🚧 이 기능은 현재 준비 중입니다. 다음 업데이트에서 제공될 예정입니다.")
 
 
 

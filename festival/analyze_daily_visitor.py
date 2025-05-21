@@ -65,7 +65,7 @@ def analyze_daily_visitor():
         })
         
         # ✅ 비율 계산
-        df["전체 비율(%)"] = df["전체 방문객"] / total_sum * 100 if total_sum > 0 else 0
+        #df["전체 비율(%)"] = df["전체 방문객"] / total_sum * 100 if total_sum > 0 else 0
         df["현지인 비율(%)"] = df["현지인 방문객"] / local_sum * 100 if local_sum > 0 else 0
         df["외지인 비율(%)"] = df["외지인 방문객"] / tourist_sum * 100 if tourist_sum > 0 else 0
 

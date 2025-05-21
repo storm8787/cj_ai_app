@@ -19,9 +19,6 @@ from openai import OpenAI
 # ✅ 한글 가나다 정렬을 위한 로케일 설정
 locale.setlocale(locale.LC_ALL, '')
 
-# ✅ GPT API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
 # ✅ 기준 디렉토리 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
@@ -35,8 +32,10 @@ def load_meta_dict(standard):
         original_meta = json.load(f)
     return {k.strip().replace(" ", ""): v for k, v in original_meta.items()}
 
-# ✅ GPT 기반 정규식 생성 함수
+# ✅ GPT 기반 정규식 생성 함수 (OpenAI SDK v1.x 방식)
 def generate_regex_from_description(description, column_name):
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
     prompt = f"""
 다음은 공공데이터의 컬럼에 대한 설명입니다.
 
@@ -46,8 +45,9 @@ def generate_regex_from_description(description, column_name):
 이 설명을 참고하여 해당 컬럼의 유효성 검사를 위한 정규식을 생성해주세요.
 정규식만 한 줄로 출력하고, 따옴표 없이 반환하세요.
 """
+
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
@@ -132,7 +132,7 @@ def generate_excel_with_errors(df, error_cells):
 
 # ✅ Streamlit 앱 실행
 def data_validator_app():
-    st.title("📑 공공데이터 정밀 검증기 (GPT 기반 자동 정규식 생성 포함)")
+    st.title("📑 공공데이터 정밀 검증기 (GPT 자동 정규식 생성 포함)")
 
     uploaded_file = st.file_uploader("📂 CSV 파일을 업로드하세요", type=["csv"])
 

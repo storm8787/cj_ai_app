@@ -35,10 +35,12 @@ def load_meta_dict(standard):
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
-# ✅ 셀 검증 함수
+# ✅ 셀 검증 함수 (공백 제거 및 대소문자 무시 처리 포함)
 def validate_cell(val, col, meta, row_data):
     errors = []
-    val = str(val).strip()
+    val_raw = str(val).strip()
+    val_clean = val_raw.upper()  # 대소문자 무시
+
     meta_col = meta.get(col)
     if not meta_col:
         return errors
@@ -47,24 +49,26 @@ def validate_cell(val, col, meta, row_data):
     required = meta_col.get("필수여부") == "필수"
     조건부 = meta_col.get("조건부필수")
 
-    if val in ["", "nan", "NaN"]:
+    if val_clean in ["", "NAN", "NA"]:
         if required:
             errors.append("필수값 누락")
         elif 조건부:
             기준필드, 기준값들 = list(조건부.items())[0]
-            기준값 = row_data.get(기준필드, "").strip()
-            if 기준값 in 기준값들:
+            기준값 = str(row_data.get(기준필드, "")).strip().upper()
+            if 기준값 in [v.upper() for v in 기준값들]:
                 errors.append("조건부 필수 누락")
         return errors
 
     # 허용값 체크
     allowed = meta_col.get("허용값")
-    if allowed and val not in allowed:
-        errors.append("허용값 오류")
+    if allowed:
+        allowed_clean = [v.strip().upper() for v in allowed]
+        if val_clean not in allowed_clean:
+            errors.append("허용값 오류")
 
     # 정규식 체크
     regex = meta_col.get("정규식")
-    if regex and not re.fullmatch(regex, val):
+    if regex and not re.fullmatch(regex, val_raw):
         errors.append("형식 오류")
 
     return errors

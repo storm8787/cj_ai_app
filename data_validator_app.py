@@ -5,7 +5,6 @@
 
 
 # ✅ Streamlit용 메타 사전 기반 정밀 검증기 구조
-
 import streamlit as st
 import pandas as pd
 import json
@@ -16,9 +15,21 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 👉 현재 py 파일 기준
+META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
+
+standard = st.selectbox(
+    "검증 기준 표준을 선택하세요",
+    options=[
+        f.replace(".json", "")
+        for f in os.listdir(META_DIR)
+        if f.endswith(".json")
+    ]
+)
+
 # ✅ 메타 사전 불러오기
 def load_meta_dict(standard):
-    path = os.path.join("meta_dicts_final_clean", f"{standard}.json")
+    path = os.path.join(META_DIR, f"{standard}.json")
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as f:

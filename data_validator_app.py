@@ -68,8 +68,7 @@ def generate_regex_from_description(description,expression, column_name):
         return None
 
 def validate_cell(val, col, meta, row_data):
-    st.write(f"🔥 DEBUG - meta_col 존재 여부: {meta_col}")
-
+    #st.write(f"🔥 DEBUG - meta_col 존재 여부: {meta_col}")
     errors = []
     val_raw = str(val).strip()
     val_clean = val_raw.upper()
@@ -109,7 +108,8 @@ def validate_cell(val, col, meta, row_data):
             errors.append("허용값 오류")
     elif description:
         regex = generate_regex_from_description(description, expression, col)
-        meta_col["정규식"] = regex  # 캐싱
+        if regex:
+            meta_col["정규식"] = regex  # 캐싱
         try:
             if not re.fullmatch(regex, val_raw):
                 errors.append("형식 오류(GPT)")

@@ -30,6 +30,9 @@ def load_meta_dict(standard):
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
+     # ✅ 키 정규화 (공백 제거)
+    return {k.strip().replace(" ", ""): v for k, v in original_meta.items()}
+
 # ✅ 셀 검증 함수
 def validate_cell(val, col, meta, row_data):
     errors = []

@@ -63,6 +63,11 @@ def analyze_daily_visitor():
             "전체 방문객": total_counts,
             "비율(%)": [f"{(count / total_sum) * 100:.1f}%" if total_sum > 0 else "-" for count in total_counts]
         })
+        
+        # ✅ 비율 계산
+        df["전체 비율(%)"] = df["전체 방문객"] / total_sum * 100 if total_sum > 0 else 0
+        df["현지인 비율(%)"] = df["현지인 방문객"] / local_sum * 100 if local_sum > 0 else 0
+        df["외지인 비율(%)"] = df["외지인 방문객"] / tourist_sum * 100 if tourist_sum > 0 else 0
 
         st.dataframe(df, use_container_width=True)
 
@@ -80,19 +85,22 @@ def analyze_daily_visitor():
             location = st.session_state.get("festival_location", "")
             reference = load_daily_reference()
 
+            # ✅ 비율 포함된 daily_summary 생성
             daily_summary = "\n".join([
-                f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,}명 / 외지인 {row['외지인 방문객']:,}명 / 전체 {row['전체 방문객']:,}명"
+                f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,}명 ({row['현지인 비율(%)']:.1f}%) / "
+                f"외지인 {row['외지인 방문객']:,}명 ({row['외지인 비율(%)']:.1f}%) / "
+                f"전체 {row['전체 방문객']:,}명 ({row['전체 비율(%)']:.1f}%)"
                 for _, row in df.iterrows()
             ])
-
+            
             prompt = f"""다음은 {name}({period}, {location}) 축제의 일자별 방문객 분석 자료입니다. 아래 정보를 바탕으로 공공기관 보고서에 포함할 '시사점'을 작성해주세요.
 
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
 ▸ 항목은 ▸ 기호로 구분하여 3~5문장으로 간결하게 작성  
-▸ 각 날짜별 방문객 수 변화를 기반으로 특징적인 패턴이나 의미를 도출할 것  
-▸ **부정적인 평가나 비판은 피하고**, 긍정적인 요소(예: 개막일 집중, 주말 효과 등)를 중심으로 작성  
-▸ 방문객 수가 적은 날은 단순히 '집중도가 높았던 날과 비교해 상대적으로 적은 수준' 정도로 중립적 표현  
-▸ 필요 시 ※ 표시로 부가 설명 가능
+▸ 각 날짜별 방문객 수 및 전체/현지인/외지인 비율 변화를 기반으로 특징적인 패턴이나 의미를 도출할 것  
+▸ 수치는 괄호 안에 %와 함께 병기하여 서술할 것 (예: '6월 12일은 전체 방문객 수(30.2%)가 가장 높았으며')  
+▸ 부정적인 평가는 피하고, 긍정적 해석을 중심으로 작성하며 단순 수치는 중립적으로 전달  
+▸ 필요 시 ※ 표시로 보충 설명 가능
 
 ## 일자별 방문객 수 요약:
 {daily_summary}
@@ -103,7 +111,7 @@ def analyze_daily_visitor():
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하는 전문가야."},
+                    {"role": "system", "content": "너는 충주시 축제 데이터를 분석하는 전문가야."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,

@@ -81,8 +81,11 @@ def data_validator_app():
     if uploaded_file is not None:
         try:
             # ✅ 파일 바이트 직접 읽기
-            raw_bytes = uploaded_file.getvalue()
+            raw_bytes = uploaded_file.read()
 
+            import chardet
+            from io import BytesIO
+            
             # ✅ 인코딩 자동 감지
             detected = chardet.detect(raw_bytes)
             encoding = detected["encoding"] or "utf-8"
@@ -92,7 +95,6 @@ def data_validator_app():
             df.fillna("", inplace=True)
 
             st.success(f"✅ 파일 업로드 성공 ({uploaded_file.name}, 인코딩: {encoding})")
-
             # ✅ 즉시 데이터 미리보기 원할 경우
             st.dataframe(df)
 

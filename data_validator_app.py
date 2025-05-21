@@ -14,17 +14,18 @@ import chardet
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
+import locale
+locale.setlocale(locale.LC_ALL, '')  # 현재 시스템 로케일로 설정
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 👉 현재 py 파일 기준
 META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
 
 standard = st.selectbox(
     "검증 기준 표준을 선택하세요",
-    options=sorted([
-        f.replace(".json", "")
-        for f in os.listdir(META_DIR)
-        if f.endswith(".json")
-    ])
+    options=sorted(
+        [f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json")],
+        key=locale.strxfrm  # ✅ 한글 가나다 정렬용
+    )
 )
 
 # ✅ 메타 사전 불러오기

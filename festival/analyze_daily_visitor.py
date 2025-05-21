@@ -64,15 +64,16 @@ def analyze_daily_visitor():
             #"비율(%)": [f"{(count / total_sum) * 100:.1f}%" if total_sum > 0 else "-" for count in total_counts]
         })
         
-        # ✅ 비율 계산
-        df["전체 비율(%)"] = df["전체 방문객"] / total_sum * 100 if total_sum > 0 else 0
-        df["현지인 비율(%)"] = df["현지인 방문객"] / local_sum * 100 if local_sum > 0 else 0
-        df["외지인 비율(%)"] = df["외지인 방문객"] / tourist_sum * 100 if tourist_sum > 0 else 0
+        # 비율은 숫자 그대로 유지 (계산용)
+        df["전체 비율"] = df["전체 방문객"] / total_sum * 100 if total_sum > 0 else 0
+        df["현지인 비율"] = df["현지인 방문객"] / local_sum * 100 if local_sum > 0 else 0
+        df["외지인 비율"] = df["외지인 방문객"] / tourist_sum * 100 if tourist_sum > 0 else 0
 
-        # ✅ 소수점 2자리 + % 표기 추가
-        df["전체 비율(%)"] = df["전체 비율(%)"].map(lambda x: f"{x:.2f}%" if total_sum > 0 else "-")
-        df["현지인 비율(%)"] = df["현지인 비율(%)"].map(lambda x: f"{x:.2f}%" if local_sum > 0 else "-")
-        df["외지인 비율(%)"] = df["외지인 비율(%)"].map(lambda x: f"{x:.2f}%" if tourist_sum > 0 else "-")
+        # 표시용만 따로 문자열 변환
+        df["전체 비율(%)"] = df["전체 비율"].map(lambda x: f"{x:.2f}%" if total_sum > 0 else "-")
+        df["현지인 비율(%)"] = df["현지인 비율"].map(lambda x: f"{x:.2f}%" if local_sum > 0 else "-")
+        df["외지인 비율(%)"] = df["외지인 비율"].map(lambda x: f"{x:.2f}%" if tourist_sum > 0 else "-")
+
 
         st.dataframe(df, use_container_width=True)
 
@@ -92,9 +93,9 @@ def analyze_daily_visitor():
 
             # ✅ 비율 포함된 daily_summary 생성
             daily_summary = "\n".join([
-                f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,}명 ({row['현지인 비율(%)']:.1f}%) / "
-                f"외지인 {row['외지인 방문객']:,}명 ({row['외지인 비율(%)']:.1f}%) / "
-                f"전체 {row['전체 방문객']:,}명 ({row['전체 비율(%)']:.1f}%)"
+                f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,}명 ({row['현지인 비율']:.1f}%) / "
+                f"외지인 {row['외지인 방문객']:,}명 ({row['외지인 비율']:.1f}%) / "
+                f"전체 {row['전체 방문객']:,}명 ({row['전체 비율']:.1f}%)"
                 for _, row in df.iterrows()
             ])
             

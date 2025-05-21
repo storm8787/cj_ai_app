@@ -66,16 +66,34 @@ def analyze_gender_by_age():
         location = st.session_state.get("festival_location", "")
 
         summary = "\n".join([
-            f"- {row['연령구분']}: 남성 {row['남자']:,}명 / 여성 {row['여자']:,}명"
+            f"- {row['연령구분']}: 남성 {row['남자']:,}명 ({row['남자비율']:.2f}%) / 여성 {row['여자']:,}명 ({row['여자비율']:.2f}%)"
             for _, row in result_df.iterrows()
         ])
 
-        prompt = f"""다음은 {name}({period}, {location}) 축제의 연령대별 성별 방문객 직접 입력 데이터를 기반으로 한 분석입니다.
+        # ✅ 성별 비율 기준 정렬 텍스트
+        male_sorted = result_df.sort_values("남자비율", ascending=False)
+        female_sorted = result_df.sort_values("여자비율", ascending=False)
+
+        gender_rank_text = f"""
+        - 남성: · {' > '.join([f"{row['연령구분']}({row['남자비율']:.2f}%)" for _, row in male_sorted.iterrows()])}
+        - 여성: · {' > '.join([f"{row['연령구분']}({row['여자비율']:.2f}%)" for _, row in female_sorted.iterrows()])}
+        """
+
+        prompt = f"""다음은 {name}({period}, {location}) 축제의 연령대별 성별 방문객 데이터를 기반으로 한 분석입니다.
+
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
+▸ 각 문장은 ▸ 기호로 시작하되, 지나치게 짧지 않도록 자연스럽게 연결하여 행정 보고서에 적합한 흐름으로 작성할 것  
+▸ 성별 비율은 높은 순으로 나열하여 정리하고, 괄호에 %를 표기할 것 (예: · 50대(26.3%) > 60대(21.8%) > ...)  
+▸ 특정 세대·성별 집중 현상은 축제의 특성과 결합하여 긍정적으로 해석  
+▸ 전 세대 분포의 균형 여부, 특정 성별 비중의 우위는 정책적으로 활용 가능한 방향으로 연결  
+▸ 필요시 ※ 기호로 보충 설명 가능  
+▸ 단정적 개선 제안은 피하고, 긍정적 분석이나 정책적 시사점 중심으로 기술
 
 [연령대별 성별 방문객 수 요약]
 {summary}
 
-이 데이터를 바탕으로, 연령대별 남녀 방문자의 특징 및 주요 시사점을 3~5문장으로 간결하게 정리해주세요.
+[성별 비율 순위 정리]
+{gender_rank_text}
 """
 
         response = client.chat.completions.create(

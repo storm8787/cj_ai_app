@@ -110,7 +110,7 @@ def data_validator_app():
     st.title("📑 공공데이터 정밀 검증기 (Meta 기반)")
 
     uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
-    standard = st.selectbox("검증 기준 표준을 선택하세요", options=[f.replace(".json", "") for f in os.listdir("meta_dicts_final_clean") if f.endswith(".json")])
+    standard = st.selectbox("검증 기준 표준을 선택하세요", options=sorted([f.replace(".json", "") for f in os.listdir("meta_dicts_final_clean") if f.endswith(".json")]))
 
     if uploaded_file and standard:
         try:

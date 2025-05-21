@@ -15,22 +15,21 @@ from openpyxl.styles import PatternFill
 import os
 import locale
 
-# ✅ 한글 정렬을 위한 로케일 설정
+# ✅ 한글 가나다 정렬을 위한 로케일 설정
 locale.setlocale(locale.LC_ALL, '')
 
-# ✅ 기준 경로
+# ✅ 기준 디렉토리 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
 
-# ✅ 메타 사전 불러오기
+# ✅ 메타 사전 로딩 (키 공백 제거)
 def load_meta_dict(standard):
     path = os.path.join(META_DIR, f"{standard}.json")
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-     # ✅ 키 정규화 (공백 제거)
+        original_meta = json.load(f)
+    # ✅ 공백 제거해서 키 정리
     return {k.strip().replace(" ", ""): v for k, v in original_meta.items()}
 
 # ✅ 셀 검증 함수
@@ -41,9 +40,9 @@ def validate_cell(val, col, meta, row_data):
 
     meta_col = meta.get(col)
     if not meta_col:
+        st.write(f"[DEBUG] '{col}' → 메타에 없음 ❌")  # ← 컬럼 누락 확인용 로그
         return errors
 
-    # 필수 여부
     required = meta_col.get("필수여부") == "필수"
     조건부 = meta_col.get("조건부필수")
 
@@ -53,25 +52,23 @@ def validate_cell(val, col, meta, row_data):
         elif 조건부:
             기준필드, 기준값들 = list(조건부.items())[0]
             기준값 = str(row_data.get(기준필드, "")).strip().upper()
-            if 기준값 in [v.upper() for v in 기준값들]:
+            if 기준값 in [v.strip().upper() for v in 기준값들]:
                 errors.append("조건부 필수 누락")
         return errors
 
-    # 허용값
     allowed = meta_col.get("허용값")
     if allowed:
         allowed_clean = [v.strip().upper() for v in allowed]
         if val_clean not in allowed_clean:
             errors.append("허용값 오류")
 
-    # 정규식
     regex = meta_col.get("정규식")
     if regex and not re.fullmatch(regex, val_raw):
         errors.append("형식 오류")
 
     return errors
 
-# ✅ 검증 실행
+# ✅ 검증 실행 함수
 def run_meta_validation(df, meta):
     error_cells = []
     for i, row in df.iterrows():
@@ -83,7 +80,7 @@ def run_meta_validation(df, meta):
                 error_cells.append((i+2, col, ", ".join(errs)))
     return error_cells
 
-# ✅ 엑셀 오류 셀 표시
+# ✅ 오류 셀 표시된 엑셀 생성
 def generate_excel_with_errors(df, error_cells):
     output = BytesIO()
     df.to_excel(output, index=False)
@@ -105,11 +102,11 @@ def data_validator_app():
 
     uploaded_file = st.file_uploader("📂 CSV 파일을 업로드하세요", type=["csv"])
 
-    # ✅ 파일 목록 정렬
     if not os.path.exists(META_DIR):
         st.error("❌ meta_dicts_final_clean 폴더가 존재하지 않습니다.")
         st.stop()
 
+    # ✅ 메타 목록 정렬
     meta_files = [f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json")]
     meta_files_sorted = sorted(meta_files, key=locale.strxfrm)
 
@@ -121,7 +118,7 @@ def data_validator_app():
             encoding = chardet.detect(raw_bytes)['encoding'] or 'utf-8'
             df = pd.read_csv(BytesIO(raw_bytes), encoding=encoding, dtype=str).fillna("")
 
-            # ✅ 컬럼 공백 제거 (메타 키 정합성 보장)
+            # ✅ 컬럼 공백 제거 (meta 키와 정합성 맞추기)
             df.columns = [col.strip().replace(" ", "") for col in df.columns]
 
             st.success(f"✅ 파일 업로드 성공 (인코딩: {encoding})")

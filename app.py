@@ -25,7 +25,7 @@ def main():
     basic_features = [
         "(생성형AI) 보도자료 생성기",
         "(생성형AI) 빅데이터 분석기",
-        "(생성형AI) 공공데이터 검증기",
+        "(생성형AI) 공공데이터 검증기(개발중)",
         "(업무자동화) 엑셀 취합기"
     ]
     admin_features = [
@@ -78,7 +78,7 @@ def main():
         excel_merger()
     elif st.session_state.selected_app == "(생성형AI) 빅데이터 분석기":
         festival_analysis_app()    
-    elif st.session_state.selected_app == "(생성형AI) 공공데이터 검증기":
+    elif st.session_state.selected_app == "(생성형AI) 공공데이터 검증기(개발중)":
         data_validator_app()    
 
 if __name__ == "__main__":

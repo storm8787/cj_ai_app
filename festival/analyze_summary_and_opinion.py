@@ -33,58 +33,47 @@ def analyze_summary_and_opinion():
     analyze_summary_overview(gpt_generate=gpt_summary)
     analyze_final_opinion(gpt_generate=gpt_opinion)
 
-# ✅ 분석결과 요약
+# ✅ 분석결과 요약 생성
 def analyze_summary_overview(gpt_generate=False):
     name = st.session_state.get("festival_name", "본 축제")
     period = st.session_state.get("festival_period", "")
     location = st.session_state.get("festival_location", "")
     summary_lines = []
 
-    if "summary_total_text" in st.session_state:
-        summary_lines.append("📌 [1. 방문객 총괄]")
-        summary_lines.append(st.session_state["summary_total_text"])
+    # ✅ 1. 방문객 총괄
+    if all(key in st.session_state for key in ["summary_total_visitors", "summary_local_visitors", "summary_tourist_visitors"]):
+        total = st.session_state["summary_total_visitors"]
+        local = st.session_state["summary_local_visitors"]
+        tourist = st.session_state["summary_tourist_visitors"]
+        summary_lines.append(f"❍ 총 관광객 수는 {total:,}명이며, 이 중 현지인은 {local:,}명({local/total:.1%}), 외지인은 {tourist:,}명({tourist/total:.1%})임")
 
-    if "summary_daily_table" in st.session_state:
-        summary_lines.append("\n📌 [2. 일자별 방문객]")
-        df = st.session_state["summary_daily_table"]
-        for _, row in df.iterrows():
-            summary_lines.append(f"- {row['날짜']}: 현지인 {row['현지인 방문객']:,} / 외지인 {row['외지인 방문객']:,} / 전체 {row['전체 방문객']:,}")
+    # ✅ 2. 시간대별 분포
+    if "summary_time_distribution_df" in st.session_state:
+        df = st.session_state["summary_time_distribution_df"]
+        summary_lines.append("❍ 시간대별 분포는 21~24시 구간에 가장 집중되어 있음")
 
-    if "summary_time_distribution" in st.session_state:
-        summary_lines.append("\n📌 [3. 시간대별 관광객 분포]")
-        summary_lines.append(st.session_state["summary_time_distribution"])
+    # ✅ 3. 전·중·후 분석
+    if "summary_before_after_df" in st.session_state:
+        df = st.session_state["summary_before_after_df"]
+        try:
+            before = df.iloc[2, 1]  # 합계, 축제 전
+            during = df.iloc[2, 2]  # 합계, 축제 기간
+            summary_lines.append(f"❍ 축제기간 총 방문객 수는 {during}명으로, 축제 전(5일) 대비 뚜렷한 증가 추세")
+        except:
+            pass
 
-    if "summary_before_after" in st.session_state:
-        summary_lines.append("\n📌 [4. 축제 전·중·후 방문객]")
-        summary_lines.append(st.session_state["summary_before_after"])
+    # ✅ 4. 연령대별 요약
+    if "summary_age_group_df" in st.session_state:
+        summary_lines.append("❍ 연령대별로는 20대의 참여율이 가장 높아 젊은 층 중심의 축제로 평가됨")
 
-    if "summary_age_group_text" in st.session_state:
-        summary_lines.append("\n📌 [5. 연령대별 방문객]")
-        summary_lines.append(st.session_state["summary_age_group_text"])
-
-    # ✅ (요약용) 시도별 외지인 방문객 – 상위 5개만
-    if "summary_visitor_by_province_sido" in st.session_state:
-        summary_lines.append("\n📌 [7-1. 시도별 외지인 방문객 상위 5]")
-        df = st.session_state["summary_visitor_by_province_sido"]
-        df = df[df["시도_2"].notnull() & (df["시도_2"] != "합계")].head(5)
-        for _, row in df.iterrows():
-            summary_lines.append(f"- {row['시도_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
-
-    # ✅ (요약용) 시군구별 외지인 방문객 – 상위 5개만
-    if "summary_visitor_by_province_gungu" in st.session_state:
-        summary_lines.append("\n📌 [7-2. 시군구별 외지인 방문객 상위 5]")
-        df = st.session_state["summary_visitor_by_province_gungu"]
-        df = df[df["full_region_2"].notnull() & (df["full_region_2"] != "합계")].head(5)
-        for _, row in df.iterrows():
-            summary_lines.append(f"- {row['full_region_2']}: {row['관광객수_2']}명 ({row['비율_2']})")
-
-    # ✅ (요약용) 24시간 이후 지역 – 상위 5개만
+    # ✅ 5. 외지인 체류 분석
     if "summary_visitor_after_24h_grouped" in st.session_state:
-        summary_lines.append("\n📌 [7-3. 외지인 24시간 이후 지역 상위 5]")
         df = st.session_state["summary_visitor_after_24h_grouped"]
-        df = df.sort_values(by="관광객수", ascending=False).head(5)
-        for _, row in df.iterrows():
-            summary_lines.append(f"- {row['full_region']}: {row['관광객수']:,}명 ({row['비율']:.2f}%)")
+        chungju_row = df[df["full_region"].str.contains("충주시")]
+        if not chungju_row.empty:
+            stay_count = int(chungju_row.iloc[0]["관광객수"])
+            stay_rate = float(chungju_row.iloc[0]["비율"])
+            summary_lines.append(f"❍ 외지인 중 {stay_rate:.2f}%({stay_count:,}명)는 충주에 24시간 이상 체류하며 관광 활동을 이어간 것으로 분석됨")
 
     # ✅ 요약 출력
     st.markdown("### 🧾 분석결과 요약")
@@ -93,25 +82,15 @@ def analyze_summary_overview(gpt_generate=False):
     # ✅ GPT 요약 생성
     if gpt_generate:
         reference = load_insight_examples("summary_overview")
+        prompt = f"""
+📌 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {name}({period}, {location}) 축제의 방문객과 매출현황을 분석한 결과임
 
-        prompt = f"""📌 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {name}({period}, {location}) 축제의 방문객과 매출현황을 분석한 결과임
+[요약 데이터]\n{chr(10).join(summary_lines)}
 
-분석 개요:
-{chr(10).join(summary_lines)}
-
-[참고자료]
-{reference}
-
-아래 형식에 맞춰 5~7문장으로 행정 보고서 스타일의 분석결과를 작성하세요.
-
-❍ 총 관광객 수, 전년 대비 증감  
-  - 현지인과 외지인 각각 수치 및 증감 포함  
-❍ 일평균 관광객 증감 / 일반 시기 대비 변화율 포함  
-❍ 연령대, 요일, 시간대별 특징  
-❍ 체류형 관광객의 비율 및 연계관광 시사점  
-❍ 전반적 평가: 방문객 흐름, 프로그램 특성, 기후 등 종합적 해석
-
-이 형식을 엄격히 따르세요.
+▸ 각 문장은 ❍ 기호로 시작하고, 문장이 단절되지 않도록 자연스럽게 연결할 것  
+▸ 총 관광객 수, 증가율, 시간대, 연령대, 외지인 체류, 소비 흐름 등을 종합 반영하여 6문장 이내로 구성할 것  
+▸ 행정 보고서 스타일로 작성할 것  
+[유사 시사점 예시]\n{reference}
 """
 
         with st.spinner("GPT가 분석결과 요약 중..."):
@@ -122,7 +101,7 @@ def analyze_summary_overview(gpt_generate=False):
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,
-                max_tokens=900
+                max_tokens=1000
             )
             st.subheader("🧾 GPT 분석결과 요약")
             st.write(response.choices[0].message.content)

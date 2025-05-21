@@ -68,6 +68,8 @@ def generate_regex_from_description(description,expression, column_name):
         return None
 
 def validate_cell(val, col, meta, row_data):
+    st.write(f"🔥 DEBUG - meta_col 존재 여부: {meta_col}")
+
     errors = []
     val_raw = str(val).strip()
     val_clean = val_raw.upper()

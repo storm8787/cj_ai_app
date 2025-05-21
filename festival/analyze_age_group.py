@@ -131,6 +131,14 @@ def analyze_age_group():
             for age in age_columns
         ])
 
+        # ✅ 현지인/외지인 연령 비율 정렬 후 텍스트로 요약
+        local_ranked = local_ratio.sort_values(ascending=False)
+        tourist_ranked = tourist_ratio.sort_values(ascending=False)
+
+        age_summary_text = f"""
+        - 현지인: · {' > '.join([f'{age}({ratio})' for age, ratio in local_ranked.items()])}
+        - 외지인: · {' > '.join([f'{age}({ratio})' for age, ratio in tourist_ranked.items()])}
+        """
         prompt = f"""
 다음은 {name}({period}, {location}) 축제의 연령별 방문객 분석 자료입니다. 아래 정보를 바탕으로 공공기관 보고서에 포함할 '시사점'을 작성해주세요.
 

@@ -69,6 +69,11 @@ def analyze_daily_visitor():
         df["현지인 비율(%)"] = df["현지인 방문객"] / local_sum * 100 if local_sum > 0 else 0
         df["외지인 비율(%)"] = df["외지인 방문객"] / tourist_sum * 100 if tourist_sum > 0 else 0
 
+        # ✅ 소수점 2자리 + % 표기 추가
+        df["전체 비율(%)"] = df["전체 비율(%)"].map(lambda x: f"{x:.2f}%" if total_sum > 0 else "-")
+        df["현지인 비율(%)"] = df["현지인 비율(%)"].map(lambda x: f"{x:.2f}%" if local_sum > 0 else "-")
+        df["외지인 비율(%)"] = df["외지인 비율(%)"].map(lambda x: f"{x:.2f}%" if tourist_sum > 0 else "-")
+
         st.dataframe(df, use_container_width=True)
 
         st.markdown("---")

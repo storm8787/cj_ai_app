@@ -24,7 +24,7 @@ def load_insight_examples(section_id):
 def analyze_before_after():
     st.subheader("📊 4. 축제 전·중·후 방문객 분석")
 
-    st.markdown("**축제 전 5일, 축제기간 3일, 축제 후 5일 방문객 수를 구분하여 입력해주세요.**")
+    st.markdown("**축제 전 5일, 축제기간, 축제 후 5일 방문객 수를 구분하여 입력해주세요.**")
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -67,7 +67,14 @@ def analyze_before_after():
             reference = load_insight_examples("4_before_after")
 
             prompt = f"""
-다음은 {name}({period}, {location}) 축제에 대한 전·중·후 방문객 분석입니다.
+다음은 {name}({period}, {location}) 축제에 대한 전·중·후 방문객 분석입니다. 아래 정보를 바탕으로 공공기관 보고서에 포함할 '시사점'을 작성해주세요.
+
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
+▸ 각 문장은 ▸ 기호로 시작하며, 총 3~5문장으로 구성  
+▸ 핵심 수치(일평균 방문객 수, 증가율, 현지인/외지인 증감률 등)는 괄호로 병기  
+▸ 증가 수치에 대해서는 긍정적 해석을 중심으로 기술하고, 축제 이후 방문객 감소는 '일시적 현상' 또는 '재방문 기대 효과' 등 완곡하게 표현  
+▸ 지역 유입 확대, 지역민 참여도, 관광 자원화, 재방문 가능성 등의 키워드 포함  
+▸ 필요시 ※ 기호로 보충 설명 가능
 
 [입력값 요약]
 - 축제 전 (5일) 방문객: 현지인 {local_before:,}명 / 외지인 {tourist_before:,}명 / 합계 {total_before:,}명
@@ -80,8 +87,9 @@ def analyze_before_after():
 [참고자료]
 {reference}
 
-위 데이터를 바탕으로, 전·중·후 방문객 패턴의 특징 및 해석 가능한 시사점을 행정 보고서 스타일로 3~5문장으로 작성해주세요.
+위 데이터를 바탕으로 시사점을 작성해주세요.
 """
+
 
             response = client.chat.completions.create(
                 model="gpt-4o",

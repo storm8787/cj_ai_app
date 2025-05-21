@@ -84,8 +84,6 @@ def analyze_before_after():
 [전 대비 축제기간 증감률]
 - 현지인: {inc_local}, 외지인: {inc_tourist}, 전체: {inc_total}
 
-[참고자료]
-{reference}
 
 위 데이터를 바탕으로 시사점을 작성해주세요.
 """

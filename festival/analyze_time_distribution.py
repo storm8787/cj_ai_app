@@ -128,10 +128,13 @@ def analyze_time_distribution():
         location = st.session_state.get("festival_location", "")
         examples = load_daily_reference()
         lines = []
+        lines.append(f"축제 기간: {name} ({period}, {location})")
 
         for group_name, cols in time_groups:
-            local_vals = []
-            tourist_vals = []
+            local_total = local_df[cols].fillna(0).applymap(lambda x: int(str(x).replace(",", "").replace("명", ""))).sum().sum()
+            tourist_total = tourist_df[cols].fillna(0).applymap(lambda x: int(str(x).replace(",", "").replace("명", ""))).sum().sum()
+            total = local_total + tourist_total
+            lines.append(f"- {group_name}: 현지인 {local_total:,}명 / 외지인 {tourist_total:,}명 / 전체 {total:,}명")
 
             for i in range(len(local_df)):
                 subtotal_local = sum([
@@ -151,13 +154,19 @@ def analyze_time_distribution():
         lines.append(f"{group_name} - 외지인: " + ", ".join(f"{v:,}명" for v in tourist_vals))
 
         prompt = f"""
+    다음은 {name}({period}, {location}) 축제의 시간대별 관광객 분석입니다. 아래 정보를 바탕으로 공공기관 보고서에 포함할 시사점을 작성해주세요.
+
+    ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
+    ▸ 항목은 ▸ 기호로 구분하여 4~6문장 정도로 간결하면서도 풍부하게 작성  
+    ▸ 현지인/외지인 각각에 대해 시간대별 분포 특성을 구분하여 설명  
+    ▸ 특정 시간대에 집중된 경향, 주말/야간 방문 패턴, 고른 분포 여부 등을 함께 분석  
+    ▸ 부정적 해석은 지양하고, 긍정적 요소 중심으로 표현하거나 단순 진술로 서술  
+    ▸ 필요 시 ※ 기호를 활용하여 보조설명을 붙일 수 있음
     [유사 시사점 예시]
     {examples}
 
     [시간대별 관광객 수]
-    {chr(10).join(lines)}
-
-    위 데이터를 참고하여 시간대별 특성과 변화 양상을 행정 보고서 스타일로 3~5문장 작성해주세요.
+    {chr(10).join(lines)}    
     """
         response = client.chat.completions.create(
             model="gpt-4o",

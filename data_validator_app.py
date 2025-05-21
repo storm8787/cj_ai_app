@@ -22,8 +22,7 @@ META_DIR = os.path.join(BASE_DIR, "meta_dicts_final_clean")
 
 standard = st.selectbox(
     "검증 기준 표준을 선택하세요",
-    options=sorted(
-        [f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json")],
+    options=[f.replace(".json", "") for f in os.listdir(META_DIR) if f.endswith(".json"),
         key=locale.strxfrm  # ✅ 한글 가나다 정렬용
     )
 )

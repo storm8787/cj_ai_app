@@ -173,7 +173,8 @@ def analyze_visitor_by_province():
 ▸ 참고자료는 단순 참고용이며, 해석은 반드시 데이터 요약값 기반으로 도출할 것
 
 [시도별 외지인 방문객 수 요약]
-{summary_sido}
+{summary_sido}+ f"\n\n[유사 시사점 예시]\n{reference}"
+
 """
 
         response_sido = client.chat.completions.create(
@@ -200,7 +201,8 @@ def analyze_visitor_by_province():
 ▸ 참고자료는 문체 참고용이며, 분석은 반드시 아래 요약 데이터를 기반으로 작성할 것
 
 [시군구별 외지인 방문객 수 요약]
-{summary_gungu}
+{summary_gungu}+ f"\n\n[유사 시사점 예시]\n{reference}"
+
 
 """
 

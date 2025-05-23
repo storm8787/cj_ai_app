@@ -21,8 +21,9 @@ def load_daily_reference():
         return ""
 
 def analyze_card_spending():
-    st.subheader("📊 8. 일자별 카드 소비 분석기")
+    st.subheader("📊 6. 일자별 카드 소비 분석기")
 
+    # ✅ 기본 정보
     start_date = st.session_state.get("festival_start_date")
     end_date = st.session_state.get("festival_end_date")
 
@@ -33,43 +34,44 @@ def analyze_card_spending():
     date_range = pd.date_range(start=start_date, end=end_date)
     date_strs = [d.strftime("%Y-%m-%d") for d in date_range]
 
-    with st.form("card_spending_form"):
-        st.markdown("💳 축제 기간 동안의 일자별 매출금액(천원)과 매출건수를 입력하세요.")
+    # ✅ 입력부
+    st.markdown("🎫 **축제 기간 동안 일자별 매출금액(천원)과 매출건수를 입력하세요**")
 
-        sales_inputs = {}
-        count_inputs = {}
+    sales_inputs = {}
+    count_inputs = {}
 
-        for d_str in date_strs:
-            with st.expander(f"📅 {d_str}"):
-                col1, col2 = st.columns(2)
-                with col1:
-                    sales = st.number_input(f"{d_str} 매출금액 (천원)", min_value=0, key=f"{d_str}_sales")
-                with col2:
-                    count = st.number_input(f"{d_str} 매출건수", min_value=0, key=f"{d_str}_count")
-                sales_inputs[d_str] = sales
-                count_inputs[d_str] = count
+    for d_str in date_strs:
+        col1, col2 = st.columns(2)
+        with col1:
+            sales = st.number_input(f"{d_str} 매출금액 (천원)", min_value=0, key=f"{d_str}_sales")
+        with col2:
+            count = st.number_input(f"{d_str} 매출건수", min_value=0, key=f"{d_str}_count")
+        sales_inputs[d_str] = sales
+        count_inputs[d_str] = count
 
-        submitted = st.form_submit_button("분석 실행")
+    if st.button("📊 분석 실행"):
+        # ✅ 결과 계산
+        sales_list = [sales_inputs[d] for d in date_strs]
+        count_list = [count_inputs[d] for d in date_strs]
+        unit_price_list = [
+            int(sales_inputs[d] * 1000 / count_inputs[d]) if count_inputs[d] > 0 else 0
+            for d in date_strs
+        ]
 
-    if submitted:
-        df = pd.DataFrame({
-            "일자": date_strs,
-            "매출금액(천원)": [sales_inputs[d] for d in date_strs],
-            "매출건수": [count_inputs[d] for d in date_strs]
+        total_sales = sum(sales_list)
+        total_count = sum(count_list)
+        total_unit_price = int(total_sales * 1000 / total_count) if total_count > 0 else 0
+
+        # ✅ 결과 표 구성
+        df_t = pd.DataFrame({
+            "구분": ["매출금액", "매출건수", "건단가"]
         })
+        for i, d in enumerate(date_strs):
+            df_t[d] = [sales_list[i], count_list[i], unit_price_list[i]]
+        df_t["합계"] = [total_sales, total_count, total_unit_price]
 
-        df["건단가(원)"] = (df["매출금액(천원)"] * 1000 / df["매출건수"]).round(0).astype(int)
-
-        total_sales = df["매출금액(천원)"].sum()
-        total_count = df["매출건수"].sum()
-        total_unit_price = int((total_sales * 1000 / total_count).round())
-
-        df["매출금액 비율(%)"] = (df["매출금액(천원)"] / total_sales * 100).round(2)
-        df["매출건수 비율(%)"] = (df["매출건수"] / total_count * 100).round(2)
-
-        df.loc["합계"] = ["합계", total_sales, total_count, total_unit_price, 100.0, 100.0]
-
-        st.dataframe(df)
+        st.subheader("📊 결과 테이블")
+        st.dataframe(df_t.set_index("구분"))
 
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
@@ -79,10 +81,7 @@ def analyze_card_spending():
 
             spending_summary = ""
             for i, d_str in enumerate(date_strs):
-                sales = sales_inputs[d_str]
-                count = count_inputs[d_str]
-                unit_price = df.loc[i, "건단가(원)"]
-                spending_summary += f"- {d_str}: 매출 {sales:,}천원 / {count:,}건 / 건단가 {unit_price:,}원\n"
+                spending_summary += f"- {d_str}: 매출 {sales_list[i]:,}천원 / {count_list[i]:,}건 / 건단가 {unit_price_list[i]:,}원\n"
             spending_summary += f"- 총합: 매출 {total_sales:,}천원 / {total_count:,}건 / 평균 건단가 {total_unit_price:,}원"
 
             prompt = f"""다음은 {name}({period}, {location})에 대한 카드 소비 분석입니다.
@@ -105,11 +104,11 @@ def analyze_card_spending():
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "너는 충주시의 지역 축제 카드 소비 데이터를 분석하는 전문가야."},
+                    {"role": "system", "content": "너는 지방정부의 지역 축제 카드 소비 데이터를 분석하는 전문가야."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,
-                max_tokens=800
+                max_tokens=600
             )
 
             st.subheader("🧠 GPT 시사점")

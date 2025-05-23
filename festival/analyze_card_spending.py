@@ -16,14 +16,14 @@ def analyze_card_spending():
     with st.form("card_spending_form"):
         col1, col2, col3 = st.columns(3)
         with col1:
-            sales_day1 = st.number_input("4월 11일 매출금액(천원)", min_value=0, value=155071)
-            count_day1 = st.number_input("4월 11일 매출건수", min_value=0, value=5497)
+            sales_day1 = st.number_input("4월 11일 매출금액(천원)", min_value=0)
+            count_day1 = st.number_input("4월 11일 매출건수", min_value=0)
         with col2:
-            sales_day2 = st.number_input("4월 12일 매출금액(천원)", min_value=0, value=251318)
-            count_day2 = st.number_input("4월 12일 매출건수", min_value=0, value=7469)
+            sales_day2 = st.number_input("4월 12일 매출금액(천원)", min_value=0)
+            count_day2 = st.number_input("4월 12일 매출건수", min_value=0)
         with col3:
-            sales_day3 = st.number_input("4월 13일 매출금액(천원)", min_value=0, value=157956)
-            count_day3 = st.number_input("4월 13일 매출건수", min_value=0, value=5139)
+            sales_day3 = st.number_input("4월 13일 매출금액(천원)", min_value=0)
+            count_day3 = st.number_input("4월 13일 매출건수", min_value=0)
 
         submitted = st.form_submit_button("분석 실행")
 

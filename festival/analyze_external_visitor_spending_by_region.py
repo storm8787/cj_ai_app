@@ -26,7 +26,7 @@ def analyze_external_visitor_spending_by_region():
     TEMPLATE_PATH = os.path.join(os.getcwd(), "data", "templates", "12_template.xlsx")
     # ✅ 템플릿 다운로드 버튼
     try:
-        with open("data/templates/12_template.xlsx", "rb") as f:
+        with open(TEMPLATE_PATH, "rb") as f:
             st.download_button(
                 label="📥 템플릿 다운로드 (외지인 소비지역 입력용)",
                 data=f,

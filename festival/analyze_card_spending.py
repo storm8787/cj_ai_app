@@ -9,12 +9,12 @@ import pandas as pd
 import os
 from openai import OpenAI
 
-client = OpenAI()
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ 백데이터 로딩
-def load_daily_reference():
-    path = os.path.join("press_release_app", "data", "insights", "2_daily.txt")
+# ✅ 시사점 예시 불러오기
+def load_insight_examples(section_id):
     try:
+        path = os.path.join("press_release_app", "data", "insights", f"{section_id}.txt")
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
@@ -50,7 +50,7 @@ def analyze_card_spending():
         count_inputs[d_str] = count
 
     if st.button("📊 분석 실행"):
-        # ✅ 결과 계산
+        # ✅ 계산
         sales_list = [sales_inputs[d] for d in date_strs]
         count_list = [count_inputs[d] for d in date_strs]
         unit_price_list = [
@@ -62,14 +62,31 @@ def analyze_card_spending():
         total_count = sum(count_list)
         total_unit_price = int(total_sales * 1000 / total_count) if total_count > 0 else 0
 
-        # ✅ 결과 표 구성
+        # ✅ 문자열로 변환하여 비율 포함
+        sales_strs = [
+            f"{s:,} ({s / total_sales * 100:.1f}%)" if total_sales > 0 else f"{s:,} (0.0%)"
+            for s in sales_list
+        ]
+        count_strs = [
+            f"{c:,} ({c / total_count * 100:.1f}%)" if total_count > 0 else f"{c:,} (0.0%)"
+            for c in count_list
+        ]
+        unit_price_strs = [f"{u:,}" for u in unit_price_list]
+
+        # ✅ 합계 열 추가
+        sales_strs.append(f"{total_sales:,} (100.0%)")
+        count_strs.append(f"{total_count:,} (100.0%)")
+        unit_price_strs.append(f"{total_unit_price:,}")
+
+        # ✅ 표 생성
         df_t = pd.DataFrame({
             "구분": ["매출금액", "매출건수", "건단가"]
         })
         for i, d in enumerate(date_strs):
-            df_t[d] = [sales_list[i], count_list[i], unit_price_list[i]]
-        df_t["합계"] = [total_sales, total_count, total_unit_price]
+            df_t[d] = [sales_strs[i], count_strs[i], unit_price_strs[i]]
+        df_t["합계"] = [sales_strs[-1], count_strs[-1], unit_price_strs[-1]]
 
+        # ✅ 출력
         st.subheader("📊 결과 테이블")
         st.dataframe(df_t.set_index("구분"))
 
@@ -81,7 +98,10 @@ def analyze_card_spending():
 
             spending_summary = ""
             for i, d_str in enumerate(date_strs):
-                spending_summary += f"- {d_str}: 매출 {sales_list[i]:,}천원 / {count_list[i]:,}건 / 건단가 {unit_price_list[i]:,}원\n"
+                spending_summary += (
+                    f"- {d_str}: 매출 {sales_list[i]:,}천원 / {count_list[i]:,}건 / "
+                    f"건단가 {unit_price_list[i]:,}원\n"
+                )
             spending_summary += f"- 총합: 매출 {total_sales:,}천원 / {total_count:,}건 / 평균 건단가 {total_unit_price:,}원"
 
             prompt = f"""다음은 {name}({period}, {location})에 대한 카드 소비 분석입니다.

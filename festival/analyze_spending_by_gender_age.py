@@ -116,8 +116,13 @@ def analyze_spending_by_gender_age():
         male_pct = gender_ratio.get("남자", 0)
         female_pct = gender_ratio.get("여자", 0)
 
-        prompt = f"""다음은 {name}({period}, {location})의 연령별 및 성별 소비현황 분석입니다.
+         # ✅ 성별 시사점 포함 여부 결정
+        if female_pct >= 50:
+            gender_directive = "▸ 성별 소비비율 차이를 중심으로 구조적 특성 해석"
+        else:
+            gender_directive = "▸ 성별 소비는 남성이 소폭 높은 비중을 보였으며, 이는 동반 방문 특성으로 해석 가능함 ※ 자세한 분석은 생략"
 
+        prompt = f"""다음은 {name}({period}, {location})의 연령별 및 성별 소비현황 분석입니다.
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~기여하고 있음', '~보임')  
 ▸ 각 문장은 ▸ 기호로 시작하며 3~5문장으로 작성  
 ▸ 모든 수치는 소비금액이 아닌 소비비율(%) 기준으로 분석  
@@ -138,7 +143,7 @@ def analyze_spending_by_gender_age():
                 {"role": "user", "content": prompt}
             ],
             temperature=0.5,
-            max_tokens=600
+            max_tokens=800
         )
 
         st.subheader("🧠 GPT 시사점")

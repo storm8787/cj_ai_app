@@ -19,7 +19,7 @@ def load_insight_examples(section_id):
             return f.read()
     except FileNotFoundError:
         return ""
-
+# 10번 분석기
 def analyze_spending_by_visitor_type():
     st.subheader("📊 10. 방문유형별 소비현황")
 

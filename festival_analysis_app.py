@@ -39,77 +39,64 @@ def festival_basic_info():
     st.session_state["festival_start_date"] = start_date
     st.session_state["festival_end_date"] = end_date
 
-# ✅ 통합 분석기 실행 함수 (탭 기반)
 def festival_analysis_app():
     st.title("🎯 축제 빅데이터 분석기")
 
     # ✅ 기본정보 입력
     festival_basic_info()
 
-    # ✅ 대분류 구간
-    category = st.radio("📌 분석 카테고리 선택", ["👣 방문객 분석", "💳 카드 소비 분석", "📋 종합 분석"], horizontal=True)
+    # ✅ 분석영역 선택
+    section = st.selectbox("🔍 분석 영역 선택", ["방문객 분석", "카드 소비 분석", "분석결과"])
 
-    if category == "👣 방문객 분석":
-        selected = st.selectbox("📁 방문객 분석기 선택", [
-            "1. 방문객 총괄 분석",
-            "2. 일자별 방문객 분석",
-            "3. 시간대별 관광객 분석",
-            "4. 전·중·후 방문객 분석",
-            "5. 연령별 방문객 분석",
-            "6. 성별/연령별 방문객 분석",
-            "7. 외지인 거주지역 분석",
-            "7-3. 방문 24시간 이후 지역 분석"
+    if section == "방문객 분석":
+        tabs = st.tabs([
+            "1. 방문객 총괄", "2. 일자별 방문객", "3. 시간대별 관광객",
+            "4. 전·중·후", "5. 연령별", "6. 성별/연령", "7. 지역분석"
         ])
-        if selected.startswith("1."):
+        with tabs[0]:
             from festival.analyze_summary import analyze_summary
             analyze_summary()
-        elif selected.startswith("2."):
+        with tabs[1]:
             from festival.analyze_daily_visitor import analyze_daily_visitor
             analyze_daily_visitor()
-        elif selected.startswith("3."):
+        with tabs[2]:
             from festival.analyze_time_distribution import analyze_time_distribution
             analyze_time_distribution()
-        elif selected.startswith("4."):
+        with tabs[3]:
             from festival.analyze_before_after import analyze_before_after
             analyze_before_after()
-        elif selected.startswith("5."):
+        with tabs[4]:
             from festival.analyze_age_group import analyze_age_group
             analyze_age_group()
-        elif selected.startswith("6."):
+        with tabs[5]:
             from festival.analyze_gender_by_age import analyze_gender_by_age
             analyze_gender_by_age()
-        elif selected.startswith("7."):
+        with tabs[6]:
             from festival.analyze_visitor_by_province import analyze_visitor_by_province
             analyze_visitor_by_province()
-        elif selected.startswith("7-3."):
-            from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
-            analyze_visitor_after_24h()
 
-    elif category == "💳 카드 소비 분석":
-        selected = st.selectbox("📁 카드 소비 분석기 선택", [
-            "8. 일자별 소비 분석기",
-            "9. 축제 전·중 소비 분석",
-            "10. 방문유형별 소비현황",
-            "11. 성별/연령별 소비현황",
-            "12. 외지인 소비지역 분석"
+    elif section == "카드 소비 분석":
+        tabs = st.tabs([
+            "8. 일자별 소비", "9. 전·중 소비비교", "10. 방문유형별 소비",
+            "11. 성별/연령 소비", "12. 외지인 소비지역"
         ])
-        if selected.startswith("8."):
+        with tabs[0]:
             from festival.analyze_card_spending import analyze_card_spending
             analyze_card_spending()
-        elif selected.startswith("9."):
+        with tabs[1]:
             from festival.analyze_sales_before_during import analyze_sales_before_during
             analyze_sales_before_during()
-        elif selected.startswith("10."):
+        with tabs[2]:
             from festival.analyze_spending_by_visitor_type import analyze_spending_by_visitor_type
             analyze_spending_by_visitor_type()
-        elif selected.startswith("11."):
+        with tabs[3]:
             from festival.analyze_spending_by_gender_age import analyze_spending_by_gender_age
             analyze_spending_by_gender_age()
-        elif selected.startswith("12."):
+        with tabs[4]:
             from festival.analyze_external_visitor_spending_by_region import analyze_external_visitor_spending_by_region
             analyze_external_visitor_spending_by_region()
 
-    elif category == "📋 분석결과":
+    elif section == "📋 분석결과":
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()
         st.subheader("📊 13. 요약 및 종합의견")

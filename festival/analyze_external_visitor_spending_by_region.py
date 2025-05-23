@@ -46,7 +46,7 @@ def analyze_external_visitor_spending_by_region():
         return
 
     # ✅ 제외할 시군구 조합
-    exclude_regions = ["충청북도 충주시", "경기도 포천시"]
+    exclude_regions = ["충청북도 충주시"]
 
     # ✅ 병합 대상 시 리스트
     merge_target_cities = [

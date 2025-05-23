@@ -21,7 +21,7 @@ def load_daily_reference():
         return ""
 
 def analyze_card_spending():
-    st.subheader("📊 6. 일자별 카드 소비 분석기")
+    st.subheader("📊 8. 일자별 카드 소비 분석현황")
 
     # ✅ 기본 정보
     start_date = st.session_state.get("festival_start_date")

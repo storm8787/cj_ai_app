@@ -6,9 +6,19 @@
 
 import streamlit as st
 import pandas as pd
+import os
 from openai import OpenAI
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI()
+
+# ✅ 백데이터 로딩
+def load_daily_reference():
+    path = os.path.join("press_release_app", "data", "insights", "2_daily.txt")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
 
 def analyze_card_spending():
     st.subheader("📊 8. 일자별 카드 소비 분석기")

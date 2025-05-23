@@ -81,7 +81,7 @@ def analyze_sales_before_during():
             ]
         })
 
-        st.subheader("📊 전·중 매출 비교 요약표")
+        #st.subheader("📊 전·중 매출 비교 요약표")
         st.dataframe(df.set_index("구분"))
 
         # ✅ GPT 시사점 생성

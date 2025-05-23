@@ -7,6 +7,9 @@
 import streamlit as st
 import pandas as pd
 import io
+from openai import OpenAI
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_internal_spending_by_region():
     st.subheader("📊 13. 외지인 도내 소비현황 분석기")
@@ -69,4 +72,43 @@ def analyze_internal_spending_by_region():
     # ✅ 결과 출력
     st.markdown("### 🧾 도내 소비현황 요약표")
     st.dataframe(df_final, use_container_width=True)
+
+
+    # ✅ GPT 시사점 생성
+    with st.spinner("🤖 GPT 시사점 생성 중..."):
+        name = st.session_state.get("festival_name", "본 축제")
+        period = st.session_state.get("festival_period", "")
+        location = st.session_state.get("festival_location", "")
+
+        # 상위 5개 지역 요약
+        summary_lines = [
+            f"- {row['시군구']}: {row['소비금액(원)']} / {row['소비건수(건)']} / {row['비율(%)']}"
+            for _, row in df_final.iloc[1:6].iterrows()
+        ]
+        top5_summary = "\n".join(summary_lines)
+
+        prompt = f"""다음은 {name}({period}, {location})의 외지인 도내 소비현황 분석 결과입니다.
+
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~기여하고 있음')  
+▸ 각 문장은 ▸ 기호로 시작하고 3~5문장 구성  
+▸ 축제기간 내에 축제방문인들의 충주시 소비금액을 강조
+▸ 충주시의 소비금액에 대한 정책적 해석이나 지역경제 파급효과 중심으로 해석  
+▸ 마지막 문장은 실무적 제언 포함 (예: 지역 상권 연계 필요성, 협업 전략 등)
+
+## 소비금액 상위 5개 지역
+{top5_summary}
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 지방정부 축제 소비 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=700
+        )
+
+        st.subheader("🧠 GPT 시사점")
+        st.write(response.choices[0].message.content)
 

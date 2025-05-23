@@ -47,6 +47,8 @@ def analyze_external_visitor_spending_by_region():
         st.error("❌ '한글시도명', '한글시군구명', '매출금액' 컬럼이 포함된 파일을 업로드해주세요.")
         return
 
+    # ✅ 제외할 시군구 목록
+    exclude_cities = ["충주시", "포천시"]
     # ✅ 구 단위를 시로 병합
     merge_target_cities = [
         "청주시", "수원시", "안양시", "천안시", "용인시",
@@ -60,6 +62,9 @@ def analyze_external_visitor_spending_by_region():
         return name
 
     df["시군구"] = df["한글시군구명"].apply(merge_sigungu)
+    
+    # ✅ 충주시/포천시 제외
+    df = df[~df["시군구"].isin(exclude_cities)]
 
     # ✅ 시군구 기준 그룹화
     df_grouped = df.groupby("시군구", as_index=False)["매출금액"].sum()
@@ -98,7 +103,8 @@ def analyze_external_visitor_spending_by_region():
         visitor_str = "\n".join(visitor_compare_lines)
 
         prompt = f"""다음은 {name}({period}, {location})의 외지인 소비지역 분석입니다.
-
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
+▸ ▸ 기호로 시작하여 3~5문장으로 작성  
 ▸ 시군구별 소비금액 비중을 중심으로 분석하며, 전체 외지인 소비금액 대비 각 지역의 기여도를 해석할 것  
 ▸ 소비 비중이 높은 지역이 방문객 비중과 일치하는지 비교하고, 편중 여부 해석  
 ▸ 소비금액 상위 시군구(10개)의 기여도와 지역 분포를 기반으로 전략적 정책 제언 포함  

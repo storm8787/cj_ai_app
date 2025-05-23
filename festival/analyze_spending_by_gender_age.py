@@ -130,8 +130,8 @@ def analyze_spending_by_gender_age():
 ▸ 성별 소비비율은 단순 수치 전달 후 해석은 생략하거나 간단한 언급에 그칠 것
 ▸ 상위 연령대에는 괄호로 소비비율 표기 (예: 60대(29.51%))  
 ▸ 부정적 표현은 지양하고, 전략적 해석을 기반으로 서술
-▸ 필요시 ※ 기호로 보충 설명 가능  
 ▸ **각 문장은 줄바꿈(엔터)으로 구분되도록 작성**
+▸ 맨마지막에 → 기호를 넣고 현재까지의 시사점을 종합한 문장을 작성(ex : 이를 통해 수안보온천제 기간 소비활동이 중장년 남성 중심으로 구성된 특징이 뚜렷하게 나타난 것으로 분석)
 
 ## 주요 수치:
 - 연령별 상위 3계층: {top_ages}
@@ -141,7 +141,7 @@ def analyze_spending_by_gender_age():
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 축제 소비 데이터를 분석하는 전문가야."},
+                {"role": "system", "content": "너는 충주시 축제 소비 데이터를 분석하는 전문가야."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.5,

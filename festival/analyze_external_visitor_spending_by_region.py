@@ -23,7 +23,7 @@ def analyze_external_visitor_spending_by_region():
     # ✅ 외지인 방문객 비율 정보 (7번 분석기에서 저장)
     visitor_share = st.session_state.get("visitor_by_province", {})
 
-    TEMPLATE_PATH = os.path.join(os.getcwd(), "data", "templates", "12_template.xlsx")
+    TEMPLATE_PATH = "data/templates/12_template.xlsx"
     # ✅ 템플릿 다운로드 버튼
     try:
         with open(TEMPLATE_PATH, "rb") as f:

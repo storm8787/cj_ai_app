@@ -12,9 +12,9 @@ import os
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_spending_by_gender_age():
-    st.subheader("📊 11. 성별/연령별 소비현황 분석기")
+    st.subheader("📊 11. 성별/연령별 소비현황")
 
-    # ✅ 전체 소비금액 가져오기 (8번 분석기에서 저장된 값)
+    # ✅ 전체 소비금액 (8번 분석기 기준)
     sales_inputs = st.session_state.get("card_sales_inputs", {})
     if not sales_inputs:
         st.warning("먼저 '8. 일자별 카드 소비 분석기'에서 데이터를 입력해주세요.")
@@ -26,15 +26,18 @@ def analyze_spending_by_gender_age():
     st.markdown("### 📝 템플릿 다운로드 및 업로드")
 
     TEMPLATE_PATH = os.path.join(os.getcwd(), "data", "templates", "11_template.xlsx")
-
-    # 다운로드 버튼
-    with open("data/templates/11_template.xlsx", "rb") as f:
-        st.download_button(
-            label="📥 템플릿 다운로드 (성별/연령 소비비율 입력용)",
-            data=f,
-            file_name="11_template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    
+    # 템플릿 다운로드
+    try:
+        with open("data/templates/11_template.xlsx", "rb") as f:
+            st.download_button(
+                label="📥 템플릿 다운로드 (성별/연령 소비비율 입력용)",
+                data=f,
+                file_name="11_template.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+    except FileNotFoundError:
+        st.error("❌ 템플릿 파일을 찾을 수 없습니다. 파일 경로를 확인해주세요.")
 
     # ✅ 템플릿 업로드
     uploaded_file = st.file_uploader("📂 성별/연령별 소비비율 엑셀 업로드", type=["xlsx"])
@@ -42,42 +45,51 @@ def analyze_spending_by_gender_age():
         return
 
     df_raw = pd.read_excel(uploaded_file, sheet_name="Sheet1")
-
-    # ✅ 소비금액 계산
     df_raw["총소비금액"] = (df_raw["상주"] + df_raw["유입"]) / 100 * total_sales
 
     # ✅ 10-1. 연령별 소비현황
     df_age = df_raw.groupby("연령구분", as_index=False)["총소비금액"].sum()
     df_age.columns = ["연령", "소비금액"]
-    df_age["소비비율"] = (df_age["소비금액"] / df_age["소비금액"].sum() * 100).round(2)
+    df_age["소비비율"] = (df_age["소비금액"] / df_age["소비금액"].sum() * 100)
+
     df_age["순위"] = df_age["소비금액"].rank(ascending=False).astype(int)
     df_age["비고"] = df_age["순위"].apply(lambda x: f"{x}위" if x <= 5 else "")
+
+    df_age_display = df_age.copy()
+    df_age_display["소비금액"] = (df_age_display["소비금액"] / 1000).round(-2).astype(int)
+    df_age_display["소비금액"] = df_age_display["소비금액"].apply(lambda x: f"{x:,}천원")
+    df_age_display["소비비율"] = df_age["소비비율"].apply(lambda x: f"{x:.2f}%")
 
     df_age_final = pd.concat([
         pd.DataFrame([{
             "연령": "계",
-            "소비금액": df_age["소비금액"].sum(),
+            "소비금액": f"{(total_sales/1000):,.0f}천원",
             "소비비율": "100%",
             "비고": ""
         }]),
-        df_age[["연령", "소비금액", "소비비율", "비고"]]
+        df_age_display[["연령", "소비금액", "소비비율", "비고"]]
     ], ignore_index=True)
 
     # ✅ 10-2. 성별 소비현황
     df_gender = df_raw.groupby("성별구분", as_index=False)["총소비금액"].sum()
     df_gender.columns = ["성별", "소비금액"]
-    df_gender["소비비율"] = (df_gender["소비금액"] / df_gender["소비금액"].sum() * 100).round(2)
+    df_gender["소비비율"] = (df_gender["소비금액"] / df_gender["소비금액"].sum() * 100)
+
+    df_gender_display = df_gender.copy()
+    df_gender_display["소비금액"] = (df_gender_display["소비금액"] / 1000).round(-2).astype(int)
+    df_gender_display["소비금액"] = df_gender_display["소비금액"].apply(lambda x: f"{x:,}천원")
+    df_gender_display["소비비율"] = df_gender["소비비율"].apply(lambda x: f"{x:.2f}%")
 
     df_gender_final = pd.concat([
         pd.DataFrame([{
             "성별": "계",
-            "소비금액": df_gender["소비금액"].sum(),
+            "소비금액": f"{(total_sales/1000):,.0f}천원",
             "소비비율": "100%"
         }]),
-        df_gender[["성별", "소비금액", "소비비율"]]
+        df_gender_display[["성별", "소비금액", "소비비율"]]
     ], ignore_index=True)
 
-    # ✅ 출력
+    # ✅ 결과 출력
     st.markdown("### 📊 10-1. 연령별 소비현황")
     st.dataframe(df_age_final.set_index("연령"))
 
@@ -90,8 +102,11 @@ def analyze_spending_by_gender_age():
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
 
-        age_insight = df_age.sort_values("소비금액", ascending=False).head(3)
-        top_ages = ", ".join(age_insight["연령"].tolist())
+        top_age_rows = df_age.sort_values("순위").head(3)
+        top_ages = ", ".join([
+            f"{row['연령']}({row['소비비율']:.2f}%)" for _, row in top_age_rows.iterrows()
+        ])
+
         gender_ratio = df_gender.set_index("성별")["소비비율"].to_dict()
         male_pct = gender_ratio.get("남자", 0)
         female_pct = gender_ratio.get("여자", 0)
@@ -99,11 +114,11 @@ def analyze_spending_by_gender_age():
         prompt = f"""다음은 {name}({period}, {location})의 연령별 및 성별 소비현황 분석입니다.
 
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~기여하고 있음', '~보임')  
-▸ 각 문장은 ▸ 기호로 시작하여 3~5문장 구성  
-▸ 연령별 상위 계층 비중과 소비 집중도 중심으로 작성  
-▸ 성별 비율 차이를 구체적으로 제시하고, 소비 패턴 차이를 정책적으로 해석  
-▸ 필요 시 ※ 표시로 부가 설명 포함  
-▸ 부정적 표현은 지양하고, 중립 또는 전략적 표현 사용
+▸ 각 문장은 ▸ 기호로 시작하며 3~5문장으로 작성  
+▸ 연령별 소비금액 비율 및 중장년층 집중 여부를 중심으로 분석  
+▸ 성별 소비비율 차이를 중심으로 구조적 특성 해석  
+▸ 상위 연령대에는 괄호로 소비비율 표기 (예: 60대(29.51%))  
+▸ 부정적 표현은 지양하고, 전략적 해석을 기반으로 서술
 
 ## 주요 수치:
 - 총 소비금액: {total_sales:,}원

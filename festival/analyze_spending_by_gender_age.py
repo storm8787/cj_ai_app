@@ -7,6 +7,7 @@
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
+import os
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -23,6 +24,8 @@ def analyze_spending_by_gender_age():
     st.markdown(f"💰 **총 소비금액: {total_sales:,}원** (자동 계산됨)")
 
     st.markdown("### 📝 템플릿 다운로드 및 업로드")
+
+    TEMPLATE_PATH = os.path.join(os.getcwd(), "data", "templates", "11_template.xlsx")
 
     # 다운로드 버튼
     with open("data/templates/11_template.xlsx", "rb") as f:

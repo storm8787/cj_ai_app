@@ -45,24 +45,44 @@ def analyze_sales_before_during():
         last_during = st.number_input("📈 전년도 축제기간 매출액(천원)", min_value=0, step=1000, key="last_during")
 
     if st.button("📊 분석 실행", key="btn_analyze_sales_before_during"):
-        # ✅ 올해 분석
+        # ✅ 올해 계산
         this_avg = int(this_during / days)
-        this_diff = this_during - this_before
-        this_rate = round(this_diff / this_before * 100, 1) if this_before > 0 else 0
+        this_rate = round((this_during - this_before) / this_before * 100, 2) if this_before else 0
+        this_change = f"{abs(this_rate):.2f}% {'증가' if this_rate > 0 else '감소'}"
 
-        st.markdown(f"✅ 올해 축제기간 일평균 매출액: **{this_avg:,}천원**")
-        st.markdown(f"📈 직전 1주 대비 매출 증감률: **{this_rate:+.1f}%**")
-
-        # ✅ 전년도 비교
-        last_avg = last_diff = last_rate = None
+        # ✅ 전년도 계산
+        last_avg = last_rate = 0
+        last_change = "-"
         if compare_last == "있음" and last_before and last_during:
             last_avg = int(last_during / days)
-            last_diff = last_during - last_before
-            last_rate = round(last_diff / last_before * 100, 1) if last_before > 0 else 0
+            last_rate = round((last_during - last_before) / last_before * 100, 2) if last_before else 0
+            last_change = f"{abs(last_rate):.2f}% {'증가' if last_rate > 0 else '감소'}"
 
-            st.markdown("---")
-            st.markdown(f"📊 전년도 축제기간 일평균 매출액: **{last_avg:,}천원**")
-            st.markdown(f"📉 전년도 직전 1주 대비 증감률: **{last_rate:+.1f}%**")
+        # ✅ 표 구성
+        df = pd.DataFrame({
+            "구분": ["전년도", "", "올해", ""],
+            "직전 1주": [
+                f"{last_before:,}천원" if last_before else "-",
+                f"(일평균 {int(last_before / days):,}천원)" if last_before else "",
+                f"{this_before:,}천원",
+                f"(일평균 {int(this_before / days):,}천원)"
+            ],
+            "증감률": [
+                last_change,
+                "⇢",
+                f"{this_change}",
+                "⇢"
+            ],
+            "축제기간": [
+                f"{last_during:,}천원" if last_during else "-",
+                f"(일평균 {last_avg:,}천원)" if last_during else "",
+                f"{this_during:,}천원",
+                f"(일평균 {this_avg:,}천원)"
+            ]
+        })
+
+        st.subheader("📊 전·중 매출 비교 요약표")
+        st.dataframe(df.set_index("구분"))
 
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):

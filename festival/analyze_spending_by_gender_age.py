@@ -56,8 +56,9 @@ def analyze_spending_by_gender_age():
     df_age["비고"] = df_age["순위"].apply(lambda x: f"{x}위" if x <= 5 else "")
 
     df_age_display = df_age.copy()
-    df_age_display["소비금액"] = (df_age_display["소비금액"] / 1000).round(-2).astype(int)
-    df_age_display["소비금액"] = df_age_display["소비금액"].apply(lambda x: f"{x:,}천원")
+    # 연령별 소비금액
+    df_age_display["소비금액"] = df_age_display["소비금액"].round(0).astype(int)
+    df_age_display["소비금액"] = df_age_display["소비금액"].apply(lambda x: f"{x:,}")
     df_age_display["소비비율"] = df_age["소비비율"].apply(lambda x: f"{x:.2f}%")
 
     df_age_final = pd.concat([
@@ -76,8 +77,9 @@ def analyze_spending_by_gender_age():
     df_gender["소비비율"] = (df_gender["소비금액"] / df_gender["소비금액"].sum() * 100)
 
     df_gender_display = df_gender.copy()
-    df_gender_display["소비금액"] = (df_gender_display["소비금액"] / 1000).round(-2).astype(int)
-    df_gender_display["소비금액"] = df_gender_display["소비금액"].apply(lambda x: f"{x:,}천원")
+    # 성별 소비금액
+    df_gender_display["소비금액"] = df_gender_display["소비금액"].round(0).astype(int)
+    df_gender_display["소비금액"] = df_gender_display["소비금액"].apply(lambda x: f"{x:,}")
     df_gender_display["소비비율"] = df_gender["소비비율"].apply(lambda x: f"{x:.2f}%")
 
     df_gender_final = pd.concat([
@@ -115,15 +117,16 @@ def analyze_spending_by_gender_age():
 
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~기여하고 있음', '~보임')  
 ▸ 각 문장은 ▸ 기호로 시작하며 3~5문장으로 작성  
-▸ 연령별 소비금액 비율 및 중장년층 집중 여부를 중심으로 분석  
+▸ 모든 수치는 소비금액이 아닌 소비비율(%) 기준으로 분석  
+▸ 연령별 소비금액 비율 및 중장년층(50대, 60대) 혹은 청년층(20대, 30대) 집중 여부를 중심으로 분석  
 ▸ 성별 소비비율 차이를 중심으로 구조적 특성 해석  
 ▸ 상위 연령대에는 괄호로 소비비율 표기 (예: 60대(29.51%))  
 ▸ 부정적 표현은 지양하고, 전략적 해석을 기반으로 서술
 
 ## 주요 수치:
 - 총 소비금액: {total_sales:,}원
-- 연령별 상위 3계층: {top_ages}
-- 성별 비율: 남성 {male_pct:.2f}%, 여성 {female_pct:.2f}%
+- 연령별 상위 3계층: {top_ages}  ← (예: "60대(29.51%), 50대(28.07%), 40대(15.50%)")
+- 성별 소비비율: 남성 {male_pct:.2f}%, 여성 {female_pct:.2f}%
 
 위 정보를 바탕으로 소비 특성 시사점을 작성해주세요.
 """

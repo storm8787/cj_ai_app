@@ -74,6 +74,7 @@ def festival_analysis_app():
         "24시간 이후지역",
         "일자별 상권 소비매출",
         "축제 전중 소비변화",
+        "방문유형별 소비현황",
         "요약 및 종합의견(준비중)"
     ])
 
@@ -108,6 +109,9 @@ def festival_analysis_app():
     with tabs[9]:
         from festival.analyze_sales_before_during import analyze_sales_before_during
         analyze_sales_before_during()
+    with tabs[10]:
+        from festival.analyze_spending_by_visitor_type import analyze_spending_by_visitor_type
+        analyze_spending_by_visitor_type()
     with tabs[-1]:
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()

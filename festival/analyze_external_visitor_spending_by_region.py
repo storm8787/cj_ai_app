@@ -35,6 +35,7 @@ def analyze_external_visitor_spending_by_region():
     except FileNotFoundError:
         st.error("❌ 템플릿 파일이 없습니다. 경로를 확인해주세요.")
 
+    # ✅ 업로드
     uploaded_file = st.file_uploader("📂 외지인 소비지역 데이터 업로드", type=["xlsx"])
     if not uploaded_file:
         return
@@ -44,31 +45,31 @@ def analyze_external_visitor_spending_by_region():
         st.error("❌ '한글시도명', '한글시군구명', '매출금액' 컬럼이 포함된 파일을 업로드해주세요.")
         return
 
-    # ✅ 병합 대상 설정
-    exclude_cities = ["충주시", "포천시"]
+    # ✅ 제외할 시군구 조합
+    exclude_regions = ["충청북도 충주시", "경기도 포천시"]
+
+    # ✅ 병합 대상 시 리스트
     merge_target_cities = [
         "청주시", "수원시", "안양시", "천안시", "용인시",
         "성남시", "고양시", "부천시", "안산시"
     ]
-    merge_metros = {
-        "서울": "서울시", "부산": "부산시", "대구": "대구시",
-        "인천": "인천시", "광주": "광주시", "대전": "대전시",
-        "울산": "울산시", "세종": "세종시"
-    }
 
-    def merge_sigungu(sigungu, sido):
-        for prefix, merged in merge_metros.items():
-            if sido.startswith(prefix):
-                return merged
+    def merge_sigungu(sigungu):
         for city in merge_target_cities:
             if sigungu.startswith(city):
                 return city
         return sigungu
 
-    df["시군구"] = df.apply(lambda row: merge_sigungu(row["한글시군구명"], row["한글시도명"]), axis=1)
-    df = df[~df["시군구"].isin(exclude_cities)]
+    # ✅ full_region 생성: 시도 + 병합된 시군구
+    df["full_region"] = df.apply(
+        lambda row: f"{row['한글시도명']} {merge_sigungu(row['한글시군구명'])}", axis=1
+    )
 
-    df_grouped = df.groupby("시군구", as_index=False)["매출금액"].sum()
+    # ✅ 제외 대상 제거
+    df = df[~df["full_region"].isin(exclude_regions)]
+
+    # ✅ 그룹화
+    df_grouped = df.groupby("full_region", as_index=False)["매출금액"].sum()
     df_grouped = df_grouped.sort_values("매출금액", ascending=False).reset_index(drop=True)
 
     df_grouped["비중(%)"] = df_grouped["매출금액"] / external_total_sales * 100
@@ -78,7 +79,7 @@ def analyze_external_visitor_spending_by_region():
 
     df_top10 = df_grouped.head(10)
 
-    st.markdown("### 📊 외지인 소비지역 상위 10개 시군구")
+    st.markdown("### 📊 외지인 소비지역 상위 10개 지역")
     st.dataframe(df_top10.reset_index(drop=True))
 
     # ✅ GPT 시사점 생성
@@ -87,12 +88,16 @@ def analyze_external_visitor_spending_by_region():
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
 
-        top_str = "\n".join([f"- {row['시군구']}: {row['비중(%)']}" for _, row in df_top10.iterrows()])
-        visitor_str = "\n".join([
-            f"{row['시군구']}: 방문객 {visitor_share.get(row['시군구'], 0):.2f}% / 소비 {row['비중(%)']}"
-            for _, row in df_top10.iterrows()
-            if row["시군구"] in visitor_share
-        ])
+        top_lines = [f"- {row['full_region']}: {row['비중(%)']}" for _, row in df_top10.iterrows()]
+        top_str = "\n".join(top_lines)
+
+        visitor_compare_lines = []
+        for _, row in df_top10.iterrows():
+            region = row["full_region"]
+            visitor_ratio = visitor_share.get(region, None)
+            if visitor_ratio:
+                visitor_compare_lines.append(f"{region}: 방문객 {visitor_ratio:.2f}% / 소비 {row['비중(%)']}")
+        visitor_str = "\n".join(visitor_compare_lines)
 
         prompt = f"""다음은 {name}({period}, {location})의 외지인 소비지역 분석입니다.
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  

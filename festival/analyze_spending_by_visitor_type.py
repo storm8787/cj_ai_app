@@ -21,7 +21,7 @@ def load_insight_examples(section_id):
         return ""
 
 def analyze_spending_by_visitor_type():
-    st.subheader("📊 10. 방문유형별 소비현황 분석기")
+    st.subheader("📊 10. 방문유형별 소비현황")
 
     st.markdown("🎫 **8번 분석 결과에서 도출된 전체 소비금액과 건수를 입력하고, 유형별 비율을 입력하세요**")
 

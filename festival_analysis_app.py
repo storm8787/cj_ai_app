@@ -108,7 +108,7 @@ def festival_analysis_app():
     with tabs[9]:
         from festival.analyze_sales_before_during import analyze_sales_before_during
         analyze_sales_before_during()
-    with tabs[12]:
+    with tabs[-1]:
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()
         st.subheader("📊 8. 요약 및 종합의견")

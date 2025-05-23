@@ -51,6 +51,9 @@ def analyze_internal_spending_by_region():
     df_grouped["소비건수(건)"] = df_grouped["소비건수(건)"].round().astype(int).apply(lambda x: f"{x:,}")
     df_grouped["비율(%)"] = df_grouped["비율(%)"].apply(lambda x: f"{x:.2f}%")
 
+    # ✅ 소비금액 기준 내림차순 정렬
+    df_grouped = df_grouped.sort_values(by="소비금액(원)", ascending=False)
+    
     # ✅ 합계 행 추가 후 위로 배치
     total_row = pd.DataFrame([{
         "시군구": "합계",

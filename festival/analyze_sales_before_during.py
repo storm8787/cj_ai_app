@@ -34,17 +34,17 @@ def analyze_sales_before_during():
 
     st.markdown("🎫 **축제기간 및 직전 1주간 매출액을 입력해주세요 (단위: 천원)**")
 
-    this_before = st.number_input("📉 올해 직전 1주 매출액", min_value=0, step=1000)
-    this_during = st.number_input("📈 올해 축제기간 매출액", min_value=0, step=1000)
+    this_before = st.number_input("📉 올해 직전 1주 매출액", min_value=0, step=1000, key="this_before")
+    this_during = st.number_input("📈 올해 축제기간 매출액", min_value=0, step=1000, key="this_during")
 
     compare_last = st.radio("📂 전년도 데이터가 있나요?", ["없음", "있음"], horizontal=True)
 
     last_before = last_during = None
     if compare_last == "있음":
-        last_before = st.number_input("📉 전년도 직전 1주 매출액", min_value=0, step=1000)
-        last_during = st.number_input("📈 전년도 축제기간 매출액", min_value=0, step=1000)
+        last_before = st.number_input("📉 전년도 직전 1주 매출액", min_value=0, step=1000, key="last_before")
+        last_during = st.number_input("📈 전년도 축제기간 매출액", min_value=0, step=1000, key="last_during")
 
-    if st.button("📊 분석 실행"):
+    if st.button("📊 분석 실행", key="btn_analyze_sales_before_during"):
         # ✅ 올해 분석
         this_avg = int(this_during / days)
         this_diff = this_during - this_before

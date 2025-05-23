@@ -139,6 +139,11 @@ def analyze_visitor_by_province():
 
     # ✅ 시군구 분석 결과 출력
     st.dataframe(result_gungu, use_container_width=True)
+
+    # ✅ 시군구 비율 딕셔너리 저장 (12번 소비 분석기용)
+    visitor_dict = dict(zip(left["full_region_1"], left["비율_1"].str.replace("%", "").astype(float)))
+    st.session_state["visitor_by_province"] = visitor_dict
+
     # ✅ 저장
     st.session_state["summary_visitor_by_province_gungu"] = result_gungu.copy()
 

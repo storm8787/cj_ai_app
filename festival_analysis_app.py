@@ -76,6 +76,7 @@ def festival_analysis_app():
         "축제 전중 소비변화",
         "방문유형별 소비현황",
         "성별/연령별 소비현황",
+        "외지인 방문객 축제장 주변 소비",
         "요약 및 종합의견(준비중)"
     ])
 
@@ -116,6 +117,9 @@ def festival_analysis_app():
     with tabs[11]:
         from festival.analyze_spending_by_gender_age import analyze_spending_by_gender_age
         analyze_spending_by_gender_age()    
+    with tabs[12]:
+        from festival.analyze_external_visitor_spending_by_region import analyze_external_visitor_spending_by_region
+        analyze_external_visitor_spending_by_region()    
     with tabs[-1]:
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()

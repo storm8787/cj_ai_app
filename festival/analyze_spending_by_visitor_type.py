@@ -71,6 +71,8 @@ def analyze_spending_by_visitor_type():
         st.subheader("📊 소비현황 요약표")
         st.dataframe(df.set_index("유입유형"))
 
+        st.session_state["external_total_sales"] = tourist_amount * 1000  # 천원 → 원
+
         # ✅ GPT 시사점
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")

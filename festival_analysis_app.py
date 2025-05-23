@@ -73,6 +73,7 @@ def festival_analysis_app():
         "시도·시군구별 방문객",
         "24시간 이후지역",
         "일자별 상권 소비매출",
+        "축제 전중 소비변화",
         "요약 및 종합의견(준비중)"
     ])
 
@@ -105,6 +106,9 @@ def festival_analysis_app():
         from festival.analyze_card_spending import analyze_card_spending
         analyze_card_spending()
     with tabs[9]:
+        from festival.analyze_sales_before_during import analyze_sales_before_during
+        analyze_sales_before_during()
+    with tabs[10]:
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()
         st.subheader("📊 8. 요약 및 종합의견")

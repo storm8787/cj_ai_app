@@ -12,9 +12,9 @@ import os
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_spending_by_gender_age():
-    st.subheader("📊 11. 성별/연령별 소비현황")
+    st.subheader("📊 11. 성별/연령별 소비현황 분석기")
 
-    # ✅ 전체 소비금액 (8번 분석기 기준)
+    # ✅ 전체 소비금액
     sales_inputs = st.session_state.get("card_sales_inputs", {})
     if not sales_inputs:
         st.warning("먼저 '8. 일자별 카드 소비 분석기'에서 데이터를 입력해주세요.")
@@ -23,11 +23,8 @@ def analyze_spending_by_gender_age():
     total_sales = sum(sales_inputs.values()) * 1000  # 천원 → 원
     st.markdown(f"💰 **총 소비금액: {total_sales:,}원** (자동 계산됨)")
 
-    st.markdown("### 📝 템플릿 다운로드 및 업로드")
-
     TEMPLATE_PATH = os.path.join(os.getcwd(), "data", "templates", "11_template.xlsx")
-    
-    # 템플릿 다운로드
+    # ✅ 템플릿 다운로드
     try:
         with open("data/templates/11_template.xlsx", "rb") as f:
             st.download_button(
@@ -51,12 +48,10 @@ def analyze_spending_by_gender_age():
     df_age = df_raw.groupby("연령구분", as_index=False)["총소비금액"].sum()
     df_age.columns = ["연령", "소비금액"]
     df_age["소비비율"] = (df_age["소비금액"] / df_age["소비금액"].sum() * 100)
-
     df_age["순위"] = df_age["소비금액"].rank(ascending=False).astype(int)
     df_age["비고"] = df_age["순위"].apply(lambda x: f"{x}위" if x <= 5 else "")
 
     df_age_display = df_age.copy()
-    # 연령별 소비금액
     df_age_display["소비금액"] = df_age_display["소비금액"].round(0).astype(int)
     df_age_display["소비금액"] = df_age_display["소비금액"].apply(lambda x: f"{x:,}")
     df_age_display["소비비율"] = df_age["소비비율"].apply(lambda x: f"{x:.2f}%")
@@ -64,19 +59,21 @@ def analyze_spending_by_gender_age():
     df_age_final = pd.concat([
         pd.DataFrame([{
             "연령": "계",
-            "소비금액": f"{(total_sales/1000):,.0f}천원",
+            "소비금액": f"{int(total_sales):,}",
             "소비비율": "100%",
             "비고": ""
         }]),
         df_age_display[["연령", "소비금액", "소비비율", "비고"]]
     ], ignore_index=True)
 
-    # 원하는 정렬 순서 지정
-    age_order = ["20대미만", "20대", "30대", "40대", "50대", "60대", "70대이상"]
+    # ✅ 사용자 지정 순서 정렬 (계 맨 위 유지)
+    df_total_row = df_age_final[df_age_final["연령"] == "계"]
+    df_rest = df_age_final[df_age_final["연령"] != "계"]
 
-    # 정렬 순서 적용
-    df_age_final["연령"] = pd.Categorical(df_age_final["연령"], categories=age_order + ["계"], ordered=True)
-    df_age_final = df_age_final.sort_values("연령").reset_index(drop=True)    
+    age_order = ["20대미만", "20대", "30대", "40대", "50대", "60대", "70대이상"]
+    df_rest["연령"] = pd.Categorical(df_rest["연령"], categories=age_order, ordered=True)
+    df_rest = df_rest.sort_values("연령").reset_index(drop=True)
+    df_age_final = pd.concat([df_total_row, df_rest], ignore_index=True)
 
     # ✅ 10-2. 성별 소비현황
     df_gender = df_raw.groupby("성별구분", as_index=False)["총소비금액"].sum()
@@ -84,7 +81,6 @@ def analyze_spending_by_gender_age():
     df_gender["소비비율"] = (df_gender["소비금액"] / df_gender["소비금액"].sum() * 100)
 
     df_gender_display = df_gender.copy()
-    # 성별 소비금액
     df_gender_display["소비금액"] = df_gender_display["소비금액"].round(0).astype(int)
     df_gender_display["소비금액"] = df_gender_display["소비금액"].apply(lambda x: f"{x:,}")
     df_gender_display["소비비율"] = df_gender["소비비율"].apply(lambda x: f"{x:.2f}%")
@@ -92,7 +88,7 @@ def analyze_spending_by_gender_age():
     df_gender_final = pd.concat([
         pd.DataFrame([{
             "성별": "계",
-            "소비금액": f"{(total_sales/1000):,.0f}천원",
+            "소비금액": f"{int(total_sales):,}",
             "소비비율": "100%"
         }]),
         df_gender_display[["성별", "소비금액", "소비비율"]]
@@ -105,7 +101,7 @@ def analyze_spending_by_gender_age():
     st.markdown("### 📊 10-2. 성별 소비현황")
     st.dataframe(df_gender_final.set_index("성별"))
 
-    # ✅ GPT 시사점 생성
+    # ✅ GPT 시사점
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")
         period = st.session_state.get("festival_period", "")
@@ -131,11 +127,8 @@ def analyze_spending_by_gender_age():
 ▸ 부정적 표현은 지양하고, 전략적 해석을 기반으로 서술
 
 ## 주요 수치:
-- 총 소비금액: {total_sales:,}원
-- 연령별 상위 3계층: {top_ages}  ← (예: "60대(29.51%), 50대(28.07%), 40대(15.50%)")
+- 연령별 상위 3계층: {top_ages}
 - 성별 소비비율: 남성 {male_pct:.2f}%, 여성 {female_pct:.2f}%
-
-위 정보를 바탕으로 소비 특성 시사점을 작성해주세요.
 """
 
         response = client.chat.completions.create(

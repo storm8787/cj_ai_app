@@ -23,10 +23,17 @@ def load_insight_examples(section_id):
 def analyze_spending_by_visitor_type():
     st.subheader("📊 10. 방문유형별 소비현황")
 
-    st.markdown("🎫 **8번 분석 결과에서 도출된 전체 소비금액과 건수를 입력하고, 유형별 비율을 입력하세요**")
+    # 카드소비 입력값 불러오기
+    sales_inputs = st.session_state.get("card_sales_inputs", {})
+    count_inputs = st.session_state.get("card_count_inputs", {})
 
-    total_amount = st.number_input("💰 전체 소비금액 (천원)", min_value=0, step=1000, key="type_total_amount")
-    total_count = st.number_input("🧾 전체 소비건수 (건)", min_value=0, step=1, key="type_total_count")
+    if not sales_inputs or not count_inputs:
+        st.warning("먼저 '8. 일자별 카드 소비 분석기'에서 데이터를 입력해주세요.")
+        return
+
+    # 합계 계산
+    total_amount = sum(sales_inputs.values())  # 천원 단위
+    total_count = sum(count_inputs.values())   # 건수
 
     col1, col2 = st.columns(2)
     with col1:

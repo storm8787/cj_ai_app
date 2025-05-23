@@ -50,6 +50,9 @@ def analyze_card_spending():
         count_inputs[d_str] = count
 
     if st.button("📊 분석 실행"):
+        st.session_state["card_sales_inputs"] = sales_inputs
+        st.session_state["card_count_inputs"] = count_inputs
+
         # ✅ 계산
         sales_list = [sales_inputs[d] for d in date_strs]
         count_list = [count_inputs[d] for d in date_strs]

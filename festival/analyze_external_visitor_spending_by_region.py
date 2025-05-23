@@ -17,13 +17,14 @@ def analyze_external_visitor_spending_by_region():
     # ✅ 외지인 소비금액 (10번 분석기에서 저장)
     external_total_sales = st.session_state.get("external_total_sales", None)
     if not external_total_sales:
-        st.warning("먼저 '10. 방문유형별 소비현황'에서 외지인 소비금액을 분석해주세요.")
+        st.warning("먼저 '10. 방문유형별 소비현황'에서 외지인 소비금액을 확인해주세요.")
         return
 
     # ✅ 외지인 방문객 비율 정보 (7번 분석기에서 저장)
     visitor_share = st.session_state.get("visitor_by_province", {})
 
     TEMPLATE_PATH = "data/templates/12_template.xlsx"
+    
     # ✅ 템플릿 다운로드 버튼
     try:
         with open(TEMPLATE_PATH, "rb") as f:

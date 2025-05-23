@@ -80,24 +80,27 @@ def analyze_internal_spending_by_region():
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
 
-        # 상위 5개 지역 요약
-        summary_lines = [
-            f"- {row['시군구']}: {row['소비금액(원)']} / {row['소비건수(건)']} / {row['비율(%)']}"
-            for _, row in df_final.iloc[1:6].iterrows()
-        ]
-        top5_summary = "\n".join(summary_lines)
+        # 충주시 소비금액 및 비중 추출
+        chungju_row = df_final[df_final["시군구"] == "충주시"]
+        if not chungju_row.empty:
+            chungju_amount = chungju_row["소비금액(원)"].values[0]
+            chungju_ratio = chungju_row["비율(%)"].values[0]
+        else:
+            chungju_amount = "0"
+            chungju_ratio = "0.00%"
 
-        prompt = f"""다음은 {name}({period}, {location})의 외지인 도내 소비현황 분석 결과입니다.
+        prompt = f"""다음은 {name}({period}, {location})의 외지인 도내 소비현황 분석 중 충주시 소비에 대한 시사점입니다.
 
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~기여하고 있음')  
 ▸ 각 문장은 ▸ 기호로 시작하고 1~2문장 구성  
-▸ 축제기간 내에 축제방문인들의 충주시 소비금액을 강조(충주시 외 타 시군에 대한 언급은 하지말것)
+▸ 축제기간 내에 축제방문인들의 충주시 소비금액을 강조(충주시 외 타 시군에 대한 언급은 하지말것)  
 ▸ 충주시의 소비금액에 대한 정책적 해석이나 지역경제 파급효과 중심으로 해석  
-▸ 마지막 문장은 실무적 제언 포함 (예: 지역 상권 연계 필요성, 협업 전략 등)
-▸ **각 문장은 줄바꿈(엔터)으로 구분되도록 작성**  
+▸ 마지막 문장은 실무적 제언 포함 (예: 지역 상권 연계 필요성, 협업 전략 등)  
+▸ **각 문장은 줄바꿈(엔터)으로 구분되도록 작성**
 
-## 소비금액 상위 5개 지역
-{top5_summary}
+## 충주시 소비금액 요약
+- 소비금액: {chungju_amount}
+- 소비 비중: {chungju_ratio}
 """
 
         response = client.chat.completions.create(
@@ -107,7 +110,7 @@ def analyze_internal_spending_by_region():
                 {"role": "user", "content": prompt}
             ],
             temperature=0.5,
-            max_tokens=700
+            max_tokens=600
         )
 
         st.subheader("🧠 GPT 시사점")

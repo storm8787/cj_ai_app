@@ -112,6 +112,9 @@ def festival_analysis_app():
     with tabs[10]:
         from festival.analyze_spending_by_visitor_type import analyze_spending_by_visitor_type
         analyze_spending_by_visitor_type()
+    with tabs[11]:
+        from festival.analyze_spending_by_gender_age import analyze_spending_by_gender_age
+        analyze_spending_by_gender_age()    
     with tabs[-1]:
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()

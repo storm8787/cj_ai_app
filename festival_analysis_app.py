@@ -109,7 +109,7 @@ def festival_analysis_app():
             from festival.analyze_external_visitor_spending_by_region import analyze_external_visitor_spending_by_region
             analyze_external_visitor_spending_by_region()
 
-    elif category == "📋 종합 분석":
+    elif category == "📋 분석결과":
         #from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
         #analyze_summary_and_opinion()
         st.subheader("📊 13. 요약 및 종합의견")

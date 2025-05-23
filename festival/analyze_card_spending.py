@@ -6,81 +6,73 @@
 
 import streamlit as st
 import pandas as pd
-import os
 from openai import OpenAI
 
-# ✅ OpenAI 클라이언트 초기화
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ 시사점 예시 불러오기 (선택사항)
-def load_insight_examples(section_id):
-    try:
-        path = os.path.join("press_release_app", "data", "insights", f"{section_id}.txt")
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return ""
-
-# ✅ 카드 소비 분석기 함수
 def analyze_card_spending():
-    st.subheader("📊 일자별 카드 소비 분석기")
+    st.subheader("📊 8. 일자별 카드 소비 분석기")
 
-    st.markdown("💳 축제 기간 동안의 일자별 매출금액(천원)과 매출건수 데이터를 입력하세요.")
+    start_date = st.session_state.get("festival_start_date")
+    end_date = st.session_state.get("festival_end_date")
 
-    # ✅ 축제 일자 리스트 (예: ['2025-04-11', '2025-04-12', '2025-04-13'])
-    festival_dates = st.session_state.get("festival_dates", [])
+    if not start_date or not end_date:
+        st.warning("먼저 축제 기본정보를 입력해주세요.")
+        return
+
+    date_range = pd.date_range(start=start_date, end=end_date)
+    date_strs = [d.strftime("%Y-%m-%d") for d in date_range]
 
     with st.form("card_spending_form"):
+        st.markdown("💳 축제 기간 동안의 일자별 매출금액(천원)과 매출건수를 입력하세요.")
+
         sales_inputs = {}
         count_inputs = {}
 
-        for date in festival_dates:
-            with st.expander(f"📅 {date}"):
+        for d_str in date_strs:
+            with st.expander(f"📅 {d_str}"):
                 col1, col2 = st.columns(2)
                 with col1:
-                    sales = st.number_input(f"{date} 매출금액 (천원)", min_value=0, key=f"{date}_sales")
+                    sales = st.number_input(f"{d_str} 매출금액 (천원)", min_value=0, key=f"{d_str}_sales")
                 with col2:
-                    count = st.number_input(f"{date} 매출건수", min_value=0, key=f"{date}_count")
-
-                sales_inputs[date] = sales
-                count_inputs[date] = count
+                    count = st.number_input(f"{d_str} 매출건수", min_value=0, key=f"{d_str}_count")
+                sales_inputs[d_str] = sales
+                count_inputs[d_str] = count
 
         submitted = st.form_submit_button("분석 실행")
 
-    if submitted and festival_dates:
+    if submitted:
         df = pd.DataFrame({
-            "일자": festival_dates,
-            "매출금액(천원)": [sales_inputs[d] for d in festival_dates],
-            "매출건수": [count_inputs[d] for d in festival_dates]
+            "일자": date_strs,
+            "매출금액(천원)": [sales_inputs[d] for d in date_strs],
+            "매출건수": [count_inputs[d] for d in date_strs]
         })
 
-        # 건단가 계산
         df["건단가(원)"] = (df["매출금액(천원)"] * 1000 / df["매출건수"]).round(0).astype(int)
 
-        # 총합 및 비율
         total_sales = df["매출금액(천원)"].sum()
         total_count = df["매출건수"].sum()
         total_unit_price = int((total_sales * 1000 / total_count).round())
+
         df["매출금액 비율(%)"] = (df["매출금액(천원)"] / total_sales * 100).round(2)
         df["매출건수 비율(%)"] = (df["매출건수"] / total_count * 100).round(2)
+
         df.loc["합계"] = ["합계", total_sales, total_count, total_unit_price, 100.0, 100.0]
 
-        # 결과 출력
         st.dataframe(df)
 
-        # GPT 시사점 생성
+        # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")
             period = st.session_state.get("festival_period", "")
             location = st.session_state.get("festival_location", "")
 
-            # 소비 지표 요약
             spending_summary = ""
-            for i, date in enumerate(festival_dates):
-                sales = sales_inputs[date]
-                count = count_inputs[date]
+            for i, d_str in enumerate(date_strs):
+                sales = sales_inputs[d_str]
+                count = count_inputs[d_str]
                 unit_price = df.loc[i, "건단가(원)"]
-                spending_summary += f"- {date}: 매출 {sales:,}천원 / {count:,}건 / 건단가 {unit_price:,}원\n"
+                spending_summary += f"- {d_str}: 매출 {sales:,}천원 / {count:,}건 / 건단가 {unit_price:,}원\n"
             spending_summary += f"- 총합: 매출 {total_sales:,}천원 / {total_count:,}건 / 평균 건단가 {total_unit_price:,}원"
 
             prompt = f"""다음은 {name}({period}, {location})에 대한 카드 소비 분석입니다.

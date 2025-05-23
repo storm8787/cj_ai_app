@@ -71,6 +71,13 @@ def analyze_spending_by_gender_age():
         df_age_display[["연령", "소비금액", "소비비율", "비고"]]
     ], ignore_index=True)
 
+    # 원하는 정렬 순서 지정
+    age_order = ["20대미만", "20대", "30대", "40대", "50대", "60대", "70대이상"]
+
+    # 정렬 순서 적용
+    df_age_final["연령"] = pd.Categorical(df_age_final["연령"], categories=age_order + ["계"], ordered=True)
+    df_age_final = df_age_final.sort_values("연령").reset_index(drop=True)    
+
     # ✅ 10-2. 성별 소비현황
     df_gender = df_raw.groupby("성별구분", as_index=False)["총소비금액"].sum()
     df_gender.columns = ["성별", "소비금액"]

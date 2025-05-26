@@ -12,7 +12,7 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_external_visitor_spending_in_chungju():
-    st.subheader("📊 14. 추주관내 출서 외지인 소비현황")
+    st.subheader("📊 14. 축제방문 외지인의 충주 관내 소비현황")
     #st.markdown("\ud83d\udcc2 \uc5c5로드된 \uc5d8셀 \ud30c일의 '읍면동, \uc18c비\uae08액(\uc6d0), \uc18c비\uac74수(\uac74)' \uceec\ub7fc을 \uae30준으로 \ubd84석\ud569니다.")
 
     # ✅ 템플릿 다운로드

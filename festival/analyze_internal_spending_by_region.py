@@ -32,6 +32,12 @@ def analyze_internal_spending_by_region():
     if not uploaded_file:
         return
 
+    try:
+        df = pd.read_excel(uploaded_file).dropna(how="all")
+    except Exception as e:
+        st.error(f"❌ 파일을 불러오는 데 문제가 발생했습니다: {e}")
+        return
+
     df = pd.read_excel(uploaded_file).dropna(how="all")
 
     # ✅ '청주시'처럼 구 단위 시는 통합

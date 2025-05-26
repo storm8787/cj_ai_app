@@ -106,7 +106,7 @@ def festival_analysis_app():
         with tabs[4]:
             from festival.analyze_external_visitor_spending_by_region import analyze_external_visitor_spending_by_region
             analyze_external_visitor_spending_by_region()
-        with tabs[-1]:
+        with tabs[5]:
             from festival.analyze_internal_spending_by_region import analyze_internal_spending_by_region
             analyze_internal_spending_by_region()
             

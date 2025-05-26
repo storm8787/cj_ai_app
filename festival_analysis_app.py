@@ -22,15 +22,7 @@ def load_insight_examples(section_id):
 
 # ✅ 공통 정보 입력부
 def festival_basic_info():
-    st.markdown("""
-    <style>
-    /* 탭 글씨 크기와 굵기 조절 */
-    [data-baseweb="tab"] > div {
-        font-size: 18px !important;
-        font-weight: 700 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
     
     st.subheader("📌 축제 기본정보 입력")
 
@@ -50,6 +42,15 @@ def festival_basic_info():
     st.session_state["festival_end_date"] = end_date
 
 def festival_analysis_app():
+    st.markdown("""
+    <style>
+    /* 탭 글씨 크기와 굵기 조절 */
+    [data-baseweb="tab"] > div {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     st.title("🎯 축제 빅데이터 분석기")
 
     # ✅ 기본정보 입력

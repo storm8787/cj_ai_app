@@ -39,10 +39,20 @@ def analyze_external_visitor_spending_in_chungju():
     df["소비금액(원)"] = df["소비금액(원)"].astype(float)
     df["소비건수(건)"] = df["소비건수(건)"].astype(int)
 
-    # ✅ 합계 계산
-    total_amount = df["소비금액(원)"].sum()
-    total_count = df["소비건수(건)"].sum()
+    # ✅ 합계 행 계산
+    total_row = pd.DataFrame([{
+        "읍면동": "합계",
+        "소비금액(원)": df["소비금액(원)"].sum(),
+        "소비건수(건)": df["소비건수(건)"].sum()
+    }])
+
+    # ✅ 합계 포함 데이터 재구성
+    df = pd.concat([total_row, df], ignore_index=True)
+
+    # ✅ 소비비율 계산
+    total_amount = total_row["소비금액(원)"].values[0]
     df["소비비율"] = (df["소비금액(원)"] / total_amount * 100).round(2)
+    df.loc[0, "소비비율"] = 100.00  # 합계는 무조건 100%
 
     # ✅ 읍면동 순서 강제 지정
     order = [

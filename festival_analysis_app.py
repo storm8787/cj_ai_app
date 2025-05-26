@@ -89,7 +89,7 @@ def festival_analysis_app():
     elif section == "카드 소비 분석":
         tabs = st.tabs([
             "8. 일자별 소비", "9. 전·중 소비비교", "10. 방문유형별 소비",
-            "11. 성별/연령 소비", "12. 외지인 소비지역", "13. 도내 소비현황, 14. 충주관내 소비현황"
+            "11. 성별/연령 소비", "12. 외지인 소비지역", "13. 도내 소비현황", "14. 충주관내 소비현황"
         ])
         with tabs[0]:
             from festival.analyze_card_spending import analyze_card_spending

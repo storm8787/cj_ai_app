@@ -12,8 +12,8 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_external_visitor_spending_in_chungju():
-    st.subheader("📊 14. 축제방문 외지인의 충주 관내 소비현황")
-    st.markdown("📂 업로드된 엑셀 파일의 '읍면동, 소비금액(원), 소비건수(건)' 컬럼을 기준으로 분석합니다.")
+    st.subheader("📊 14. 추주관내 출서 외지인 소비현황")
+    #st.markdown("\ud83d\udcc2 \uc5c5로드된 \uc5d8셀 \ud30c일의 '읍면동, \uc18c비\uae08액(\uc6d0), \uc18c비\uac74수(\uac74)' \uceec\ub7fc을 \uae30준으로 \ubd84석\ud569니다.")
 
     # ✅ 템플릿 다운로드
     template_df = pd.DataFrame(columns=["읍면동", "소비금액(원)", "소비건수(건)"])
@@ -21,18 +21,18 @@ def analyze_external_visitor_spending_in_chungju():
     template_df.to_excel(buffer, index=False)
     buffer.seek(0)
     st.download_button(
-        label="📥 14_template.xlsx 다운로드",
+        label="📅 14_template.xlsx 다운로드",
         data=buffer,
         file_name="14_template.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
     # ✅ 파일 업로드
-    uploaded_file = st.file_uploader("엑셀 파일 업로드", type=["xlsx"])
+    uploaded_file = st.file_uploader("\uc5d8셀 \ud30c일 \uc5c5\ub85c\ub4dc", type=["xlsx"])
     if not uploaded_file:
         return
 
-    # ✅ 데이터 로딩
+    # ✅ 데이터 로드
     df = pd.read_excel(uploaded_file).dropna(how="all")
 
     # ✅ 숫자 정리
@@ -52,7 +52,7 @@ def analyze_external_visitor_spending_in_chungju():
     # ✅ 소비비율 계산
     total_amount = total_row["소비금액(원)"].values[0]
     df["소비비율"] = (df["소비금액(원)"] / total_amount * 100).round(2)
-    df.loc[0, "소비비율"] = 100.00  # 합계는 무조건 100%
+    df.loc[0, "소비비율"] = 100.00
 
     # ✅ 읍면동 순서 강제 지정
     order = [
@@ -69,27 +69,19 @@ def analyze_external_visitor_spending_in_chungju():
     df["소비건수(건)"] = df["소비건수(건)"].astype(int).apply(lambda x: f"{x:,}건")
     df["소비비율"] = df["소비비율"].apply(lambda x: f"{x:.2f}%")
 
-    # ✅ 출력
-    st.markdown("### 🧾 읍면동별 소비현황")
+    # ✅ 결과 표출
+    st.markdown("### 📎 읍면동별 소비현황")
     st.dataframe(df, use_container_width=True)
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
-        top5 = df[df["읍면동"] != "합계"].copy()
-        top5["금액수치"] = top5["소비금액(원)"].str.replace(",", "").str.replace("원", "").astype(int)
-        top5 = top5.sort_values(by="금액수치", ascending=False).drop(columns="금액수치").head(5)
-
-        lines = [f"- {row['읍면동']}: {row['소비금액(원)']} / {row['소비건수(건)']} ({row['소비비율']})" for _, row in top5.iterrows()]
-        summary = "\n".join(lines)
-
         name = st.session_state.get("festival_name", "본 축제")
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
 
-        df_summary = df_grouped.copy()
-        df_summary.columns = ["읍면동", "소비금액", "소비건수", "소비비율"]
+        df_summary = df[df["읍면동"] != "합계"]
         summary_text = "\n".join([
-            f"- {row['읍면동']}: {row['소비금액']} / {row['소비건수']} / {row['소비비율']}"
+            f"- {row['읍면동']}: {row['소비금액(원)']} / {row['소비건수(건)']} / {row['소비비율']}"
             for _, row in df_summary.iterrows()
         ])
 
@@ -104,8 +96,6 @@ def analyze_external_visitor_spending_in_chungju():
 
 [충주시 읍면동별 외지인 소비현황 요약]
 {summary_text}
-
-※ 지역 특징 자동 추론: 각 읍면동의 특성(예: 숙박지 밀집, 관광명소, 시외 접근성 등)을 상식적 수준에서 판단하여 기술
 """
 
         response = client.chat.completions.create(
@@ -118,6 +108,6 @@ def analyze_external_visitor_spending_in_chungju():
             max_tokens=800
         )
 
-        st.subheader("🧠 GPT 시사점")
+        st.subheader("🤖 GPT 시사점")
         st.write(response.choices[0].message.content)
 

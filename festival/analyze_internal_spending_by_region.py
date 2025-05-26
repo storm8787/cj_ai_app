@@ -13,6 +13,7 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_internal_spending_by_region():
     st.subheader("📊 13. 외지인 도내 소비현황 분석기")
+    st.markdown("데이터 업로드 후 분석을 실행하세요.")
 
     # ✅ 템플릿 다운로드
     template_df = pd.DataFrame(columns=["시군구", "소비금액(원)", "소비건수(건)"])

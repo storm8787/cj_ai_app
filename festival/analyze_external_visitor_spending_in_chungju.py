@@ -73,3 +73,41 @@ def analyze_external_visitor_spending_in_chungju():
     st.markdown("### 🧾 읍면동별 소비현황")
     st.dataframe(df, use_container_width=True)
 
+    # ✅ GPT 시사점 생성
+    with st.spinner("🤖 GPT 시사점 생성 중..."):
+        top5 = df[df["읍면동"] != "합계"].copy()
+        top5["금액수치"] = top5["소비금액(원)"].str.replace(",", "").str.replace("원", "").astype(int)
+        top5 = top5.sort_values(by="금액수치", ascending=False).drop(columns="금액수치").head(5)
+
+        lines = [f"- {row['읍면동']}: {row['소비금액(원)']} / {row['소비건수(건)']} ({row['소비비율']})" for _, row in top5.iterrows()]
+        summary = "\n".join(lines)
+
+        name = st.session_state.get("festival_name", "본 축제")
+        period = st.session_state.get("festival_period", "")
+        location = st.session_state.get("festival_location", "")
+
+        prompt = f"""다음은 {name}({period}, {location})의 축제방문 외지인에 대한 충주 관내 소비현황 분석 자료입니다.
+
+▸ 각 문장은 ▸ 기호로 시작하되, 지나치게 짧지 않도록 자연스럽게 연결하여 행정 보고서에 적합한 흐름으로 작성할 것  
+▸ 외지인 소비가 특정 읍면동에 집중된 양상과 그 수치를 제시하고, 해당 지역의 역할(중심 소비지/보조 소비거점 등)을 해석할 것  
+▸ 축제장 접근성, 숙박/음식시설, 체류 가능성 등과의 연관성을 바탕으로 공간적 특성을 분석  
+▸ 총 2~3문장, 단정적 표현은 피하고 지역의 긍정적 기능을 중심으로 작성  
+▸ **각 문장은 줄바꿈(엔터)으로 구분되도록 작성**
+
+[상위 읍면동별 소비현황 요약]
+{summary}
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 지방정부 축제 소비 데이터를 분석하는 전문가야."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=800
+        )
+
+        st.subheader("🧠 GPT 시사점")
+        st.write(response.choices[0].message.content)
+

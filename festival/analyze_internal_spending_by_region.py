@@ -12,7 +12,7 @@ from openai import OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_internal_spending_by_region():
-    st.subheader("📊 13. 외지인 도내 소비현황 분석기")
+    st.subheader("📊 13. 축제기간 중 도내 소비현황")
     st.markdown("데이터 업로드 후 분석을 실행하세요.")
 
     # ✅ 템플릿 다운로드

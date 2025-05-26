@@ -86,6 +86,8 @@ def analyze_external_visitor_spending_in_chungju():
         period = st.session_state.get("festival_period", "")
         location = st.session_state.get("festival_location", "")
 
+        df_summary = df_grouped.copy()
+        df_summary.columns = ["읍면동", "소비금액", "소비건수", "소비비율"]
         summary_text = "\n".join([
             f"- {row['읍면동']}: {row['소비금액']} / {row['소비건수']} / {row['소비비율']}"
             for _, row in df_summary.iterrows()

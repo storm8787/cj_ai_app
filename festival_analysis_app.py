@@ -27,7 +27,7 @@ def festival_basic_info():
     st.subheader("📌 축제 기본정보 입력")
 
     festival_name = st.text_input("🎪 축제명")
-    location = st.text_input("📍 축제 장소")
+    location = st.text_input("📍 축제장소")
     start_date = st.date_input("🗓 축제 시작일")
     end_date = st.date_input("🏁 축제 종료일")
 

@@ -21,7 +21,7 @@ def analyze_external_visitor_spending_in_chungju():
     template_df.to_excel(buffer, index=False)
     buffer.seek(0)
     st.download_button(
-        label="📅 14_template.xlsx 다운로드",
+        label="📥 템플릿 다운로드",
         data=buffer,
         file_name="14_template.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

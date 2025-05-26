@@ -110,8 +110,8 @@ def festival_analysis_app():
             from festival.analyze_internal_spending_by_region import analyze_internal_spending_by_region
             analyze_internal_spending_by_region()
         with tabs[6]:
-            from festival.analyze_internal_spending_by_region import analyze_internal_spending_by_region
-            analyze_internal_spending_by_region()
+            from festival.analyze_external_visitor_spending_in_chungju import analyze_external_visitor_spending_in_chungju
+            analyze_external_visitor_spending_in_chungju
             
 
 #    elif section == "📋 분석결과":

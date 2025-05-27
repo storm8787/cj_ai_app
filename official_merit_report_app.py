@@ -16,12 +16,14 @@ def generate_merit_report(name, position, start_date, career_list, merit_points)
     merit_str = "\n".join([f"{i+1}. {point}" for i, point in enumerate(merit_points)])
 
     prompt = f"""
-당신은 공무원의 공적심사 의결서를 작성하는 역할을 맡고 있습니다.
+당신은 충주시 공무원의 공적심사 의결서를 작성하는 역할을 맡고 있습니다.
 
 다음은 공무원 정보입니다:
 - 성명: {name}
 - 직급: {position}
 - 임용일: {start_date}
+- 표창 종류: {award_type}
+- 공적 분야: {achievement_area}
 - 주요경력:
 {career_str}
 
@@ -68,6 +70,12 @@ def create_official_merit_report():
             if text:
                 formatted = f"{date.strftime('%Y.%m')} {text}"
                 career_entries.append(formatted)
+
+        st.markdown("### 🏆 표창 종류")
+        award_type = st.text_input("예: 대통령, 국무총리, 장관, 도지사등")
+
+        st.markdown("### 📌 공적 분야")
+        achievement_area = st.text_input("예: 시 모범 및 우수공무원 등")
 
         st.markdown("### 공적요지 (한 줄에 하나씩 입력)")
         merit_raw = st.text_area("공적요지", height=200)

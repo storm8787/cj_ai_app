@@ -8,10 +8,11 @@
 
 import streamlit as st
 from openai import OpenAI
+import datetime
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-def generate_merit_report(name, position, start_date, career_list, merit_points):
+def generate_merit_report(name, position, start_date, award_type, achievement_area, career_list, merit_points):
     career_str = "\n".join([f"- {item}" for item in career_list])
     merit_str = "\n".join([f"{i+1}. {point}" for i, point in enumerate(merit_points)])
 
@@ -56,9 +57,14 @@ def create_official_merit_report():
     with st.form("merit_form"):
         name = st.text_input("성명")
         position = st.text_input("직급")
-        start_date = st.date_input("임용일").strftime("%Y년 %m월 %d일")
+        #start_date = st.date_input("임용일").strftime("%Y년 %m월 %d일")
+        start_date = st.date_input(
+            "임용일",
+            min_value=datetime.date(1980, 1, 1),
+            max_value=datetime.date.today()
+        ).strftime("%Y년 %m월 %d일")
         
-        st.markdown("### 주요경력 (최대 3건 입력 가능)")
+        st.markdown("### 주요경력 (최근 3건 입력 가능)")
 
         career_entries = []
         for i in range(3):
@@ -85,7 +91,10 @@ def create_official_merit_report():
     
     if submitted:
         with st.spinner("GPT가 공적조서를 작성 중입니다..."):
-            result = generate_merit_report(name, position, start_date, career_list, merit_points)
+            result = generate_merit_report(
+                name, position, start_date, award_type, achievement_area, career_entries, merit_points
+            )
+
             st.subheader("📄 생성된 공적사항")
             st.write(result)
             st.download_button(

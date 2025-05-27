@@ -9,7 +9,7 @@
 import streamlit as st
 from openai import OpenAI
 
-client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def generate_merit_report(name, position, start_date, career_list, merit_points):
     career_str = "\n".join([f"- {item}" for item in career_list])

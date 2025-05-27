@@ -56,9 +56,18 @@ def create_official_merit_report():
         position = st.text_input("직급")
         start_date = st.date_input("임용일").strftime("%Y년 %m월 %d일")
         
-        st.markdown("### 주요경력 (연월일/이력 형식, 줄 단위)")
-        career_raw = st.text_area("주요경력", height=150)
-        career_list = [line.strip() for line in career_raw.splitlines() if line.strip()]
+        st.markdown("### 주요경력 (최대 3건 입력 가능)")
+
+        career_entries = []
+        for i in range(3):
+            cols = st.columns([1, 3])
+            with cols[0]:
+                date = st.date_input(f"경력 {i+1} 날짜", key=f"career_date_{i}")
+            with cols[1]:
+                text = st.text_input(f"경력 {i+1} 내용 (부서 및 업무)", key=f"career_text_{i}")
+            if text:
+                formatted = f"{date.strftime('%Y.%m')} {text}"
+                career_entries.append(formatted)
 
         st.markdown("### 공적요지 (한 줄에 하나씩 입력)")
         merit_raw = st.text_area("공적요지", height=200)

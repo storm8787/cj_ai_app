@@ -40,6 +40,7 @@ def generate_merit_report(name, position, start_date, award_type, achievement_ar
 
 2. 도입부(서론)는 다음 기준에 따라 작성합니다:
 - "위 공무원은..." 문구는 서론에서만 사용하며, 그 외 구간에서는 이름이나 대명사를 사용하지 않습니다.
+- 도입부(서론)에서는 {department}, {position}은 명시하지 않습니다
 - 공직자로서의 태도, 책임감, 전문성, 해당 분야에서의 헌신 등을 통합적으로 기술하십시오.
 - 서론 마지막 문장은 다음 형식을 따릅니다:
   "{achievement_area} 발전에 지대한 공로가 인정되는 바, 그 공적을 나열하면 다음과 같습니다."

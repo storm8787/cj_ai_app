@@ -20,7 +20,8 @@ from official_merit_report_app import create_official_merit_report
 from report_writer import report_writer_app
 
 def main():
-    st.sidebar.title("🧰 기능 선택")
+    
+    #st.sidebar.title("🧰 기능 선택")
 
     # ✅ 기본 기능 목록
     basic_features = [

@@ -86,8 +86,7 @@ def main():
     elif st.session_state.selected_app == "(생성형AI) 공적조서 생성기":        
         create_official_merit_report()
     elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기":
-        #report_writer.run()
-        run()   
+        report_writer_app()
 
 if __name__ == "__main__":
     main()

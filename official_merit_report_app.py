@@ -57,67 +57,65 @@ def generate_merit_report(name, position, start_date, award_type, achievement_ar
 - 문장은 간결하지만 구체적이고 사실 중심이어야 하며, 일반적 칭찬보다는 실적 중심의 정제된 기술을 하세요.
 """
 
-     response = client.chat.completions.create(
-         model="gpt-4o",
-         messages=[{"role": "user", "content": prompt}],
-         temperature=0.4,
-         max_tokens=3000
-     )
-     return response.choices[0].message.content
-
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+        max_tokens=3000
+    )
+    return response.choices[0].message.content
 
 def create_official_merit_report():
-    st.title("🏅 공적심사의결서 생성기")
-     st.markdown("공무원 정보를 입력하면 GPT가 공적사항 보고서를 자동으로 생성합니다.")
+    st.title("\U0001F3C5 공적심사의결서 생성기")
+    st.markdown("공무원 정보를 입력하면 GPT가 공적사항 보고서를 자동으로 생성합니다.")
 
-     with st.form("merit_form"):
-         name = st.text_input("성명")
-         position = st.text_input("직급")
-         department = st.text_input("소속부서")
+    with st.form("merit_form"):
+        name = st.text_input("성명")
+        position = st.text_input("직급")
+        department = st.text_input("소속부서")
 
-         start_date = st.date_input(
-             "임용일",
-             min_value=datetime.date(1980, 1, 1),
-             max_value=datetime.date.today()
-         ).strftime("%Y년 %m월 %d일")
-     
-         st.markdown("### 주요경력 (최근 3건 입력 가능)")
+        start_date = st.date_input(
+            "임용일",
+            min_value=datetime.date(1980, 1, 1),
+            max_value=datetime.date.today()
+        ).strftime("%Y년 %m월 %d일")
 
-         career_entries = []
-         for i in range(3):
-             cols = st.columns([1, 3])
-             with cols[0]:
-                 date = st.date_input(f"경력 {i+1} 날짜", key=f"career_date_{i}")
-             with cols[1]:
-                 text = st.text_input(f"경력 {i+1} 내용 (부서 및 업무)", key=f"career_text_{i}")
-             if text:
-                 formatted = f"{date.strftime('%Y.%m')} {text}"
-                 career_entries.append(formatted)
+        st.markdown("### 주요경력 (최근 3건 입력 가능)")
+        career_entries = []
+        for i in range(3):
+            cols = st.columns([1, 3])
+            with cols[0]:
+                date = st.date_input(f"경력 {i+1} 날짜", key=f"career_date_{i}")
+            with cols[1]:
+                text = st.text_input(f"경력 {i+1} 내용 (부서 및 업무)", key=f"career_text_{i}")
+            if text:
+                formatted = f"{date.strftime('%Y.%m')} {text}"
+                career_entries.append(formatted)
 
-         st.markdown("### 🏆 표창 종류")
-         award_type = st.text_input("예: 대통령, 국무총리, 장관, 도지사 등")
+        st.markdown("### \U0001F3C6 표창 종류")
+        award_type = st.text_input("예: 대통령, 국무총리, 장관, 도지사 등")
 
-         st.markdown("### 📌 공적 분야")
-         achievement_area = st.text_input("예: 공공데이터 활용, 개인정보보호 등")
+        st.markdown("### \U0001F4CC 공적 분야")
+        achievement_area = st.text_input("예: 공공데이터 활용, 개인정보보호 등")
 
-         st.markdown("### 공적요지 (한 줄에 하나씩 입력)")
-         merit_raw = st.text_area("공적요지", height=200)
-         merit_points = [line.strip() for line in merit_raw.splitlines() if line.strip()]
+        st.markdown("### 공적요지 (한 줄에 하나씩 입력)")
+        merit_raw = st.text_area("공적요지", height=200)
+        merit_points = [line.strip() for line in merit_raw.splitlines() if line.strip()]
 
-         submitted = st.form_submit_button("📄 공적사항 생성하기")
- 
-     if submitted:
-         with st.spinner("GPT가 공적조서를 작성 중입니다..."):
-             result = generate_merit_report(
-                 name, position, start_date, award_type, achievement_area, career_entries, merit_points, department
-             )
+        submitted = st.form_submit_button("\U0001F4C4 공적사항 생성하기")
 
-             st.subheader("📄 생성된 공적사항")
-             st.write(result)
-             st.download_button(
-                 label="📥 결과 다운로드 (TXT)",
-                 data=result,
-                 file_name=f"{name}_공적조서.txt",
-                 mime="text/plain"
-             )
+    if submitted:
+        with st.spinner("GPT가 공적조서를 작성 중입니다..."):
+            result = generate_merit_report(
+                name, position, start_date, award_type, achievement_area, career_entries, merit_points, department
+            )
+
+            st.subheader("\U0001F4C4 생성된 공적사항")
+            st.write(result)
+            st.download_button(
+                label="\U0001F4E5 결과 다운로드 (TXT)",
+                data=result,
+                file_name=f"{name}_공적조서.txt",
+                mime="text/plain"
+            )
 

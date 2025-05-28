@@ -17,7 +17,7 @@ from excel_merger import excel_merger
 from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메인 함수 불러오기
 from data_validator_app import data_validator_app
 from official_merit_report_app import create_official_merit_report
-from report_writer import report_writer
+from report_writer_app import report_writer
 
 def main():
     st.sidebar.title("🧰 기능 선택")

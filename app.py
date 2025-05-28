@@ -20,8 +20,7 @@ from official_merit_report_app import create_official_merit_report
 from report_writer import report_writer_app
 
 def main():
-    
-    #st.sidebar.title("🧰 기능 선택")
+    st.sidebar.title("🧰 기능 선택")
 
     # ✅ 기본 기능 목록
     basic_features = [
@@ -36,16 +35,17 @@ def main():
         "(관리자) 빅데이터 분석기"        
     ]
 
-    # ✅ 선택 유지
+    # ✅ 선택 상태 유지
     if "selected_app" not in st.session_state:
         st.session_state.selected_app = basic_features[0]
 
-    # ✅ 라디오 버튼 출력 + 간격 조절
-    st.sidebar.title("🧰 기능 선택")
-    selected_app = st.sidebar.radio("📂 사용할 기능을 선택하세요", basic_features, index=basic_features.index(st.session_state.selected_app))
+    # ✅ 기능 선택 라디오 버튼 먼저 출력
+    selected_app = st.sidebar.radio("📂 사용할 기능을 선택하세요", basic_features)
+    st.session_state.selected_app = selected_app
 
-    # ✅ 라디오 아래에 줄바꿈으로 간격 추가
-    st.sidebar.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+    # ✅ 아래쪽에 공간 확보
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(" ")
 
     # ✅ 최초 초기화
     if "admin_mode" not in st.session_state:
@@ -85,8 +85,9 @@ def main():
         data_validator_app()    
     elif st.session_state.selected_app == "(생성형AI) 공적조서 생성기":        
         create_official_merit_report()
-    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기(개발중)":
-        report_writer_app()        
+    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기":
+        report_writer_app()
+    elif st.session_state.selecte
 
 if __name__ == "__main__":
     main()

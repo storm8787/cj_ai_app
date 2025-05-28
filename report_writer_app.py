@@ -10,7 +10,7 @@ from openai import OpenAI
 # 🔑 OpenAI 키 설정 (Streamlit Secrets or 직접 입력)
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-def run():
+def report_writer_app():
     st.title("🧠 AI 기반 업무보고 생성기")
 
     # 1. 보고서 유형 선택

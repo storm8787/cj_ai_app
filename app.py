@@ -17,6 +17,7 @@ from excel_merger import excel_merger
 from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메인 함수 불러오기
 from data_validator_app import data_validator_app
 from official_merit_report_app import create_official_merit_report
+from report_writer import report_writer_app
 
 def main():
     st.sidebar.title("🧰 기능 선택")
@@ -84,8 +85,8 @@ def main():
         data_validator_app()    
     elif st.session_state.selected_app == "(생성형AI) 공적조서 생성기":        
         create_official_merit_report()
-    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기":
-        report_writer_app()
+    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기(개발중)":
+        report_writer_app()        
 
 if __name__ == "__main__":
     main()

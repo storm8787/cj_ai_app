@@ -41,6 +41,8 @@ def main():
 
     # ✅ 기능 선택 라디오 버튼 먼저 출력
     selected_app = st.sidebar.radio("📂 사용할 기능을 선택하세요", basic_features)
+    # ✅ 라디오 아래에 줄바꿈으로 간격 추가
+    st.sidebar.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
     st.session_state.selected_app = selected_app
 
     # ✅ 아래쪽에 공간 확보

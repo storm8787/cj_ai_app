@@ -110,7 +110,7 @@ def report_writer_app():
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    temperature=0.5、
+                    temperature=0.5,
                     max_tokens=2000                    
                 )
 

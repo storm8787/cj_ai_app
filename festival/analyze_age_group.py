@@ -119,6 +119,27 @@ def analyze_age_group():
     # ✅ 8번에서 활용할 수 있도록 결과 테이블 저장
     st.session_state["summary_age_group_df"] = final_df.copy()
 
+    # ✅ 상위 연령대 항목 자동 추출 후 세션에 저장
+    # 연령대별 비율을 숫자(float)로 재변환
+    local_ratio_numeric = local_ratio.apply(lambda x: float(x.strip('%')))
+    tourist_ratio_numeric = tourist_ratio.apply(lambda x: float(x.strip('%')))
+    total_ratio_numeric = total_ratio.apply(lambda x: float(x.strip('%')))
+
+    # 전체 기준 상위 연령대
+    top_total = total_ratio_numeric.idxmax()
+    top_total_value = total_ratio_numeric.max()
+    st.session_state["summary_age_group_top"] = f"{top_total}({top_total_value:.2f}%)"
+
+    # 현지인 기준 상위 연령대
+    top_local = local_ratio_numeric.idxmax()
+    top_local_value = local_ratio_numeric.max()
+    st.session_state["summary_age_group_top_local"] = f"{top_local}({top_local_value:.2f}%)"
+
+    # 외지인 기준 상위 연령대
+    top_tourist = tourist_ratio_numeric.idxmax()
+    top_tourist_value = tourist_ratio_numeric.max()
+    st.session_state["summary_age_group_top_tourist"] = f"{top_tourist}({top_tourist_value:.2f}%)"
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

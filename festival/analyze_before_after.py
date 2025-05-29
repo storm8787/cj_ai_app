@@ -50,13 +50,13 @@ def analyze_before_after():
 
     if st.button("🚀 분석 실행", key="before_after_btn"):
         # ✅ 일평균 계산
-        local_avg_before = local_before / 5
-        local_avg_during = local_during / 4
-        local_avg_after = local_after / 5
+        local_avg_before = local_before
+        local_avg_during = local_during
+        local_avg_after = local_after
 
-        tourist_avg_before = tourist_before / 5
-        tourist_avg_during = tourist_during / 4
-        tourist_avg_after = tourist_after / 5
+        tourist_avg_before = tourist_before 
+        tourist_avg_during = tourist_during 
+        tourist_avg_after = tourist_after 
 
         # ✅ 합계
         total_before = local_avg_before + tourist_avg_before

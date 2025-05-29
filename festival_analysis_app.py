@@ -57,7 +57,7 @@ def festival_analysis_app():
     festival_basic_info()
 
     # ✅ 분석영역 선택
-    section = st.selectbox("🔍 분석 영역 선택", ["방문객 분석", "카드 소비 분석"])
+    section = st.selectbox("🔍 분석 영역 선택", ["방문객 분석", "카드 소비 분석", "분석요약 및 종합의견"])
 
     if section == "방문객 분석":
         tabs = st.tabs([
@@ -112,19 +112,12 @@ def festival_analysis_app():
         with tabs[6]:
             from festival.analyze_external_visitor_spending_in_chungju import analyze_external_visitor_spending_in_chungju
             analyze_external_visitor_spending_in_chungju()
-            
+                      
+    elif section == "분석요약 및 종합의견":
+        st.subheader("📋 분석요약 및 종합의견")
+        from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
+    analyze_summary_and_opinion()
 
-#    elif section == "📋 분석결과":
-#         tabs = st.tabs([
-#            "13. 요약 및종합의견"
-#        ])
-#        with tabs[0]:
-#            from festival.analyze_card_spending import analyze_card_spending
-#            analyze_card_spending()
-#        from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
-#        analyze_summary_and_opinion()
-#        st.subheader("📊 13. 요약 및 종합의견")
-        #st.info("🚧 이 기능은 현재 준비 중입니다. 다음 업데이트에서 제공될 예정입니다.")
 
 
 # In[ ]:

@@ -137,6 +137,20 @@ def analyze_time_distribution():
             total = local_total + tourist_total
             lines.append(f"- {group_name}: 현지인 {local_total:,}명 / 외지인 {tourist_total:,}명 / 전체 {total:,}명")
 
+        # ✅ 가장 붐빈 시간대 (현지인 / 외지인 각각 따로 계산)
+        time_totals_local = {}
+        time_totals_tourist = {}
+
+        for group_name, cols in time_groups:
+            local_sum = local_df[cols].fillna(0).applymap(lambda x: int(str(x).replace(",", "").replace("명", ""))).sum().sum()
+            tourist_sum = tourist_df[cols].fillna(0).applymap(lambda x: int(str(x).replace(",", "").replace("명", ""))).sum().sum()
+            time_totals_local[group_name] = local_sum
+            time_totals_tourist[group_name] = tourist_sum
+
+        # ✅ 세션에 따로 저장
+        st.session_state["summary_top_time_local"] = max(time_totals_local, key=time_totals_local.get)
+        st.session_state["summary_top_time_tourist"] = max(time_totals_tourist, key=time_totals_tourist.get)
+
         # ✅ 일자별 시간대 분포 요약
         for i in range(len(local_df)):
             row_summary = f"{local_df.iloc[i]['날짜라벨']} - "

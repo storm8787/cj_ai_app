@@ -58,6 +58,8 @@ def analyze_visitor_by_province():
 
     # ✅ 시도별 그룹화 및 2열 출력
     grouped = df.groupby("시도", as_index=False)["관광객수"].sum()
+    # ✅ 바로 여기서 먼저 int 처리
+    grouped["관광객수"] = grouped["관광객수"].astype(int)
     grouped["비율"] = (grouped["관광객수"] / total_visitors * 100)
 
     # 정렬 추가

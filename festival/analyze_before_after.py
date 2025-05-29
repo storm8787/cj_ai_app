@@ -50,13 +50,13 @@ def analyze_before_after():
 
     if st.button("🚀 분석 실행", key="before_after_btn"):
         # ✅ 일평균 계산
-        local_avg_before = round(local_before / 5, 1)
-        local_avg_during = round(local_during / 4, 1)
-        local_avg_after = round(local_after / 5, 1)
+        local_avg_before = st.number_input("현지인(축제 전 일평균)", min_value=0.0, step=1.0)
+        local_avg_during = st.number_input("현지인(축제기간 일평균)", min_value=0.0, step=1.0)
+        local_avg_after = st.number_input("현지인(축제 후 일평균)", min_value=0.0, step=1.0)
 
-        tourist_avg_before = round(tourist_before / 5, 1)
-        tourist_avg_during = round(tourist_during / 4, 1)
-        tourist_avg_after = round(tourist_after / 5, 1)
+        tourist_avg_before = st.number_input("외지인(축제 전 일평균)", min_value=0.0, step=1.0)
+        tourist_avg_during = st.number_input("외지인(축제기간 일평균)", min_value=0.0, step=1.0)
+        tourist_avg_after = st.number_input("외지인(축제 후 일평균)", min_value=0.0, step=1.0)
 
         # ✅ 합계
         total_before = local_avg_before + tourist_avg_before
@@ -76,7 +76,7 @@ def analyze_before_after():
             ["현지인", f"{avg_local:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
             ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
             ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"]
-        ], columns=["구분", "2024년 일평균", "축제 전", "축제기간", "축제 후", "비고"])
+        ], columns=["구분", "전년도 일평균", "축제 전", "축제기간", "축제 후", "비고"])
 
         st.dataframe(df, use_container_width=True)
 
@@ -106,8 +106,9 @@ def analyze_before_after():
 ▸ **각 문장은 줄바꿈(엔터)으로 구분할 것**
 
 [분석 요약]
-- 현지인 일평균 방문객: 전 {avg_local_before:,.1f}명 / 중 {avg_local_during:,.1f}명 / 후 {avg_local_after:,.1f}명  
-- 외지인 일평균 방문객: 전 {avg_tourist_before:,.1f}명 / 중 {avg_tourist_during:,.1f}명 / 후 {avg_tourist_after:,.1f}명  
+# 잘못된 변수명 수정
+- 현지인 일평균 방문객: 전 {local_avg_before:,.1f}명 / 중 {local_avg_during:,.1f}명 / 후 {local_avg_after:,.1f}명
+- 외지인 일평균 방문객: 전 {tourist_avg_before:,.1f}명 / 중 {tourist_avg_during:,.1f}명 / 후 {tourist_avg_after:,.1f}명
 - 전체 방문객 일평균: 전 {avg_total_before:,.1f}명 / 중 {avg_total_during:,.1f}명 / 후 {avg_total_after:,.1f}명  
 - 전 기간 대비 축제기간 증가율: {inc_rate:.2f}%  
 - 기준(연평균 등) 대비 축제기간 증가율: {inc_from_ref:.2f}%

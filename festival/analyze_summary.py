@@ -58,6 +58,10 @@ def analyze_summary():
         st.session_state["summary_local_visitors"] = local_curr
         st.session_state["summary_tourist_visitors"] = tourist_curr
 
+        # ✅ 전년도 데이터도 함께 저장
+        st.session_state["summary_total_visitors_prev"] = total_prev
+        st.session_state["summary_local_visitors_prev"] = local_prev
+        st.session_state["summary_tourist_visitors_prev"] = tourist_prev
         rows = []
 
         if total_prev > 0:

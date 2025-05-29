@@ -22,7 +22,7 @@ def load_insight_examples(section_id):
         return ""
 
 def analyze_visitor_after_24h():
-    st.subheader("📊 7-2. 외지인 24시간 이후지역 현황")
+    st.subheader("📊 7-3. 외지인 24시간 이후지역 현황")
 
     # ✅ 템플릿 다운로드
     template_df = pd.DataFrame(columns=["시도", "시군구", "관광객수(%)"])
@@ -104,6 +104,14 @@ def analyze_visitor_after_24h():
     # ✅ 세션 저장 (8번에서 활용)
     st.session_state["summary_visitor_after_24h"] = result_df.copy()
     st.session_state["summary_visitor_after_24h_grouped"] = grouped.copy()
+
+    # ✅ 최다 체류 지역 1곳 추출
+    top1_row = grouped.sort_values(by="관광객수", ascending=False).iloc[0]
+
+    # ✅ 세션 상태 저장 (GPT 시사점 생성기에서 활용 예정)
+    st.session_state["summary_visitor_after_24h_top1_region"] = top1_row["full_region"]
+    st.session_state["summary_visitor_after_24h_top1_count"] = int(top1_row["관광객수"])
+    st.session_state["summary_visitor_after_24h_top1_ratio"] = round(top1_row["비율"], 2)
     
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
@@ -118,7 +126,7 @@ def analyze_visitor_after_24h():
         ])
 
         prompt = f"""다음은 {name}({period}, {location}) 축제의 외지인 방문객에 대한 축제 종료 후 24시간 이내 체류지 분석 자료입니다.
-
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
 ▸ 각 문장은 ▸ 기호로 시작하되, 지나치게 짧지 않도록 자연스럽게 연결하여 행정 보고서에 적합한 흐름으로 작성할 것  
 ▸ 전체 외지인 중 충주 내에 머무른 방문객 수와 비율을 수치로 제시하고, '단순 방문'이 아닌 '체류 관광'으로 이어졌다는 해석 중심으로 작성  
 ▸ 충주의 관광자원(온천, 벚꽃, 자연경관 등)이 외지인 체류에 기여했을 가능성을 언급  

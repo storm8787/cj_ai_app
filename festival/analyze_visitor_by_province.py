@@ -70,8 +70,8 @@ def analyze_visitor_by_province():
     mid = len(grouped) // 2  # 항상 floor
     left = grouped.iloc[:mid].reset_index(drop=True)
     right = grouped.iloc[mid:].reset_index(drop=True)
-    left["관광객수"] = left["관광객수"].astype(int)
-    right["관광객수"] = right["관광객수"].astype(int)
+    left["관광객수"] = left["관광객수"].apply(lambda x: f"{int(x):,}")
+    right["관광객수"] = right["관광객수"].apply(lambda x: f"{int(x):,}")
     left["비율"] = left["비율"].round(2).astype(str) + "%"
     right["비율"] = right["비율"].round(2).astype(str) + "%"
     left.columns = [f"{col}_1" for col in left.columns]

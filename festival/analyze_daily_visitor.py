@@ -150,9 +150,10 @@ def analyze_daily_visitor():
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,
-                max_tokens=800
+                max_tokens=900
             )
 
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
+
 

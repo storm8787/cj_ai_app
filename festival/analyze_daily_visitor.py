@@ -70,17 +70,29 @@ def analyze_daily_visitor():
         st.subheader("📊 방문객 수 요약표")
         st.dataframe(df.set_index("일자"))
 
-        # ✅ 최대 방문요일 추출 (합계 제외)
+        # ✅ 요일 정보 추가 (합계 제외)
         temp_df = df[df["일자"] != "합계"].copy()
-        temp_df["비율"] = temp_df["합계"] / total_all
         temp_df["요일"] = temp_df["일자"].apply(get_weekday_kor)
-        top_row = temp_df.loc[temp_df["비율"].idxmax()]
-        top_weekday = top_row["요일"]
-        top_ratio = top_row["비율"] * 100
-        top_day_summary = f"{top_weekday}({top_ratio:.1f}%)"
+
+        # ✅ 전체 기준 최대 방문요일
+        temp_df["비율_전체"] = temp_df["합계"] / total_all
+        top_all_row = temp_df.loc[temp_df["비율_전체"].idxmax()]
+        top_day_all = f"{top_all_row['요일']}({top_all_row['비율_전체'] * 100:.1f}%)"
+
+        # ✅ 현지인 기준 최대 방문요일
+        temp_df["비율_현지인"] = temp_df["현지인"] / total_local
+        top_local_row = temp_df.loc[temp_df["비율_현지인"].idxmax()]
+        top_day_local = f"{top_local_row['요일']}({top_local_row['비율_현지인'] * 100:.1f}%)"
+
+        # ✅ 외지인 기준 최대 방문요일
+        temp_df["비율_외지인"] = temp_df["외지인"] / total_tourist
+        top_tourist_row = temp_df.loc[temp_df["비율_외지인"].idxmax()]
+        top_day_tourist = f"{top_tourist_row['요일']}({top_tourist_row['비율_외지인'] * 100:.1f}%)"
 
         # ✅ 요약 데이터 저장
-        st.session_state["summary_top_day"] = top_day_summary
+        st.session_state["summary_top_day_all"] = top_day_all
+        st.session_state["summary_top_day_local"] = top_day_local
+        st.session_state["summary_top_day_tourist"] = top_day_tourist
         st.session_state["summary_daily_df"] = df
         st.session_state["summary_daily_total_local"] = total_local
         st.session_state["summary_daily_total_tourist"] = total_tourist

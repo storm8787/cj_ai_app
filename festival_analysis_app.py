@@ -115,9 +115,9 @@ def festival_analysis_app():
                       
     elif section == "분석요약 및 종합의견":
         st.subheader("📋 분석요약 및 종합의견")
+        
         from festival.analyze_summary_and_opinion import analyze_summary_and_opinion
-    analyze_summary_and_opinion()
-
+        analyze_summary_and_opinion()
 
 
 # In[ ]:

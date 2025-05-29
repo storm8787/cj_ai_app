@@ -109,7 +109,7 @@ def analyze_before_after():
 # 잘못된 변수명 수정
 - 현지인 일평균 방문객: 전 {local_avg_before:,.1f}명 / 중 {local_avg_during:,.1f}명 / 후 {local_avg_after:,.1f}명
 - 외지인 일평균 방문객: 전 {tourist_avg_before:,.1f}명 / 중 {tourist_avg_during:,.1f}명 / 후 {tourist_avg_after:,.1f}명
-- 전체 방문객 일평균: 전 {avg_total_before:,.1f}명 / 중 {avg_total_during:,.1f}명 / 후 {avg_total_after:,.1f}명  
+- 전체 방문객 일평균: 전 {total_before:,.1f}명 / 중 {total_during:,.1f}명 / 후 {total_after:,.1f}명  
 - 전 기간 대비 축제기간 증가율: {inc_rate:.2f}%  
 - 기준(연평균 등) 대비 축제기간 증가율: {inc_from_ref:.2f}%
 """

@@ -131,7 +131,7 @@ def analyze_summary_overview(gpt_generate=True):
             max_tokens=800
         )
 
-        st.subheader("🧠 GPT 시사점 (마지막 문단)")
+        st.subheader(f"🧠 GPT 시사점: {festival_name} 분석 요약")
         st.write(response.choices[0].message.content)
 
     # ✅ 화면에 전체 내용도 출력하고 싶다면 아래 주석 해제

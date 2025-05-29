@@ -70,7 +70,7 @@ def analyze_summary():
                 "현지인 방문객수": f"{local_prev:,}명 (일평균: {local_prev // days:,}명)",
                 "외지인 방문객수": f"{tourist_prev:,}명 (일평균: {tourist_prev // days:,}명)",
                 "전체 관광객 수": f"{total_prev:,}명 (일평균: {total_prev // days:,}명)",
-                "비고": f"현지인 {local_prev / total_prev:.1%}, 외지인 {tourist_prev / total_prev:.1%}"
+                "비고": f"현지인 {local_prev / total_prev:.1%}, 외지인 {tourist_prev / total_prev:.2%}"
             }
             rows.append(row_prev)
 
@@ -79,16 +79,16 @@ def analyze_summary():
             "현지인 방문객수": f"{local_curr:,}명 (일평균: {local_curr // days:,}명)",
             "외지인 방문객수": f"{tourist_curr:,}명 (일평균: {tourist_curr // days:,}명)",
             "전체 관광객 수": f"{total_curr:,}명 (일평균: {total_curr // days:,}명)",
-            "비고": f"현지인 {local_curr / total_curr:.1%}, 외지인 {tourist_curr / total_curr:.1%}"
+            "비고": f"현지인 {local_curr / total_curr:.1%}, 외지인 {tourist_curr / total_curr:.2%}"
         }
         rows.append(row_curr)
 
         if total_prev > 0:
             row_diff = {
                 "연도": "전년대비 증감",
-                "현지인 방문객수": f"{local_curr - local_prev:+,}명 ({(local_curr - local_prev) / local_prev:.1%})",
-                "외지인 방문객수": f"{tourist_curr - tourist_prev:+,}명 ({(tourist_curr - tourist_prev) / tourist_prev:.1%})",
-                "전체 관광객 수": f"{total_curr - total_prev:+,}명 ({(total_curr - total_prev) / total_prev:.1%})",
+                "현지인 방문객수": f"{local_curr - local_prev:+,}명 ({(local_curr - local_prev) / local_prev:.2%})",
+                "외지인 방문객수": f"{tourist_curr - tourist_prev:+,}명 ({(tourist_curr - tourist_prev) / tourist_prev:.2%})",
+                "전체 관광객 수": f"{total_curr - total_prev:+,}명 ({(total_curr - total_prev) / total_prev:.2%})",
                 "비고": ""
             }
             rows.append(row_diff)

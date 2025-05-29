@@ -70,9 +70,9 @@ def analyze_daily_visitor():
         total_all = df["합계"].sum()
 
         # ✅ 비율 계산
-        df["현지인비율(%)"] = (df["현지인"] / total_local * 100).round(1)
-        df["외지인비율(%)"] = (df["외지인"] / total_tourist * 100).round(1)
-        df["합계비율(%)"] = (df["합계"] / total_all * 100).round(1)
+        df["현지인비율(%)"] = (df["현지인"] / total_local * 100).round(2)
+        df["외지인비율(%)"] = (df["외지인"] / total_tourist * 100).round(2)
+        df["합계비율(%)"] = (df["합계"] / total_all * 100).round(2)
 
         # ✅ 요약표 형태로 재구성 (전치)
         df_summary = pd.DataFrame({

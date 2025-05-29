@@ -30,9 +30,9 @@ def analyze_visitor_after_24h():
     template_df.to_excel(buffer, index=False)
     buffer.seek(0)
     st.download_button(
-        label="📥 7-2 템플릿 다운로드",
+        label="📥 7-3 템플릿 다운로드",
         data=buffer,
-        file_name="7-2. template.xlsx",
+        file_name="7-3. template.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 

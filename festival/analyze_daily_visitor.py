@@ -84,13 +84,13 @@ def analyze_daily_visitor():
 
         df_ratio = pd.DataFrame({
             day_labels[i]: [
-                df.loc[i, "현지인비율(%)"],
-                df.loc[i, "외지인비율(%)"],
-                df.loc[i, "합계비율(%)"]
+                f"{(df.loc[i, '현지인'] / total_local * 100):.2f}%",
+                f"{(df.loc[i, '외지인'] / total_tourist * 100):.2f}%",
+                f"{(df.loc[i, '합계'] / total_all * 100):.2f}%"
             ]
             for i in range(len(day_labels))
         }, index=["현지인비율(%)", "외지인비율(%)", "합계비율(%)"])
-        df_ratio["합계"] = 100.0
+        df_ratio["합계"] = "100.00%"
 
         df_final = pd.concat([df_summary, df_ratio])
         df_final.index.name = "구분"

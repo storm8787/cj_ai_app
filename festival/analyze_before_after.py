@@ -29,7 +29,7 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def analyze_before_after():
     st.subheader("📊 4. 축제 전·중·후 방문객 분석")
-    st.markdown("**현지인·외지인을 구분하여 2024년 일평균 및 축제 전후 방문객 수를 입력해주세요.**")
+    st.markdown("**현지인·외지인을 구분하여 전년도 일평균 방문객 및 축제 전후 방문객 수를 입력해주세요.**")
 
     col_avg1, col_avg2 = st.columns(2)
     with col_avg1:
@@ -65,7 +65,7 @@ def analyze_before_after():
         tourist_avg_after = round(tourist_after / 5, 1)
 
         # 합계
-        total_avg_2024 = local_avg_2024 + tourist_avg_2024
+        total_avg_2024 = avg_local + avg_tourist
         total_before = local_avg_before + tourist_avg_before
         total_during = local_avg_during + tourist_avg_during
         total_after = local_avg_after + tourist_avg_after
@@ -80,8 +80,8 @@ def analyze_before_after():
 
         # 표 생성
         df = pd.DataFrame([
-            ["현지인", f"{local_avg_2024:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
-            ["외지인", f"{tourist_avg_2024:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
+            ["현지인", f"{local_avg:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
+            ["외지인", f"{tourist_avg:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
             ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"],
         ], columns=["구분", "2024년 일평균", "축제 전", "축제기간", "축제 후", "비고"])
 

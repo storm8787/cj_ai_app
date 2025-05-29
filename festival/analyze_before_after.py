@@ -50,20 +50,20 @@ def analyze_before_after():
 
     if st.button("🚀 분석 실행", key="before_after_btn"):
         # ✅ 일평균 계산
-        local_avg_before = st.number_input("현지인(축제 전 일평균)", min_value=0.0, step=1.0)
-        local_avg_during = st.number_input("현지인(축제기간 일평균)", min_value=0.0, step=1.0)
-        local_avg_after = st.number_input("현지인(축제 후 일평균)", min_value=0.0, step=1.0)
+        local_avg_before = local_before / 5
+        local_avg_during = local_during / 4
+        local_avg_after = local_after / 5
 
-        tourist_avg_before = st.number_input("외지인(축제 전 일평균)", min_value=0.0, step=1.0)
-        tourist_avg_during = st.number_input("외지인(축제기간 일평균)", min_value=0.0, step=1.0)
-        tourist_avg_after = st.number_input("외지인(축제 후 일평균)", min_value=0.0, step=1.0)
+        tourist_avg_before = tourist_before / 5
+        tourist_avg_during = tourist_during / 4
+        tourist_avg_after = tourist_after / 5
 
         # ✅ 합계
         total_before = local_avg_before + tourist_avg_before
         total_during = local_avg_during + tourist_avg_during
         total_after = local_avg_after + tourist_avg_after
 
-        # ✅ 증가율 계산
+        # ✅ 증가율 계산 함수
         def calc_rate(before, during):
             return round((during / before - 1) * 100, 2) if before else 0.0
 
@@ -71,11 +71,15 @@ def analyze_before_after():
         tourist_rate = calc_rate(tourist_avg_before, tourist_avg_during)
         total_rate = calc_rate(total_before, total_during)
 
+        # ✅ 누락된 증가율 변수 추가
+        inc_rate = calc_rate(total_before, total_during)
+        inc_from_ref = calc_rate(total_avg_2024, total_during)
+
         # ✅ 표 생성
         df = pd.DataFrame([
-            ["현지인", f"{avg_local:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
-            ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
-            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"]
+            ["현지인", f"{avg_local:,}명", f"{local_avg_before:,.1f}명", f"{local_avg_during:,.1f}명", f"{local_avg_after:,.1f}명", f"({local_rate:.2f}% 증가)"],
+            ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,.1f}명", f"{tourist_avg_during:,.1f}명", f"{tourist_avg_after:,.1f}명", f"({tourist_rate:.2f}% 증가)"],
+            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,.1f}명", f"{total_during:,.1f}명", f"{total_after:,.1f}명", f"({total_rate:.2f}% 증가)"]
         ], columns=["구분", "전년도 일평균", "축제 전", "축제기간", "축제 후", "비고"])
 
         st.dataframe(df, use_container_width=True)
@@ -88,7 +92,7 @@ def analyze_before_after():
         st.session_state["summary_avg_tourist"] = tourist_avg_during
         st.session_state["summary_avg_total"] = total_during
 
-
+        # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")
             period = st.session_state.get("festival_period", "")
@@ -106,7 +110,6 @@ def analyze_before_after():
 ▸ **각 문장은 줄바꿈(엔터)으로 구분할 것**
 
 [분석 요약]
-# 잘못된 변수명 수정
 - 현지인 일평균 방문객: 전 {local_avg_before:,.1f}명 / 중 {local_avg_during:,.1f}명 / 후 {local_avg_after:,.1f}명
 - 외지인 일평균 방문객: 전 {tourist_avg_before:,.1f}명 / 중 {tourist_avg_during:,.1f}명 / 후 {tourist_avg_after:,.1f}명
 - 전체 방문객 일평균: 전 {total_before:,.1f}명 / 중 {total_during:,.1f}명 / 후 {total_after:,.1f}명  
@@ -126,4 +129,5 @@ def analyze_before_after():
 
             st.subheader("🧠 GPT 시사점")
             st.write(response.choices[0].message.content)
+
 

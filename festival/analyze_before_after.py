@@ -31,31 +31,25 @@ def analyze_before_after():
     st.subheader("📊 4. 축제 전·중·후 방문객 분석")
     st.markdown("**현지인·외지인을 구분하여 전년도 일평균 방문객 및 축제 전후 방문객 수를 입력해주세요.**")
 
+    # ✅ 연평균 입력
     col_avg1, col_avg2 = st.columns(2)
-    with col_avg1:
-        avg_local = st.number_input("전년도 현지인 일평균 방문객", min_value=0, step=10)
-    with col_avg2:
-        avg_tourist = st.number_input("전년도 외지인 일평균 방문객", min_value=0, step=10)
-    avg_total = avg_local + avg_tourist
+    avg_local = col_avg1.number_input("전년도 현지인 일평균 방문객", min_value=0, step=10)
+    avg_tourist = col_avg2.number_input("전년도 외지인 일평균 방문객", min_value=0, step=10)
+    total_avg_2024 = avg_local + avg_tourist
 
+    # ✅ 구간별 방문객 입력
     col1, col2, col3 = st.columns(3)
-    with col1:
-        local_before = st.number_input("현지인(축제 전 5일)", min_value=0, step=100)
-    with col2:
-        local_during = st.number_input("현지인(축제기간)", min_value=0, step=100)
-    with col3:
-        local_after = st.number_input("현지인(축제 후 5일)", min_value=0, step=100)
+    local_before = col1.number_input("현지인(축제 전 5일)", min_value=0, step=100)
+    local_during = col2.number_input("현지인(축제기간)", min_value=0, step=100)
+    local_after = col3.number_input("현지인(축제 후 5일)", min_value=0, step=100)
 
     col4, col5, col6 = st.columns(3)
-    with col4:
-        tourist_before = st.number_input("외지인(축제 전 5일)", min_value=0, step=100)
-    with col5:
-        tourist_during = st.number_input("외지인(축제기간)", min_value=0, step=100)
-    with col6:
-        tourist_after = st.number_input("외지인(축제 후 5일)", min_value=0, step=100)
+    tourist_before = col4.number_input("외지인(축제 전 5일)", min_value=0, step=100)
+    tourist_during = col5.number_input("외지인(축제기간)", min_value=0, step=100)
+    tourist_after = col6.number_input("외지인(축제 후 5일)", min_value=0, step=100)
 
     if st.button("🚀 분석 실행", key="before_after_btn"):
-        # 일평균 계산
+        # ✅ 일평균 계산
         local_avg_before = round(local_before / 5, 1)
         local_avg_during = round(local_during / 4, 1)
         local_avg_after = round(local_after / 5, 1)
@@ -64,13 +58,12 @@ def analyze_before_after():
         tourist_avg_during = round(tourist_during / 4, 1)
         tourist_avg_after = round(tourist_after / 5, 1)
 
-        # 합계
-        total_avg_2024 = avg_local + avg_tourist
+        # ✅ 합계
         total_before = local_avg_before + tourist_avg_before
         total_during = local_avg_during + tourist_avg_during
         total_after = local_avg_after + tourist_avg_after
 
-        # 증가율
+        # ✅ 증가율 계산
         def calc_rate(before, during):
             return round((during / before - 1) * 100, 2) if before else 0.0
 
@@ -78,11 +71,11 @@ def analyze_before_after():
         tourist_rate = calc_rate(tourist_avg_before, tourist_avg_during)
         total_rate = calc_rate(total_before, total_during)
 
-        # 표 생성
+        # ✅ 표 생성
         df = pd.DataFrame([
-            ["현지인", f"{local_avg:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
-            ["외지인", f"{tourist_avg:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
-            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"],
+            ["현지인", f"{avg_local:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
+            ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
+            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"]
         ], columns=["구분", "2024년 일평균", "축제 전", "축제기간", "축제 후", "비고"])
 
         st.dataframe(df, use_container_width=True)

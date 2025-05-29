@@ -73,6 +73,14 @@ def analyze_external_visitor_spending_in_chungju():
     st.markdown("### 📎 읍면동별 소비현황")
     st.dataframe(df, use_container_width=True)
 
+    # ✅ top1 저장 (합계 제외한 가장 높은 소비비율)
+    df_top1 = df[df["읍면동"] != "합계"].copy()
+    df_top1["소비비율값"] = df_top1["소비비율"].str.replace("%", "").astype(float)
+    top_row = df_top1.sort_values("소비비율값", ascending=False).iloc[0]
+
+    st.session_state["top_eupmyeondong_name"] = top_row["읍면동"]
+    st.session_state["top_eupmyeondong_ratio"] = f"{top_row['소비비율값']:.2f}%"
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

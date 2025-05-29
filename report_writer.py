@@ -57,7 +57,7 @@ def build_user_prompt(title, report_type, report_format, report_length, key_poin
         timetable_instruction = (
             "\n\n보고서 구성은 다음과 같은 4단계 구조로 작성할 것:\n"
             "0. 행사 추진배경: 해당 행사의 추진 배경을 한두 문장으로 간략하게 서술할 것.\n"
-            "1. 행사 개요: ❍ 기호를 사용해 항목별로 정리 (예: 행사명, 일시, 장소, 참석자 등)\n"
+            "1. 행사 개요: 항목별로 정리 (예: 행사명, 일시, 장소, 참석자 등)\n"
             "2. 시간표(안): 아래 예시처럼 **빈 줄 없이 연속된 Markdown 표 형식**으로 정리할 것:\n\n"
             "- 표는 중간에 빈 줄 없이 연속된 줄로 작성할 것.\n"
             "- 셀 내 줄바꿈이 필요한 경우 `<br>` 태그를 사용할 것.\n"
@@ -88,9 +88,10 @@ def build_user_prompt(title, report_type, report_format, report_length, key_poin
 
 📑 보고서는 다음과 같은 구조를 따를 것:
 1. 제목
-2. 개요
-3. 주요 내용 (필요 시 번호, 기호 또는 표 포함)
-4. 향후 계획 또는 시사점
+2. 추진배경
+3. 사업개요
+4. 상세내용
+5. 향후 추진계획
 """
 
 # ✅ Streamlit 앱

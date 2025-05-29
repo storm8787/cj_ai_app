@@ -93,6 +93,14 @@ def analyze_card_spending():
         st.subheader("📊 결과 테이블")
         st.dataframe(df_t.set_index("구분"))
 
+        # ✅ 축제기간 일수 계산 및 세션 저장
+        festival_days = len(date_strs)
+        average_sales_per_day = int(total_sales / festival_days) if festival_days > 0 else 0
+
+        st.session_state["summary_card_total_sales"] = total_sales  # 총 매출(천원)
+        st.session_state["summary_card_avg_sales_per_day"] = average_sales_per_day  # 일평균 매출(천원)
+
+
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")

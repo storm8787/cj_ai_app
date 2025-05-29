@@ -83,57 +83,51 @@ def analyze_summary_overview(gpt_generate=True):
     top_eup = st.session_state.get("top_eupmyeondong_name", "")
     eup_ratio = st.session_state.get("top_eupmyeondong_ratio", "")
 
-    # ✅ 프롬프트 정의
-    prompt = f""" 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 {festival_name} 방문객과 매출현황을 분석한 결과임
+    # ✅ 1단계: 마크다운 요약 먼저 출력
+    st.markdown(f"""
+ 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 **{festival_name}** 방문객과 매출현황을 분석한 결과임
 
-❍ {year}년 {festival_name}의 총 관광객은 {current_total:,}명으로 전년 {last_total:,}명 
-   대비 {total_diff:,}명({total_rate:.2f}%) 증가
-   - 현지인은 {current_local:,}명({local_ratio:.2f}%)으로 전년 {last_local:,}명 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}
-   - 외지인은 {current_tourist:,}명({tourist_ratio:.2f}%)으로 전년 {last_tourist:,}명 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
-     종　합 : {top_age}, {top_weekday}, {top_hour}
-      현지인 : {top_age_local}, {top_weekday_local}, {top_hour_local}
-      외지인 : {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
+❍ {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** 증가  
+   - 현지인: {current_local:,}명({local_ratio:.2f}%), 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
+   - 외지인: {current_tourist:,}명({tourist_ratio:.2f}%), 전년 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
 
-❍ 축제기간 중 일평균 관광객은 {avg_daily:,}명으로 축제 5일전 대비 {before_ratio:.2f}% 증가했고, 
-   24년 일평균 수안보온천 관광객보다 {reference_ratio:.2f}% 증가하여, 
-   {festival_name}가 지역 관광 수요를 효과적으로 견인한 것을 확인
+ 종합 프로필  
+   - 전체: {top_age}, {top_weekday}, {top_hour}  
+   - 현지인: {top_age_local}, {top_weekday_local}, {top_hour_local}  
+   - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
 
-❍ 축제방문 외지인 관광객 {stay_ratio}({stay_count:,}명)은 하루이상 충주에 머무르며
-   연계관광을 즐김
+❍ 축제기간 일평균 관광객: **{avg_daily:,}명**  
+   - 축제 5일 전 대비 {before_ratio:.2f}% 증가  
+   - 전년도 수안보온천 일평균 대비 {reference_ratio:.2f}% 증가
 
-❍ 축제기간 주변 총 소비 매출액은 {total_sales:,}천원(일평균 {daily_sales:,}천원)
-  ※ 축제장소 내 푸드트럭은 사업자가 타지로 등록되어 집계에 미포함
+❍ 외지인 중 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
-❍ 축제 방문 외지인은 축제 후 충북 전역에서 소비활동을 하였으며, 
-   충북내 소비금액의 81.92%는 충주시에서 소비함
-   - 이중 {top_eup}에서 추가 소비가 가장 많이 이루어짐({eup_ratio})
+❍ 총 소비매출액: **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
+※ 축제장 푸드트럭 제외
 
-[추가지시사항]
+❍ 외지인 소비의 81.92%가 충주시 내에서 발생  
+   - 이 중 **{top_eup}** 지역의 비중이 가장 큼 ({eup_ratio})
+""")
+
+    # ✅ 2단계: 마지막 문단 GPT 생성
+    if gpt_generate:
+        final_prompt = f"""
 ▸ 전년도 대비 전체 방문객 수가 증가하고 외지인 비중이 확대되었으며, 축제기간 동안 {top_weekday}을 중심으로 고른 방문객 유입이 이어졌음을 행정문서체로 기술할 것  
 ▸ 축제의 테마(온천, 벚꽃)와 지역 특색(자연자원, 계절감)이 방문객 체류와 소비에 긍정적으로 작용한 점을 반영할 것  
 ▸ 온화한 기후나 쾌적한 환경 등 계절적 장점이 관광 수요에 기여했음을 기술  
 ▸ 마지막 문장은 “체류형 관광 활성화를 이끈 건강하고 따뜻한 봄철 대표 축제로 자리매김”이라는 표현으로 마무리할 것  
 ▸ 전체적으로 긍정적이고 정책적 시사점을 부각하는 어조 유지
 """
-
-    # ✅ GPT 결과 생성
-    if gpt_generate:
-        from openai import OpenAI
-        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 축제 소비 데이터를 분석하는 전문가야."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하고 정책 시사점을 도출하는 전문가야."},
+                {"role": "user", "content": final_prompt}
             ],
             temperature=0.5,
-            max_tokens=800
+            max_tokens=400
         )
 
-        st.subheader(f"🧠 GPT 시사점: {festival_name} 분석 요약")
+        st.markdown("#### 🧠 GPT 시사점 (정책적 해석)")
         st.write(response.choices[0].message.content)
-
-    # ✅ 화면에 전체 내용도 출력하고 싶다면 아래 주석 해제
-    # st.markdown(prompt)
 

@@ -62,7 +62,7 @@ def festival_analysis_app():
     if section == "방문객 분석":
         tabs = st.tabs([
             "1. 방문객 총괄", "2. 일자별 방문객", "3. 시간대별 관광객",
-            "4. 전·중·후", "5. 연령별", "6. 성별/연령", "7. 지역분석"
+            "4. 전·중·후", "5. 연령별", "6. 성별/연령", "7. 지역분석", "8. 24시간 이후 지역"
         ])
         with tabs[0]:
             from festival.analyze_summary import analyze_summary
@@ -85,6 +85,9 @@ def festival_analysis_app():
         with tabs[6]:
             from festival.analyze_visitor_by_province import analyze_visitor_by_province
             analyze_visitor_by_province()
+        with tabs[7]:
+            from festival.analyze_visitor_after_24h import analyze_visitor_after_24h
+            analyze_visitor_after_24h()
 
     elif section == "카드 소비 분석":
         tabs = st.tabs([

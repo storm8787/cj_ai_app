@@ -88,9 +88,9 @@ def analyze_age_group():
     tourist_total = tourist_sum["합계"]
     grand_total = total_sum["합계"]
 
-    local_ratio = (local_sum[age_columns] / local_total).apply(lambda x: f"{x:.1%}")
-    tourist_ratio = (tourist_sum[age_columns] / tourist_total).apply(lambda x: f"{x:.1%}")
-    total_ratio = (total_sum[age_columns] / grand_total).apply(lambda x: f"{x:.1%}")
+    local_ratio = (local_sum[age_columns] / local_total).apply(lambda x: f"{x:.2%}")
+    tourist_ratio = (tourist_sum[age_columns] / tourist_total).apply(lambda x: f"{x:.2%}")
+    total_ratio = (total_sum[age_columns] / grand_total).apply(lambda x: f"{x:.2%}")
 
     # ✅ 소계 및 비율 행 생성
     local_sum_row = pd.DataFrame([["현지인", "소계"] + local_sum[age_columns].tolist() + [local_total]], columns=df.columns)
@@ -171,6 +171,7 @@ def analyze_age_group():
 ▸ 특정 세대(예: 20~30대 참여 집중, 60대 외지인 방문 등)에 대해서는 문화적·관광적 해석을 덧붙일 것  
 ▸ 필요시 ※ 기호로 보충 설명 가능  
 ▸ 단정적인 개선 제안은 피하고, 긍정적 분석이나 정책적 시사점 중심으로 기술
+▸ **각 문장은 줄바꿈(엔터)으로 구분할 것**
 
 [입력된 연령별 방문객 수 및 비율 데이터]
 {age_summary_text}

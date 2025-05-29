@@ -22,7 +22,7 @@ def load_insight_examples(section_id):
 
 # ✅ 8. 분석결과 요약 및 종합의견
 def analyze_summary_and_opinion():
-    st.markdown("### 📊 8. 분석결과 요약 및 종합의견")
+    #st.markdown("### 📊 8. 분석결과 요약 및 종합의견")
 
     # ✅ 버튼 하나씩 세로로 배치
     gpt_summary = st.button("📝 분석결과(요약) 생성 및 보기")

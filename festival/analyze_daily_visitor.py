@@ -30,7 +30,6 @@ def get_weekday_kor(date_str):
     except:
         return "요일없음"
 
-# ✅ 일자별 방문객 수 분석기
 def analyze_daily_visitor():
     st.subheader("📊 2. 일자별 방문객 수 분석")
 
@@ -42,6 +41,7 @@ def analyze_daily_visitor():
 
     date_range = pd.date_range(start=start_date, end=end_date)
     date_strs = [d.strftime("%Y-%m-%d") for d in date_range]
+    day_labels = [f"{i+1}일차" for i in range(len(date_strs))]
 
     local_counts, tourist_counts = [], []
 
@@ -56,47 +56,70 @@ def analyze_daily_visitor():
         tourist_counts.append(tourist)
 
     if st.button("📊 분석 실행"):
+        # ✅ 원본 DF 구성
         df = pd.DataFrame({
             "일자": date_strs,
             "현지인": local_counts,
             "외지인": tourist_counts
         })
         df["합계"] = df["현지인"] + df["외지인"]
+
+        # ✅ 합계 계산
         total_local = df["현지인"].sum()
         total_tourist = df["외지인"].sum()
         total_all = df["합계"].sum()
-        df.loc["합계"] = ["합계", total_local, total_tourist, total_all]
+
+        # ✅ 비율 계산
+        df["현지인비율(%)"] = (df["현지인"] / total_local * 100).round(1)
+        df["외지인비율(%)"] = (df["외지인"] / total_tourist * 100).round(1)
+        df["합계비율(%)"] = (df["합계"] / total_all * 100).round(1)
+
+        # ✅ 요약표 형태로 재구성 (전치)
+        df_summary = pd.DataFrame({
+            day_labels[i]: [local_counts[i], tourist_counts[i], local_counts[i]+tourist_counts[i]]
+            for i in range(len(day_labels))
+        }, index=["현지인", "외지인", "합계"])
+
+        df_summary["합계"] = df_summary.sum(axis=1)
+
+        df_ratio = pd.DataFrame({
+            day_labels[i]: [
+                df.loc[i, "현지인비율(%)"],
+                df.loc[i, "외지인비율(%)"],
+                df.loc[i, "합계비율(%)"]
+            ]
+            for i in range(len(day_labels))
+        }, index=["현지인비율(%)", "외지인비율(%)", "합계비율(%)"])
+        df_ratio["합계"] = 100.0
+
+        df_final = pd.concat([df_summary, df_ratio])
+        df_final.index.name = "구분"
 
         st.subheader("📊 방문객 수 요약표")
-        st.dataframe(df.set_index("일자"))
+        st.dataframe(df_final, use_container_width=True)
 
-        # ✅ 요일 정보 추가 (합계 제외)
-        temp_df = df[df["일자"] != "합계"].copy()
-        temp_df["요일"] = temp_df["일자"].apply(get_weekday_kor)
-
-        # ✅ 전체 기준 최대 방문요일
-        temp_df["비율_전체"] = temp_df["합계"] / total_all
-        top_all_row = temp_df.loc[temp_df["비율_전체"].idxmax()]
+        # ✅ 요일 분석
+        df["요일"] = df["일자"].apply(get_weekday_kor)
+        df["비율_전체"] = df["합계"] / total_all
+        top_all_row = df.loc[df["비율_전체"].idxmax()]
         top_day_all = f"{top_all_row['요일']}({top_all_row['비율_전체'] * 100:.1f}%)"
 
-        # ✅ 현지인 기준 최대 방문요일
-        temp_df["비율_현지인"] = temp_df["현지인"] / total_local
-        top_local_row = temp_df.loc[temp_df["비율_현지인"].idxmax()]
+        df["비율_현지인"] = df["현지인"] / total_local
+        top_local_row = df.loc[df["비율_현지인"].idxmax()]
         top_day_local = f"{top_local_row['요일']}({top_local_row['비율_현지인'] * 100:.1f}%)"
 
-        # ✅ 외지인 기준 최대 방문요일
-        temp_df["비율_외지인"] = temp_df["외지인"] / total_tourist
-        top_tourist_row = temp_df.loc[temp_df["비율_외지인"].idxmax()]
+        df["비율_외지인"] = df["외지인"] / total_tourist
+        top_tourist_row = df.loc[df["비율_외지인"].idxmax()]
         top_day_tourist = f"{top_tourist_row['요일']}({top_tourist_row['비율_외지인'] * 100:.1f}%)"
 
-        # ✅ 요약 데이터 저장
+        # ✅ 요약값 저장
         st.session_state["summary_top_day_all"] = top_day_all
         st.session_state["summary_top_day_local"] = top_day_local
         st.session_state["summary_top_day_tourist"] = top_day_tourist
-        st.session_state["summary_daily_df"] = df
         st.session_state["summary_daily_total_local"] = total_local
         st.session_state["summary_daily_total_tourist"] = total_tourist
         st.session_state["summary_daily_total_all"] = total_all
+        st.session_state["summary_daily_df"] = df_final
 
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):

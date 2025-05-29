@@ -77,9 +77,9 @@ def analyze_before_after():
 
         # ✅ 표 생성
         df = pd.DataFrame([
-            ["현지인", f"{avg_local:,}명", f"{local_avg_before:,.1f}명", f"{local_avg_during:,.1f}명", f"{local_avg_after:,.1f}명", f"({local_rate:.2f}% 증가)"],
-            ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,.1f}명", f"{tourist_avg_during:,.1f}명", f"{tourist_avg_after:,.1f}명", f"({tourist_rate:.2f}% 증가)"],
-            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,.1f}명", f"{total_during:,.1f}명", f"{total_after:,.1f}명", f"({total_rate:.2f}% 증가)"]
+            ["현지인", f"{avg_local:,}명", f"{local_avg_before:,}명", f"{local_avg_during:,}명", f"{local_avg_after:,}명", f"({local_rate:.2f}% 증가)"],
+            ["외지인", f"{avg_tourist:,}명", f"{tourist_avg_before:,}명", f"{tourist_avg_during:,}명", f"{tourist_avg_after:,}명", f"({tourist_rate:.2f}% 증가)"],
+            ["합 계", f"{total_avg_2024:,}명", f"{total_before:,}명", f"{total_during:,}명", f"{total_after:,}명", f"({total_rate:.2f}% 증가)"]
         ], columns=["구분", "전년도 일평균", "축제 전", "축제기간", "축제 후", "비고"])
 
         st.dataframe(df, use_container_width=True)

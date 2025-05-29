@@ -20,34 +20,48 @@ def load_insight_examples(section_id):
     except FileNotFoundError:
         return ""
 
-# ✅ 4번 분석기: 전·중·후 방문객 분석
+# ✅ 전·중·후 방문객 분석 (현지인/외지인 구분)
 def analyze_before_after():
     st.subheader("📊 4. 축제 전·중·후 방문객 분석")
 
-    st.markdown("**축제 전 5일, 축제기간, 축제 후 5일 방문객 수를 구분하여 입력해주세요.**")
+    st.markdown("**현지인·외지인을 구분하여 축제 전 5일, 축제기간, 축제 후 5일 방문객 수를 입력해주세요.**")
 
+    st.markdown("#### 🔹 현지인 방문객")
     col1, col2, col3 = st.columns(3)
     with col1:
-        total_before = st.number_input("축제 전 총 방문객 (5일)", min_value=0, step=100)
+        local_before = st.number_input("현지인(전)", min_value=0, step=100)
     with col2:
-        total_during = st.number_input("축제기간 총 방문객 (3~4일)", min_value=0, step=100)
+        local_during = st.number_input("현지인(중)", min_value=0, step=100)
     with col3:
-        total_after = st.number_input("축제 후 총 방문객 (5일)", min_value=0, step=100)
+        local_after = st.number_input("현지인(후)", min_value=0, step=100)
 
-    # ✅ 비교 기준 평균 입력 (예: 연평균 온천 관광객)
+    st.markdown("#### 🔹 외지인 방문객")
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        tourist_before = st.number_input("외지인(전)", min_value=0, step=100)
+    with col5:
+        tourist_during = st.number_input("외지인(중)", min_value=0, step=100)
+    with col6:
+        tourist_after = st.number_input("외지인(후)", min_value=0, step=100)
+
     reference_avg = st.number_input("비교 기준 일평균 방문객 (예: 연평균)", min_value=0, step=10)
 
     if st.button("🚀 분석 실행", key="before_after_btn"):
-        avg_before = round(total_before / 5, 2)
-        avg_during = round(total_during / 4, 2)  # 기본은 4일
-        avg_after = round(total_after / 5, 2)
+        def calc_avg(before, during, after):
+            return round(before / 5, 2), round(during / 4, 2), round(after / 5, 2)
 
-        # 증가율
-        inc_rate = round((avg_during / avg_before - 1) * 100, 2) if avg_before else 0
-        inc_from_ref = round((avg_during / reference_avg - 1) * 100, 2) if reference_avg else 0
+        avg_local_before, avg_local_during, avg_local_after = calc_avg(local_before, local_during, local_after)
+        avg_tourist_before, avg_tourist_during, avg_tourist_after = calc_avg(tourist_before, tourist_during, tourist_after)
+
+        avg_total_before = avg_local_before + avg_tourist_before
+        avg_total_during = avg_local_during + avg_tourist_during
+        avg_total_after = avg_local_after + avg_tourist_after
+
+        inc_rate = round((avg_total_during / avg_total_before - 1) * 100, 2) if avg_total_before else 0
+        inc_from_ref = round((avg_total_during / reference_avg - 1) * 100, 2) if reference_avg else 0
 
         df = pd.DataFrame([
-            ["일평균 방문객 수", f"{avg_before:,.1f}명", f"{avg_during:,.1f}명", f"{avg_after:,.1f}명"],
+            ["일평균 방문객 수", f"{avg_total_before:,.1f}명", f"{avg_total_during:,.1f}명", f"{avg_total_after:,.1f}명"],
             ["전 대비 증가율", "-", f"{inc_rate:.2f}%", "-"],
             ["기준 대비 증가율", "-", f"{inc_from_ref:.2f}%", "-"]
         ], columns=["구분", "축제 전 (5일)", "축제기간", "축제 후 (5일)"])
@@ -55,13 +69,12 @@ def analyze_before_after():
         st.dataframe(df, use_container_width=True)
 
         # ✅ 세션에 저장
-        st.session_state["summary_avg_before"] = avg_before
-        st.session_state["summary_avg_during"] = avg_during
-        st.session_state["summary_avg_after"] = avg_after
+        st.session_state["summary_avg_before"] = avg_total_before
+        st.session_state["summary_avg_during"] = avg_total_during
+        st.session_state["summary_avg_after"] = avg_total_after
         st.session_state["summary_increase_rate"] = inc_rate
         st.session_state["summary_avg_reference"] = reference_avg
         st.session_state["summary_increase_from_reference"] = inc_from_ref
-
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")

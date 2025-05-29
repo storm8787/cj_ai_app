@@ -80,12 +80,14 @@ def analyze_before_after():
 
         st.dataframe(df, use_container_width=True)
 
-        st.session_state["summary_avg_before"] = avg_total_before
-        st.session_state["summary_avg_during"] = avg_total_during
-        st.session_state["summary_avg_after"] = avg_total_after
-        st.session_state["summary_increase_rate"] = inc_rate
-        st.session_state["summary_avg_reference"] = avg_total
-        st.session_state["summary_increase_from_reference"] = inc_from_ref
+        # ✅ 세션 상태 저장
+        st.session_state["summary_avg_before"] = total_before
+        st.session_state["summary_avg_during"] = total_during
+        st.session_state["summary_avg_after"] = total_after
+        st.session_state["summary_avg_local"] = local_avg_during
+        st.session_state["summary_avg_tourist"] = tourist_avg_during
+        st.session_state["summary_avg_total"] = total_during
+
 
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")

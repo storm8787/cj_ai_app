@@ -45,11 +45,20 @@ def get_prompt_by_length(report_length):
     else:
         return "적절한 분량으로 행정문서체로 작성해줘."
 
-# ✅ 전체 프롬프트 구성 함수
 def build_user_prompt(title, report_type, report_format, report_length, key_points):
     type_instruction = get_prompt_by_report_type(report_type)
     format_instruction = get_prompt_by_format(report_format)
     length_instruction = get_prompt_by_length(report_length)
+
+    # 📌 특별 조건 1: '표 형식'일 경우 - Markdown 표 형식 사용
+    markdown_instruction = ""
+    if report_format == "표 형식":
+        markdown_instruction = "보고서 내 모든 표는 마크다운(Markdown) 표 형식으로 작성할 것. 예: `| 항목 | 내용 |` 구조를 따름."
+
+    # 📌 특별 조건 2: '행사보고'일 경우 - 타임테이블 포함
+    timetable_instruction = ""
+    if report_type == "행사보고":
+        timetable_instruction = "특히 '행사 일정표(타임테이블)'는 반드시 포함할 것. 시간대별 프로그램(예: 10:00 개회식, 10:20 지정서 수여 등)을 표 형태로 정리할 것."
 
     return f"""
 너는 지방자치단체 공무원을 위한 AI 보고서 생성기야. 행정문서체와 개괄식 구성을 따르며, 명확하고 간결하게 작성해줘.
@@ -62,11 +71,13 @@ def build_user_prompt(title, report_type, report_format, report_length, key_poin
 1. {type_instruction}
 2. {format_instruction}
 3. {length_instruction}
+4. {markdown_instruction}
+5. {timetable_instruction}
 
 보고서 구성은 다음 순서를 따라:
 1. 제목
 2. 개요
-3. 주요 내용 (필요 시 항목 나열)
+3. 주요 내용 (필요 시 항목 나열 또는 표 포함)
 4. 향후 계획 또는 시사점
 """
 

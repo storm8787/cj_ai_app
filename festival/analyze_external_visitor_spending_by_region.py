@@ -77,6 +77,11 @@ def analyze_external_visitor_spending_by_region():
     df_grouped["매출금액"] = df_grouped["매출금액"].apply(lambda x: f"{x:,}")
     df_grouped["비중(%)"] = df_grouped["비중(%)"].apply(lambda x: f"{x:.2f}%")
 
+    # ✅ top1 소비지역 비중(충주시 등)
+    top_region = df_grouped.iloc[0]
+    top_region_ratio = top_region["비중(%)"]
+    st.session_state["summary_external_top_region_ratio"] = top_region_ratio
+ 
     df_top10 = df_grouped.head(10)
 
     st.markdown("### 📊 외지인 소비지역 상위 10개 지역")

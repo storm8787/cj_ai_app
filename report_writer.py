@@ -51,35 +51,39 @@ def build_user_prompt(title, report_type, report_format, report_length, key_poin
     format_instruction = get_prompt_by_format(report_format)
     length_instruction = get_prompt_by_length(report_length)
 
-    # 🎯 행사보고일 경우 타임테이블 추가 지시
+    # 🎯 행사보고일 경우 특수 구조 지시
     timetable_instruction = ""
     if report_type == "행사보고":
         timetable_instruction = (
-            "보고서 말미에는 '**행사 일정표**'라는 제목과 함께 다음 예시처럼 Markdown 표 형태로 타임테이블을 작성할 것:\n\n"
+            "\n\n보고서 구성은 다음과 같은 4단계 구조로 작성할 것:\n"
+            "0. 행사 추진배경: 해당 행사의 추진 배경을 한두 문장으로 간략하게 서술할 것.\n"
+            "1. 행사 개요: ❍ 기호를 사용해 항목별로 정리 (예: 행사명, 일시, 장소, 참석자 등)\n"
+            "2. 시간표(안): 아래 형식과 같이 Markdown 표 형태로 작성할 것:\n\n"
             "| 시간    | 프로그램 항목             |\n"
             "|---------|---------------------------|\n"
             "| 10:00   | 개회식                    |\n"
             "| 10:20   | 금연아파트 지정서 수여식 |\n"
-            "| 10:40   | 주민참여 캠페인           |"
+            "| 10:40   | 주민참여 캠페인           |\n\n"
+            "3. 향후 계획: 후속 조치나 실무적 시사점을 포함할 것."
         )
 
     return f"""
-너는 지방자치단체 공무원을 위한 AI 보고서 생성기야. 반드시 다음 조건에 맞춰 작성할 것:
+너는 지방자치단체 공무원을 위한 AI 보고서 작성기야. 반드시 아래 조건을 충실히 따를 것:
 
-- 전체 문체는 '행정문서체'로 작성할 것. ('~되었음', '~임', '~필요함' 등 사용)
-- 전체 구성은 개괄식이고 불필요한 미사여구 없이 간결한 문장으로 작성할 것.
+- 전체 문장은 행정문서체로 작성할 것. (예: '~되었음', '~임', '~필요함')
+- 개괄식 구성으로 작성하며, 불필요한 수식어 없이 명확하고 간결한 문장으로 서술할 것.
 
 📌 제목: {title}  
-📄 유형: {report_type}  
+📄 보고서 유형: {report_type}  
 🧩 주요 키워드: {key_points}
 
-작성 지시:
+작성 지시사항:
 1. {type_instruction}
 2. {format_instruction}
 3. {length_instruction}
-4. {timetable_instruction}
+{timetable_instruction}
 
-보고서는 다음 구조를 따를 것:
+📑 보고서는 다음과 같은 구조를 따를 것:
 1. 제목
 2. 개요
 3. 주요 내용 (필요 시 번호, 기호 또는 표 포함)

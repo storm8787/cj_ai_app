@@ -137,8 +137,7 @@ def analyze_time_distribution():
             top_hour_all = all_ratios.idxmax()
             top_hour_all_val = all_ratios.max()
             st.session_state["summary_top_hour_all"] = f"{top_hour_all}({top_hour_all_val:.2f}%)"
-            st.write(summary_top_hour_all)
-
+            
         # 현지인 기준
         local_rows = final_df[final_df["구분"] == "현지인"]
         # 비율행이 아니라 수치행(명 단위)만 추출하도록 수정
@@ -202,9 +201,26 @@ def analyze_time_distribution():
             time_totals_local[group_name] = local_sum
             time_totals_tourist[group_name] = tourist_sum
 
-        # ✅ 세션에 따로 저장
-        st.session_state["summary_top_time_local"] = max(time_totals_local, key=time_totals_local.get)
-        st.session_state["summary_top_time_tourist"] = max(time_totals_tourist, key=time_totals_tourist.get)
+        # ✅ 종합 기준 (현지인 + 외지인)
+        combined_df = pd.concat([local_df, tourist_df], ignore_index=True)
+
+        def compute_top_time_ratio(df, label):
+            group_sums = {}
+            total_sum = 0
+            for group_name, cols in time_groups:
+                subtotal = df[cols].fillna(0).applymap(lambda x: int(str(x).replace(",", "").replace("명", ""))).sum().sum()
+                group_sums[group_name] = subtotal
+                total_sum += subtotal
+            top_time = max(group_sums, key=group_sums.get)
+            top_value = group_sums[top_time]
+            ratio = (top_value / total_sum) * 100 if total_sum else 0
+            st.session_state[f"summary_top_hour_{label}"] = f"{top_time}({ratio:.2f}%)"
+
+        # ✅ 각각 저장
+        compute_top_time_ratio(combined_df, "all")
+        compute_top_time_ratio(local_df, "local")
+        compute_top_time_ratio(tourist_df, "tourist")
+
 
         # ✅ 일자별 시간대 분포 요약
         for i in range(len(local_df)):

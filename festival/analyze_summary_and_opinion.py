@@ -68,15 +68,15 @@ def analyze_summary_overview(gpt_generate=True):
     local_ratio = (current_local / current_total * 100) if current_total else 0
     tourist_ratio = (current_tourist / current_total * 100) if current_total else 0
 
-    top_age = st.session_state.get("top_age_all", "")
-    top_weekday = st.session_state.get("top_weekday_all", "")
-    top_hour = st.session_state.get("top_hour_all", "")
-    top_age_local = st.session_state.get("top_age_local", "")
-    top_weekday_local = st.session_state.get("top_weekday_local", "")
-    top_hour_local = st.session_state.get("top_hour_local", "")
-    top_age_tourist = st.session_state.get("top_age_tourist", "")
-    top_weekday_tourist = st.session_state.get("top_weekday_tourist", "")
-    top_hour_tourist = st.session_state.get("top_hour_tourist", "")
+    top_age = st.session_state.get("summary_age_group_top", "")
+    top_weekday = st.session_state.get("summary_top_day_all", "")
+    top_hour = st.session_state.get("summary_top_hour_all", "")
+    top_age_local = st.session_state.get("summary_age_group_top_local", "")
+    top_weekday_local = st.session_state.get("summary_top_day_local", "")
+    top_hour_local = st.session_state.get("summary_top_hour_local", "")
+    top_age_tourist = st.session_state.get("summary_age_group_top_tourist", "")
+    top_weekday_tourist = st.session_state.get("summary_top_day_tourist", "")
+    top_hour_tourist = st.session_state.get("summary_top_hour_tourist", "")
 
     avg_daily = st.session_state.get("summary_daily_avg", 0)
     before_avg = st.session_state.get("summary_before_daily_avg", 0)

@@ -25,7 +25,7 @@ def load_daily_reference():
 def get_weekday_kor(date_str):
     try:
         date_obj = pd.to_datetime(date_str)
-        day_kor = ["월", "화", "수", "목", "금", "토", "일"]
+        day_kor = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
         return day_kor[date_obj.weekday()]
     except:
         return "요일없음"

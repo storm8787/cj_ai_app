@@ -93,6 +93,11 @@ def analyze_summary_overview(gpt_generate=True):
     total_sales = st.session_state.get("summary_card_total_sales", 0)
     daily_sales = st.session_state.get("summary_card_avg_sales_per_day", 0)
 
+    this_before = st.session_state["summary_sales_before_this"]   # 올해 직전 1주 매출액 (천원)
+    this_rate = st.session_state["summary_sales_change_this"]    # 올해 증감률 (%)
+
+    top_region_ratio = st.session_state["summary_external_top_region_ratio"]
+
     top_eup = st.session_state.get("top_eupmyeondong_name", "")
     eup_ratio = st.session_state.get("top_eupmyeondong_ratio", "")
 
@@ -116,12 +121,12 @@ def analyze_summary_overview(gpt_generate=True):
     st.markdown(f"""
 📍 축제 방문 외지인 관광객 {stay_ratio:.2f}%({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
-📍 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
-   ※ 축제장 푸드트럭 제외
+📍 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)으로 축제 전주**{this_before:,}천원**대비 **{this_rate:.2f}% 증가함
+   ※ 축제장소 내 푸드트럭은 사업자가 타지로 등록되어 집계에 미포함
 
 📍 **축제 방문 외지인**은 축제 후 충북 전역에서 소비활동을 하였으며,
-    충북내 소비금액의 81.92%가 충주시에서 소비함
-   - 이 중 **{top_eup}** 에서 추가 소비가 가낭 많이 이루어짐({eup_ratio})
+    충북내 소비금액의 {top_region_ratio}가 충주시에서 소비함
+   - 이 중 **{top_eup}** 에서 추가 소비가 가장 많이 이루어짐({eup_ratio})
 """)
 
     # ✅ 2단계: 마지막 문단 GPT 생성
@@ -136,7 +141,7 @@ def analyze_summary_overview(gpt_generate=True):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "너는 지방정부 축제 데이터를 분석하고 정책 시사점을 도출하는 전문가야."},
+                {"role": "system", "content": "너는 충주시 축제 데이터를 분석하고 정책 시사점을 도출하는 전문가야."},
                 {"role": "user", "content": final_prompt}
             ],
             temperature=0.5,

@@ -138,11 +138,7 @@ def analyze_age_group():
     # 외지인 기준 상위 연령대
     top_tourist = tourist_ratio_numeric.idxmax()
     top_tourist_value = tourist_ratio_numeric.max()
-    st.session_state["summary_age_group_top_tourist"] = f"{top_tourist}({top_tourist_value:.2f}%)"
-
-    st.session_state["summary_age_group_top"] = f"{top_total}({top_total_value:.2f}%)"
-    st.write("✅ summary_age_group_top 저장됨:", st.session_state["summary_age_group_top"])
-
+    st.session_state["summary_age_group_top_tourist"] = f"{top_tourist}({top_tourist_value:.2f}%)"   
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):

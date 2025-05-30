@@ -91,7 +91,8 @@ def analyze_before_after():
         st.session_state["summary_avg_local"] = local_avg_during
         st.session_state["summary_avg_tourist"] = tourist_avg_during
         st.session_state["summary_avg_total"] = total_during
-
+        st.session_state["summary_reference_avg"] = total_avg_2024
+        
         # ✅ GPT 시사점 생성
         with st.spinner("🤖 GPT 시사점 생성 중..."):
             name = st.session_state.get("festival_name", "본 축제")

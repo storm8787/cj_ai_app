@@ -51,7 +51,8 @@ def analyze_summary_overview(gpt_generate=True):
     last_tourist = st.session_state.get("summary_tourist_visitors_prev", 0)
 
     total_diff = current_total - last_total
-    total_trend = "증가" if total_diff > 0 else "감소" if total_diff < 0 else "변화 없음"
+    local_diff = current_local - last_local
+    tourist_diff = current_tourist - last_tourist
 
     # ✅ 증감 여부 문자열 변수 추가
     total_trend = "증가" if total_diff > 0 else "감소" if total_diff < 0 else "변화 없음"

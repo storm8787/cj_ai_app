@@ -137,9 +137,12 @@ def analyze_time_distribution():
             top_hour_all = all_ratios.idxmax()
             top_hour_all_val = all_ratios.max()
             st.session_state["summary_top_hour_all"] = f"{top_hour_all}({top_hour_all_val:.2f}%)"
+            st.write(summary_top_hour_all)
 
         # 현지인 기준
         local_rows = final_df[final_df["구분"] == "현지인"]
+        # 비율행이 아니라 수치행(명 단위)만 추출하도록 수정
+        #local_rows = final_df[(final_df["구분"] == "현지인") & (final_df["날짜"] != "")]
         if not local_rows.empty:
             local_row = local_rows.iloc[0]
             local_ratios = (

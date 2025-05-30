@@ -101,7 +101,7 @@ def analyze_summary_overview(gpt_generate=True):
    - 현지인: {current_local:,}명, 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
    - 외지인: {current_tourist:,}명, 전년 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
 
-🧬 종합 프로필  
+🧬 종합현황  
    - 전체: {top_age}, {top_weekday}, {top_hour}  
    - 현지인: {top_age_local}, {top_weekday_local}, {top_hour_local}  
    - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
@@ -113,7 +113,7 @@ def analyze_summary_overview(gpt_generate=True):
 🛌 외지인 중 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
 💰 총 소비매출액: **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
-※ 축제장 푸드트럭 제외
+   ※ 축제장 푸드트럭 제외
 
 🗺 외지인 소비의 81.92%가 충주시 내에서 발생  
    - 이 중 **{top_eup}** 지역의 비중이 가장 큼 ({eup_ratio})

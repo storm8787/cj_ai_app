@@ -36,8 +36,12 @@ def analyze_summary_and_opinion():
         analyze_final_opinion(gpt_generate=True)
 
 def analyze_summary_overview(gpt_generate=True):
-    # analyze_summary_and_opinion.py
-    st.write("🧪 디버깅 세션 상태", {k: v for k, v in st.session_state.items() if "summary" in k})
+    st.subheader("🔍 디버그: 세션 확인")
+    for k in ["summary_local_visitors", "summary_local_visitors_prev", 
+          "summary_tourist_visitors", "summary_tourist_visitors_prev",
+          "summary_total_visitors", "summary_total_visitors_prev"]:
+    st.write(f"{k}: {st.session_state.get(k)}")
+
 
     st.markdown("### 📝 분석요약")
     st.markdown("---")

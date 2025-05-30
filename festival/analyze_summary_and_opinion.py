@@ -46,9 +46,14 @@ def analyze_summary_overview(gpt_generate=True):
     current_total = st.session_state.get("summary_total_visitors", 0)
     current_local = st.session_state.get("summary_local_visitors", 0)
     current_tourist = st.session_state.get("summary_tourist_visitors", 0)
-    last_total = st.session_state.get("summary_total_visitors_lastyear", 0)
-    last_local = st.session_state.get("summary_local_visitors_lastyear", 0)
-    last_tourist = st.session_state.get("summary_tourist_visitors_lastyear", 0)
+    last_total = st.session_state.get("summary_total_visitors_prev", 0)
+    last_local = st.session_state.get("summary_local_visitors_prev", 0)
+    last_tourist = st.session_state.get("summary_tourist_visitors_prev", 0)
+
+    # ✅ 증감 여부 문자열 변수 추가
+    total_trend = "증가" if total_diff > 0 else "감소" if total_diff < 0 else "변화 없음"
+    local_trend = "증가" if local_diff > 0 else "감소" if local_diff < 0 else "변화 없음"
+    tourist_trend = "증가" if tourist_diff > 0 else "감소" if tourist_diff < 0 else "변화 없음"
 
     total_diff = current_total - last_total
     total_rate = (total_diff / last_total * 100) if last_total else 0
@@ -88,9 +93,9 @@ def analyze_summary_overview(gpt_generate=True):
     st.markdown(f"""
  본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 **{festival_name}** 방문객과 매출현황을 분석한 결과임
 
-❍ {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** 증가  
-   - 현지인: {current_local:,}명({local_ratio:.2f}%), 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
-   - 외지인: {current_tourist:,}명({tourist_ratio:.2f}%), 전년 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
+❍ {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** {total_trend}
+   - 현지인: {current_local:,}명, 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
+   - 외지인: {current_tourist:,}명, 전년 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
 
  종합 프로필  
    - 전체: {top_age}, {top_weekday}, {top_hour}  

@@ -121,13 +121,19 @@ def analyze_time_distribution():
     # ✅ 8번 분석기에서 재활용할 수 있도록 저장
     st.session_state["summary_time_distribution_df"] = final_df.copy()
 
-    # ✅ 상위 체류 시간대(전체, 현지인, 외지인) 추출 후 세션에 저장
     try:
         # 전체 기준
         all_rows = final_df[final_df["구분"] == "전체"]
         if not all_rows.empty:
             all_row = all_rows.iloc[0]
-            all_ratios = all_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            all_ratios = (
+                all_row.drop(["구분", "날짜"])
+                .astype(str)
+                .str.replace("명", "", regex=False)
+                .str.replace("%", "", regex=False)
+                .str.replace(",", "", regex=False)
+                .astype(float)
+            )
             top_hour_all = all_ratios.idxmax()
             top_hour_all_val = all_ratios.max()
             st.session_state["summary_top_hour_all"] = f"{top_hour_all}({top_hour_all_val:.2f}%)"
@@ -136,7 +142,14 @@ def analyze_time_distribution():
         local_rows = final_df[final_df["구분"] == "현지인"]
         if not local_rows.empty:
             local_row = local_rows.iloc[0]
-            local_ratios = local_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            local_ratios = (
+                local_row.drop(["구분", "날짜"])
+                .astype(str)
+                .str.replace("명", "", regex=False)
+                .str.replace("%", "", regex=False)
+                .str.replace(",", "", regex=False)
+                .astype(float)
+            )
             top_hour_local = local_ratios.idxmax()
             top_hour_local_val = local_ratios.max()
             st.session_state["summary_top_hour_local"] = f"{top_hour_local}({top_hour_local_val:.2f}%)"
@@ -145,12 +158,20 @@ def analyze_time_distribution():
         tourist_rows = final_df[final_df["구분"] == "외지인"]
         if not tourist_rows.empty:
             tourist_row = tourist_rows.iloc[0]
-            tourist_ratios = tourist_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            tourist_ratios = (
+                tourist_row.drop(["구분", "날짜"])
+                .astype(str)
+                .str.replace("명", "", regex=False)
+                .str.replace("%", "", regex=False)
+                .str.replace(",", "", regex=False)
+                .astype(float)
+            )
             top_hour_tourist = tourist_ratios.idxmax()
             top_hour_tourist_val = tourist_ratios.max()
             st.session_state["summary_top_hour_tourist"] = f"{top_hour_tourist}({top_hour_tourist_val:.2f}%)"
     except Exception as e:
         st.warning(f"⛔ 시간대별 top 추출 중 오류: {e}")
+
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):

@@ -111,7 +111,7 @@ def analyze_summary_overview(gpt_generate=True):
 
     st.markdown(f"""
 📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고, 전년도 일평균 수안보온천 관광객보다 **{reference_ratio:.2f}% 증가**하여  
-&nbsp;&nbsp;&nbsp;&nbsp;**{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인 """, unsafe_allow_html=True)
+&nbsp;&nbsp;&nbsp;&nbsp;**{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인 {before_avg},{reference_avg}""", unsafe_allow_html=True)
     
     st.markdown(f"""
 📍 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김

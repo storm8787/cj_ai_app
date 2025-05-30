@@ -90,8 +90,8 @@ def analyze_summary_overview(gpt_generate=True):
     stay_ratio = st.session_state.get("summary_visitor_after_24h_top1_ratio", "")
     stay_count = st.session_state.get("summary_visitor_after_24h_top1_count", 0)
 
-    total_sales = st.session_state.get("summary_total_sales", 0)
-    daily_sales = st.session_state.get("summary_daily_sales", 0)
+    total_sales = st.session_state.get("summary_card_total_sales", 0)
+    daily_sales = st.session_state.get("summary_card_avg_sales_per_day", 0)
 
     top_eup = st.session_state.get("top_eupmyeondong_name", "")
     eup_ratio = st.session_state.get("top_eupmyeondong_ratio", "")

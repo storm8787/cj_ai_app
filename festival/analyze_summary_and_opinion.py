@@ -94,6 +94,7 @@ def analyze_summary_overview(gpt_generate=True):
     daily_sales = st.session_state.get("summary_card_avg_sales_per_day", 0)
 
     this_before = st.session_state["summary_sales_before_this"]   # 올해 직전 1주 매출액 (천원)
+    this_before_per_day = st.session_state["summary_sales_before_this_per_day"]  # 올해 직전 1주 일평균 매출액 (천원)
     this_rate = st.session_state["summary_sales_change_this"]    # 올해 증감률 (%)
 
     top_region_ratio = st.session_state["summary_external_top_region_ratio"]
@@ -121,7 +122,8 @@ def analyze_summary_overview(gpt_generate=True):
     st.markdown(f"""
 📍 축제 방문 외지인 관광객 {stay_ratio:.2f}%({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
-📍 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)으로 축제 전주**{this_before:,}천원**대비 **{this_rate:.2f}% 증가함
+📍 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 : {daily_sales:,}천원)으로 축제 전주**{this_before:,}천원**
+(일평균 : {this_before_per_day}) 대비 **{this_rate:.2f}%** 증가함  
    ※ 축제장소 내 푸드트럭은 사업자가 타지로 등록되어 집계에 미포함
 
 📍 **축제 방문 외지인**은 축제 후 충북 전역에서 소비활동을 하였으며,

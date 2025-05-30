@@ -83,9 +83,9 @@ def analyze_summary_overview(gpt_generate=True):
     reference_avg = st.session_state.get("summary_reference_avg", 0)    # 전년도 일평균
 
     # 축제기간 일평균 관광객 수가 축제 5일 전 일평균 관광객 수 대비 몇 % 증가했는지 계산 (이전 수치가 0일 경우 0으로 처리)
-    before_ratio = (avg_daily / before_avg * 100) if before_avg else 0 
+    before_ratio = ((avg_daily-before_avg) / before_avg * 100) if before_avg else 0 
     # 축제기간 일평균 관광객 수가 전년도 수안보온천 일평균 관광객 수 대비 몇 % 증가했는지 계산 (기준 수치가 0일 경우 0으로 처리)
-    reference_ratio = (avg_daily / reference_avg * 100) if reference_avg else 0
+    reference_ratio = ((avg_daily-reference_avg) / reference_avg * 100) if reference_avg else 0
     
     stay_ratio = st.session_state.get("summary_visitor_after_24h_ratio", "")
     stay_count = st.session_state.get("summary_visitor_after_24h_count", 0)

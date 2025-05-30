@@ -121,30 +121,36 @@ def analyze_time_distribution():
     # ✅ 8번 분석기에서 재활용할 수 있도록 저장
     st.session_state["summary_time_distribution_df"] = final_df.copy()
 
-    # ✅ 상위 시간대(전체, 현지인, 외지인 기준) 추출
+    # ✅ 상위 체류 시간대(전체, 현지인, 외지인) 추출 후 세션에 저장
     try:
         # 전체 기준
-        all_df = final_df[final_df["구분"] == "전체"]
-        all_row = all_df.iloc[0]
-        top_hour_all_col = all_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float).idxmax()
-        top_hour_all_val = float(all_row[top_hour_all_col].replace("%", ""))
-        st.session_state["summary_top_hour_all"] = f"{top_hour_all_col}({top_hour_all_val:.2f}%)"
+        all_rows = final_df[final_df["구분"] == "전체"]
+        if not all_rows.empty:
+            all_row = all_rows.iloc[0]
+            all_ratios = all_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            top_hour_all = all_ratios.idxmax()
+            top_hour_all_val = all_ratios.max()
+            st.session_state["summary_top_hour_all"] = f"{top_hour_all}({top_hour_all_val:.2f}%)"
 
         # 현지인 기준
-        local_df = final_df[final_df["구분"] == "현지인"]
-        local_row = local_df.iloc[0]
-        top_hour_local_col = local_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float).idxmax()
-        top_hour_local_val = float(local_row[top_hour_local_col].replace("%", ""))
-        st.session_state["summary_top_hour_local"] = f"{top_hour_local_col}({top_hour_local_val:.2f}%)"
+        local_rows = final_df[final_df["구분"] == "현지인"]
+        if not local_rows.empty:
+            local_row = local_rows.iloc[0]
+            local_ratios = local_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            top_hour_local = local_ratios.idxmax()
+            top_hour_local_val = local_ratios.max()
+            st.session_state["summary_top_hour_local"] = f"{top_hour_local}({top_hour_local_val:.2f}%)"
 
         # 외지인 기준
-        tourist_df = final_df[final_df["구분"] == "외지인"]
-        tourist_row = tourist_df.iloc[0]
-        top_hour_tourist_col = tourist_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float).idxmax()
-        top_hour_tourist_val = float(tourist_row[top_hour_tourist_col].replace("%", ""))
-        st.session_state["summary_top_hour_tourist"] = f"{top_hour_tourist_col}({top_hour_tourist_val:.2f}%)"
+        tourist_rows = final_df[final_df["구분"] == "외지인"]
+        if not tourist_rows.empty:
+            tourist_row = tourist_rows.iloc[0]
+            tourist_ratios = tourist_row.drop(["구분", "날짜"]).astype(str).str.replace("%", "").astype(float)
+            top_hour_tourist = tourist_ratios.idxmax()
+            top_hour_tourist_val = tourist_ratios.max()
+            st.session_state["summary_top_hour_tourist"] = f"{top_hour_tourist}({top_hour_tourist_val:.2f}%)"
     except Exception as e:
-        st.warning(f"시간대 분석 중 오류 발생: {e}")
+        st.warning(f"⛔ 시간대별 top 추출 중 오류: {e}")
 
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):

@@ -81,6 +81,10 @@ def analyze_sales_before_during():
             ]
         })
 
+        # ✅ 세션 저장 (올해 기준)
+        st.session_state["summary_sales_before_this"] = this_before  # 올해 직전 1주 매출액 (천원)
+        st.session_state["summary_sales_change_this"] = this_rate    # 올해 증감률 (%)
+
         #st.subheader("📊 전·중 매출 비교 요약표")
         st.dataframe(df.set_index("구분"))
 

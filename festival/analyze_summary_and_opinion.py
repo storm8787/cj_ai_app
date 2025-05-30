@@ -97,7 +97,7 @@ def analyze_summary_overview(gpt_generate=True):
     st.markdown(f"""
 📊 ##본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 **{festival_name}** 방문객과 매출현황을 분석한 결과임##
 
-👥 {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** {total_trend}
+📍 {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** {total_trend}
    - 현지인: {current_local:,}명, 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
    - 외지인: {current_tourist:,}명, 전년 대비 {abs(tourist_diff):,}명({tourist_rate:.2f}%) {'증가' if tourist_diff >= 0 else '감소'}
 
@@ -106,16 +106,16 @@ def analyze_summary_overview(gpt_generate=True):
    - 현지인: {top_age_local}, {top_weekday_local}, {top_hour_local}  
    - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
 
-📈 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고,
+📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고,
     전년도 일평균 수안보온천 관광객 보다 **{reference_ratio:.2f}% 증가**
     {festival_name}이 지역 관광 수요를 효과적으로 견인한 것을 확인
 
-🛌 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
+📍 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
-💰 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
+📍 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
    ※ 축제장 푸드트럭 제외
 
-🗺 **축제 방문 외지인**은 축제 후 충북 전역에서 소비활동을 하였으며,
+📍 **축제 방문 외지인**은 축제 후 충북 전역에서 소비활동을 하였으며,
     충북내 소비금액의 81.92%가 충주시에서 소비함
    - 이 중 **{top_eup}** 에서 추가 소비가 가낭 많이 이루어짐({eup_ratio})
 """)

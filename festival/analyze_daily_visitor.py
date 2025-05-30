@@ -102,15 +102,15 @@ def analyze_daily_visitor():
         df["요일"] = df["일자"].apply(get_weekday_kor)
         df["비율_전체"] = df["합계"] / total_all
         top_all_row = df.loc[df["비율_전체"].idxmax()]
-        top_day_all = f"{top_all_row['요일']}({top_all_row['비율_전체'] * 100:.2f}%)"+ "%"
+        top_day_all = f"{top_all_row['요일']}({top_all_row['비율_전체'] * 100:.2f}%)"
 
         df["비율_현지인"] = df["현지인"] / total_local
         top_local_row = df.loc[df["비율_현지인"].idxmax()]
-        top_day_local = f"{top_local_row['요일']}({top_local_row['비율_현지인'] * 100:.2f}%)"+ "%"
+        top_day_local = f"{top_local_row['요일']}({top_local_row['비율_현지인'] * 100:.2f}%)"
 
         df["비율_외지인"] = df["외지인"] / total_tourist
         top_tourist_row = df.loc[df["비율_외지인"].idxmax()]
-        top_day_tourist = f"{top_tourist_row['요일']}({top_tourist_row['비율_외지인'] * 100:.2f}%)"+ "%"
+        top_day_tourist = f"{top_tourist_row['요일']}({top_tourist_row['비율_외지인'] * 100:.2f}%)"
 
         # ✅ 요약값 저장
         st.session_state["summary_top_day_all"] = top_day_all

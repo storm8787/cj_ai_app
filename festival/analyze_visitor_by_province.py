@@ -36,8 +36,14 @@ def analyze_visitor_by_province():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    # ✅ 기준 방문객 수 입력
-    total_visitors = st.number_input("🔢 기준 외지인 방문객 수를 입력하세요", min_value=1, step=1)
+    # ✅ 기준 외지인 방문객 수 자동 불러오기
+    total_visitors = st.session_state.get("summary_tourist_visitors", 0)
+
+    if total_visitors <= 0:
+        st.warning("❗ 외지인 방문객 수가 설정되지 않았습니다. 1번 분석기를 먼저 실행하세요.")
+        return
+    else:
+        st.info(f"🔢 기준 외지인 방문객 수: **{total_visitors:,}명** (1번 분석기에서 자동 불러옴)")
 
     # ✅ 파일 업로드
     uploaded_file = st.file_uploader("📂 시도별 비율 데이터 엑셀 업로드", type=["xlsx"])

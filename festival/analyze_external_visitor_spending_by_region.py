@@ -104,6 +104,16 @@ def analyze_external_visitor_spending_by_region():
                 visitor_compare_lines.append(f"{region}: 방문객 {visitor_ratio:.2f}% / 소비 {row['비중(%)']}")
         visitor_str = "\n".join(visitor_compare_lines)
 
+        # ✅ top1 소비지역 비중(충주시 등)
+        top_region = df_grouped.iloc[0]
+        top_region_ratio = top_region["비중(%)"]
+        top_region_ratio_float = float(top_region_ratio.replace("%", ""))
+
+        # ✅ 세션 저장
+        st.session_state["summary_external_top_region_ratio"] = top_region_ratio
+        st.session_state["summary_external_top_region_ratio_float"] = top_region_ratio_float
+
+
         prompt = f"""다음은 {name}({period}, {location})의 외지인 소비지역 분석입니다.
 ▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨')  
 ▸ ▸ 기호로 시작하여 3~5문장으로 작성  

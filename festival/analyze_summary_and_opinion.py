@@ -40,7 +40,7 @@ def analyze_summary_overview(gpt_generate=True):
     for k in ["summary_local_visitors", "summary_local_visitors_prev", 
           "summary_tourist_visitors", "summary_tourist_visitors_prev",
           "summary_total_visitors", "summary_total_visitors_prev"]:
-    st.write(f"{k}: {st.session_state.get(k)}")
+        st.write(f"{k}: {st.session_state.get(k)}")
 
 
     st.markdown("### 📝 분석요약")

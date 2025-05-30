@@ -78,6 +78,11 @@ def analyze_summary_overview(gpt_generate=True):
     top_weekday_tourist = st.session_state.get("summary_top_day_tourist", "")
     top_hour_tourist = st.session_state.get("summary_top_hour_tourist", "")
 
+    # ✅ 외지인 유입지역 Top3 (시도 / 시군구 기준) 불러오기
+    top3_sido_str = st.session_state.get("summary_external_top_region_top3_str", "")
+    top3_gungu_str = st.session_state.get("summary_external_top_region_full_top3_str", "")
+
+
     avg_daily = st.session_state.get("summary_avg_during", 0)       # 축제기간 일평균
     before_avg = st.session_state.get("summary_avg_before", 0)      # 축제 전 일평균
     reference_avg = st.session_state.get("summary_reference_avg", 0)    # 전년도 일평균
@@ -119,6 +124,12 @@ def analyze_summary_overview(gpt_generate=True):
 📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고, 전년도 일평균 수안보온천 관광객보다 **{reference_ratio:.2f}% 증가**하여  
 &nbsp;&nbsp;&nbsp;&nbsp;**{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인 """, unsafe_allow_html=True)
     
+    st.markdown(f"""
+📍 외지인 유입지역으로는 시도 기준 **{top3_sido_str}** 순으로 방문이 많았으며,  
+&nbsp;&nbsp;&nbsp;&nbsp;시군 기준으로는 **{top3_gungu_str}** 순으로 나타남.
+""", unsafe_allow_html=True)
+
+
     st.markdown(f"""
 📍 축제 방문 외지인 관광객 {stay_ratio:.2f}%({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
@@ -178,7 +189,7 @@ def analyze_final_opinion(gpt_generate=True):
     top_region = st.session_state.get("summary_external_top_region_name", "")
     top_region_subs = st.session_state.get("summary_external_top_region_subs", [])
 
-    # 매출 관련
+        # 매출 관련
     this_rate = st.session_state.get("summary_sales_change_this", 0.0)
     top_sales_day = st.session_state.get("summary_sales_top_day", "")
 

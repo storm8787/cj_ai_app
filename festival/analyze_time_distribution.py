@@ -44,7 +44,7 @@ def analyze_time_distribution():
     # ✅ 템플릿 다운로드 버튼
     with open(template_path, "rb") as f:
         st.download_button(
-            label="📥 시간대별 관광객 템플릿 다운로드",
+            label="📥 3 템플릿 다운로드",
             data=f,
             file_name="3_template.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

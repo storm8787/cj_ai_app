@@ -80,7 +80,7 @@ def analyze_summary_overview(gpt_generate=True):
 
     avg_daily = st.session_state.get("summary_avg_during", 0)       # 축제기간 일평균
     before_avg = st.session_state.get("summary_avg_before", 0)      # 축제 전 일평균
-    reference_avg = st.session_state.get("summary_avg_total", 0)    # 전년도 일평균
+    reference_avg = st.session_state.get("summary_reference_avg", 0)    # 전년도 일평균
 
     # 축제기간 일평균 관광객 수가 축제 5일 전 일평균 관광객 수 대비 몇 % 증가했는지 계산 (이전 수치가 0일 경우 0으로 처리)
     before_ratio = (avg_daily / before_avg * 100) if before_avg else 0 
@@ -109,9 +109,9 @@ def analyze_summary_overview(gpt_generate=True):
    - 현지인: {top_age_local}, {top_weekday_local}, {top_hour_local}  
    - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
 
-📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고,
-    전년도 일평균 수안보온천 관광객 보다 **{reference_ratio:.2f}% 증가**하여\n
-    {festival_name}이 지역 관광 수요를 효과적으로 견인한 것을 확인
+📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고,  
+   전년도 일평균 수안보온천 관광객보다 **{reference_ratio:.2f}% 증가**하여  
+   **{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인
 
 📍 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 

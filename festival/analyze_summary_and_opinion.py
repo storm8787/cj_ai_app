@@ -194,7 +194,8 @@ def analyze_final_opinion(gpt_generate=True):
 
     if gpt_generate:
         prompt = f"""
-다음 정보를 바탕으로 행정문서체 형식으로 종합의견을 작성해줘. 각 문장은 '❍' 또는 '-' 로 시작하고, 3개 단락 이상으로 구성할 것.
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨') 
+▸ 다음 정보를 바탕으로 행정문서체 형식으로 종합의견을 작성해줘. 각 문장은 '❍' 또는 '-' 로 시작하고, 3개 단락 이상으로 구성할 것.
 - {year}년 {festival_name}은 전년도 대비 {total_rate:.2f}% 증가한 {current_total:,}명의 방문객을 기록함
 - 외지인 방문객은 전체의 {tourist_ratio:.2f}%({current_tourist:,}명)이며, 전년도 대비 {tourist_rate:.2f}% 증가
 - 일자별로는 {top_day} 방문이 가장 많았고, {top_region} 등 주요 도시에서 유입
@@ -202,6 +203,7 @@ def analyze_final_opinion(gpt_generate=True):
 - 주요 소비층은 {top_age_ratio1}, {top_age_ratio2} 등 중장년층이 다수
 - 외지인 소비는 전체 소비의 약 {tourist_sales_ratio:.2f}% 차지하며, 현지인보다 1인당 소비단가가 약 {price_gap:.1f}배 높음
 - 주요 소비지역은 {top_eup}, 기타 {', '.join(other_eup_list)} 지역 등으로 확산됨
+- 전반적으로 축제 개최의 긍정적인 요소에 대해서 부각할것
 - 마지막 문장은 축제 성과에 대한 긍정적 평가로 마무리할 것 (예: 지역경제 파급효과, 체류형 관광 기여 등)
 """
         response = client.chat.completions.create(

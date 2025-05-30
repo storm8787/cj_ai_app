@@ -154,6 +154,70 @@ def analyze_summary_overview(gpt_generate=True):
         st.markdown("#### 🧠 GPT 시사점 (정책적 해석)")
         st.write(response.choices[0].message.content)
 
+def analyze_final_opinion(gpt_generate=True):
+    st.markdown("### 💡 종합의견")
+    st.markdown("---")
+
+    # ✅ 세션 값 불러오기
+    festival_name = st.session_state.get("festival_name", "축제")
+    year = st.session_state.get("festival_year", "2025")
+    
+    # 방문객 관련
+    current_total = st.session_state.get("summary_total_visitors", 0)
+    last_total = st.session_state.get("summary_total_visitors_prev", 0)
+    total_diff = current_total - last_total
+    total_rate = (total_diff / last_total * 100) if last_total else 0
+
+    current_tourist = st.session_state.get("summary_tourist_visitors", 0)
+    tourist_ratio = (current_tourist / current_total * 100) if current_total else 0
+
+    tourist_diff = current_tourist - st.session_state.get("summary_tourist_visitors_prev", 0)
+    tourist_rate = (tourist_diff / st.session_state.get("summary_tourist_visitors_prev", 0) * 100) if st.session_state.get("summary_tourist_visitors_prev", 0) else 0
+
+    top_day = st.session_state.get("summary_top_day_all", "")
+    top_region = st.session_state.get("summary_external_top_region_name", "")
+    top_region_subs = st.session_state.get("summary_external_top_region_subs", [])
+
+    # 매출 관련
+    this_rate = st.session_state.get("summary_sales_change_this", 0.0)
+    top_sales_day = st.session_state.get("summary_sales_top_day", "")
+
+    # 소비층
+    top_age_ratio1 = st.session_state.get("summary_top_age_ratio1", "")
+    top_age_ratio2 = st.session_state.get("summary_top_age_ratio2", "")
+
+    # 소비 분포
+    tourist_sales_ratio = st.session_state.get("summary_tourist_sales_ratio", 0.0)
+    price_gap = st.session_state.get("summary_price_gap_tourist_local", 0.0)
+    top_eup = st.session_state.get("top_eupmyeondong_name", "")
+    other_eup_list = st.session_state.get("summary_sales_top_eups", [])
+
+    if gpt_generate:
+        prompt = f"""
+다음 정보를 바탕으로 행정문서체 형식으로 종합의견을 작성해줘. 각 문장은 '❍' 또는 '-' 로 시작하고, 3개 단락 이상으로 구성할 것.
+- {year}년 {festival_name}은 전년도 대비 {total_rate:.2f}% 증가한 {current_total:,}명의 방문객을 기록함
+- 외지인 방문객은 전체의 {tourist_ratio:.2f}%({current_tourist:,}명)이며, 전년도 대비 {tourist_rate:.2f}% 증가
+- 일자별로는 {top_day} 방문이 가장 많았고, {top_region} 등 주요 도시에서 유입
+- 매출은 직전 주 대비 {this_rate:.2f}% 증가하였으며, {top_sales_day}에 집중됨
+- 주요 소비층은 {top_age_ratio1}, {top_age_ratio2} 등 중장년층이 다수
+- 외지인 소비는 전체 소비의 약 {tourist_sales_ratio:.2f}% 차지하며, 현지인보다 1인당 소비단가가 약 {price_gap:.1f}배 높음
+- 주요 소비지역은 {top_eup}, 기타 {', '.join(other_eup_list)} 지역 등으로 확산됨
+- 마지막 문장은 축제 성과에 대한 긍정적 평가로 마무리할 것 (예: 지역경제 파급효과, 체류형 관광 기여 등)
+"""
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "너는 충주시 축제 데이터를 바탕으로 행정문서 스타일의 종합의견을 작성하는 공무원 전문가야."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=2000
+        )
+
+        st.markdown("#### 🧠 GPT 종합의견")
+        st.write(response.choices[0].message.content)
+
+
 
 # In[ ]:
 

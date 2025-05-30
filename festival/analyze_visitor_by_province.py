@@ -93,6 +93,16 @@ def analyze_visitor_by_province():
     # ✅ 저장
     st.session_state["summary_visitor_by_province_sido"] = result_df.copy()
 
+    # ✅ 추가 코드 (시도 Top3 관련 세션 저장)
+    top3_sido = grouped.head(3)
+    top3_sido_list = [
+        f"{row['시도']}({row['비율']:.2f}%)" for _, row in top3_sido.iterrows()
+    ]
+    st.session_state["summary_external_top_region_name"] = top3_sido_list[0]  # 예: 경기도(48.20%)
+    st.session_state["summary_external_top_region_ratio"] = top3_sido_list[0].split("(")[1].replace(")", "")  # 예: 48.20
+    st.session_state["summary_external_top_region_top3"] = top3_sido_list
+    st.session_state["summary_external_top_region_top3_str"] = ", ".join(top3_sido_list)  # 예: 경기도(48.20%), 충청북도(45.24%), 경상북도(15.24%)
+
     # -------------------------
     # ✅ 시군구별 외지인 방문객 분석 (full_region 기준)
     # -------------------------
@@ -151,6 +161,14 @@ def analyze_visitor_by_province():
     # ✅ 저장
     st.session_state["summary_visitor_by_province_gungu"] = result_gungu.copy()
 
+    # ✅ 추가 코드 (시군구 Top3 관련 세션 저장)
+    top3_gungu = grouped_gungu.sort_values(by="관광객수", ascending=False).head(3)
+    top3_gungu_list = [
+        f"{row['full_region'].split()[-1]}({row['비율']:.2f}%)" for _, row in top3_gungu.iterrows()
+    ]
+    st.session_state["summary_external_top_region_full_top3"] = top3_gungu_list
+    st.session_state["summary_external_top_region_full_top3_str"] = ", ".join(top3_gungu_list)  # 예: 청주시(12.40%), 음성군(9.10%), 용인시(7.60%)
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")
@@ -201,7 +219,7 @@ def analyze_visitor_by_province():
 
         # ✅ GPT 프롬프트 (시군구)
         prompt_gungu = f"""다음은 {name}({period}, {location}) 축제의 시군구별 외지인 방문객 분석 자료입니다.
-
+▸ 문체는 행정보고서 형식(예: '~로 분석됨', '~한 것으로 판단됨') 
 ▸ 각 문장은 ▸ 기호로 시작하되, 지나치게 짧지 않도록 자연스럽게 연결하여 행정 보고서에 적합한 흐름으로 작성할 것  
 ▸ 비중이 높은 시군구(상위 5~7곳 정도)를 수치와 함께 나열하고, 인접성·인구규모·접근성 등과 연결하여 해석  
 ▸ 충주시 인근 시군과 수도권 도시의 참여 양상을 비교하며, 권역 확산성과 접근성의 조화를 해석적으로 기술  

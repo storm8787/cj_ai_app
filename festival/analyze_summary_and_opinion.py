@@ -36,6 +36,9 @@ def analyze_summary_and_opinion():
         analyze_final_opinion(gpt_generate=True)
 
 def analyze_summary_overview(gpt_generate=True):
+    # analyze_summary_and_opinion.py
+    st.write("🧪 디버깅 세션 상태", {k: v for k, v in st.session_state.items() if "summary" in k})
+
     st.markdown("### 📝 분석요약")
     st.markdown("---")
 

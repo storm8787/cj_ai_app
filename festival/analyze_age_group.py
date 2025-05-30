@@ -140,6 +140,10 @@ def analyze_age_group():
     top_tourist_value = tourist_ratio_numeric.max()
     st.session_state["summary_age_group_top_tourist"] = f"{top_tourist}({top_tourist_value:.2f}%)"
 
+    st.session_state["summary_age_group_top"] = f"{top_total}({top_total_value:.2f}%)"
+    st.write("✅ summary_age_group_top 저장됨:", st.session_state["summary_age_group_top"])
+
+
     # ✅ GPT 시사점 생성
     with st.spinner("🤖 GPT 시사점 생성 중..."):
         name = st.session_state.get("festival_name", "본 축제")

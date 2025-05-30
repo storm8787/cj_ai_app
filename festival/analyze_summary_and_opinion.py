@@ -110,7 +110,7 @@ def analyze_summary_overview(gpt_generate=True):
    - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
   
 📍 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고, 전년도 일평균 수안보온천 관광객보다 **{reference_ratio:.2f}% 증가**하여  
-   **{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인
+   &nbsp;&nbsp;&nbsp;**{festival_name}**이 지역 관광 수요를 효과적으로 견인한 것을 확인
 
 📍 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 

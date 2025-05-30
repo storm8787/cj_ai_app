@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import streamlit as st
@@ -95,7 +95,7 @@ def analyze_summary_overview(gpt_generate=True):
 
     # ✅ 1단계: 마크다운 요약 먼저 출력
     st.markdown(f"""
-📊 본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 **{festival_name}** 방문객과 매출현황을 분석한 결과임
+📊 ##본 분석은 KT 관광인구 / 국민카드 매출 데이터를 기초로 시장점유율에 따른 보정계수를 적용·산출한 **{festival_name}** 방문객과 매출현황을 분석한 결과임##
 
 👥 {year}년 {festival_name}의 총 관광객은 **{current_total:,}명**으로 전년 **{last_total:,}명** 대비 **{total_diff:,}명({total_rate:.2f}%)** {total_trend}
    - 현지인: {current_local:,}명, 전년 대비 {abs(local_diff):,}명({local_rate:.2f}%) {'증가' if local_diff >= 0 else '감소'}  
@@ -106,17 +106,18 @@ def analyze_summary_overview(gpt_generate=True):
    - 현지인: {top_age_local}, {top_weekday_local}, {top_hour_local}  
    - 외지인: {top_age_tourist}, {top_weekday_tourist}, {top_hour_tourist}
 
-📈 축제기간 일평균 관광객: **{avg_daily:,}명**  
-   ⏱ 축제 5일 전 대비 {before_ratio:.2f}% 증가  
-   📊 전년도 {festival_name} 일평균 대비 {reference_ratio:.2f}% 증가
+📈 축제기간 중 일평균 관광객은 **{avg_daily:,}명**으로 축제 5일전 대비 **{before_ratio:.2f}% 증가**했고,
+    전년도 일평균 수안보온천 관광객 보다 **{reference_ratio:.2f}% 증가**
+    {festival_name}이 지역 관광 수요를 효과적으로 견인한 것을 확인
 
-🛌 외지인 중 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
+🛌 축제 방문 외지인 관광객 {stay_ratio}({stay_count:,}명)는 하루 이상 충주에 체류하며 연계관광을 즐김
 
-💰 총 소비매출액: **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
+💰 축제기간 주변 총 소비 매출액은 **{total_sales:,}천원** (일평균 {daily_sales:,}천원)  
    ※ 축제장 푸드트럭 제외
 
-🗺 외지인 소비의 81.92%가 충주시 내에서 발생  
-   - 이 중 **{top_eup}** 지역의 비중이 가장 큼 ({eup_ratio})
+🗺 **축제 방문 외지인**은 축제 후 충북 전역에서 소비활동을 하였으며,
+    충북내 소비금액의 81.92%가 충주시에서 소비함
+   - 이 중 **{top_eup}** 에서 추가 소비가 가낭 많이 이루어짐({eup_ratio})
 """)
 
     # ✅ 2단계: 마지막 문단 GPT 생성
@@ -140,4 +141,10 @@ def analyze_summary_overview(gpt_generate=True):
 
         st.markdown("#### 🧠 GPT 시사점 (정책적 해석)")
         st.write(response.choices[0].message.content)
+
+
+# In[ ]:
+
+
+
 

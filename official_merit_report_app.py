@@ -116,17 +116,17 @@ def create_official_merit_report():
             max_value=datetime.date.today()
         ).strftime("%Y년 %m월 %d일")
 
-        st.markdown("### 주요경력 (최근 3건 입력 가능)")
-        career_entries = []
-        for i in range(3):
-            cols = st.columns([1, 3])
-            with cols[0]:
-                date = st.date_input(f"경력 {i+1} 날짜", key=f"career_date_{i}")
-            with cols[1]:
-                text = st.text_input(f"경력 {i+1} 내용 (부서 및 업무)", key=f"career_text_{i}")
-            if text:
-                formatted = f"{date.strftime('%Y.%m')} {text}"
-                career_entries.append(formatted)
+        #st.markdown("### 주요경력 (최근 3건 입력 가능)")
+        #career_entries = []
+        #for i in range(3):
+        #    cols = st.columns([1, 3])
+        #    with cols[0]:
+        #        date = st.date_input(f"경력 {i+1} 날짜", key=f"career_date_{i}")
+        #    with cols[1]:
+        #        text = st.text_input(f"경력 {i+1} 내용 (부서 및 업무)", key=f"career_text_{i}")
+        #    if text:
+        #        formatted = f"{date.strftime('%Y.%m')} {text}"
+        #        career_entries.append(formatted)
 
         st.markdown("### \U0001F3C6 표창 종류")
         award_type = st.text_input("예: 대통령 표창, 국무총리 표창, (행정안전부)장관 표창, 충청북도지사 표창 등")

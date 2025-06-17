@@ -128,6 +128,8 @@ def create_official_merit_report():
         #        formatted = f"{date.strftime('%Y.%m')} {text}"
         #        career_entries.append(formatted)
 
+        career_entries = []
+
         st.markdown("### \U0001F3C6 표창 종류")
         award_type = st.text_input("예: 대통령 표창, 국무총리 표창, (행정안전부)장관 표창, 충청북도지사 표창 등")
 

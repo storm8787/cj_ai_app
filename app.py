@@ -18,6 +18,7 @@ from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메
 from data_validator_app import data_validator_app
 from official_merit_report_app import create_official_merit_report
 from report_writer import report_writer_app
+from adress_geocoder import rungeocoding_tool
 
 def main():
     st.sidebar.title("🧰 기능 선택")
@@ -28,6 +29,7 @@ def main():
         "(생성형AI) 공적조서 생성기",
         "(생성형AI) 빅데이터 분석기",
         "(업무자동화) 엑셀 취합기",
+        "(업무지원) 주소-좌표 변환기",
         "(생성형AI) 업무보고 생성기(개발중)",
         "(생성형AI) 공공데이터 검증기(개발중)"
     ]
@@ -87,6 +89,8 @@ def main():
         create_official_merit_report()
     elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기(개발중)":
         report_writer_app()        
+    elif st.session_state.selected_app == "(업무지원) 주소-좌표 변환기":
+        run_geocoding_tool()        
 
 if __name__ == "__main__":
     main()

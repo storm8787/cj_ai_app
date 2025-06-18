@@ -18,11 +18,11 @@ def run_geocoding_tool():
 
     # 1. 변환 방향 선택
     st.markdown("### 📌 변환 방향")
-    direction = st.radio(["주소 → 좌표", "좌표 → 주소"], horizontal=True)
+    direction = st.radio("", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
     
     # 2. 처리 방식 선택
     st.markdown("### 🛠️ 처리 방식")
-    mode = st.radio(["건별", "파일별"], horizontal=True)
+    mode = st.radio("", ["건별", "파일별"], horizontal=True)
 
     if direction == "주소 → 좌표":
         if mode == "건별":

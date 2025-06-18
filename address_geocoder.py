@@ -78,9 +78,19 @@ def run_geocoding_tool():
 
             if st.button("주소 조회"):
                 try:
-                    location = geolocator.reverse(f"{lat}, {lon}")
+                    location = geolocator.reverse(f"{lat}, {lon}", language="ko")
                     if location:
-                        st.success(f"📍 주소: {location.address}")
+                        addr = location.raw.get("address", {})
+                        road = addr.get("road", "")
+                        house_number = addr.get("house_number", "")
+                        dong = addr.get("suburb", "") or addr.get("neighbourhood", "")
+                        city = addr.get("city", "") or addr.get("town", "") or addr.get("county", "")
+                        state = addr.get("state", "")
+                        postcode = addr.get("postcode", "")
+            
+                        # 한국식 주소 구성
+                        full_address = f"{state} {city} {dong} {road} {house_number}".strip()
+                        st.success(f"📍 주소: {full_address}")
                     else:
                         st.warning("결과 없음")
                 except Exception as e:

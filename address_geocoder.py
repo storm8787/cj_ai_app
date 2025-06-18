@@ -10,7 +10,10 @@ import requests
 import io
 
 VWORLD_API_KEY = st.secrets["VWORLD"]["KEY"]
-NAVER_CLIENT_ID = st.secrets["NAVER_MAP"]["CLIENT_ID"]
+
+NAVER_CLIENT_ID = st.secrets["NAVER_API"]["client_id"]
+NAVER_CLIENT_SECRET = st.secrets["NAVER_API"]["client_secret"]
+
 
 def run_geocoding_tool():
     st.title("📍 주소-좌표 변환기 (VWorld + 네이버맵)")

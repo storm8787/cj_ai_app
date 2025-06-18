@@ -6,9 +6,10 @@
 
 import streamlit as st
 import pandas as pd
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
+import requests
 import io
+
+KAKAO_API_KEY = st.secrets["KAKAO_API_KEY"]
 
 def run_geocoding_tool():
     st.header("📍 (업무지원) 주소-좌표 변환기")
@@ -19,24 +20,20 @@ def run_geocoding_tool():
     # 2. 처리 방식 선택
     mode = st.radio("처리 방식을 선택하세요", ["건별 입력", "파일 업로드"], horizontal=True)
 
-    geolocator = Nominatim(user_agent="cj_ai_app")
-    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-    reverse = RateLimiter(geolocator.reverse, min_delay_seconds=1)
-
     # -------------------
     # 주소 → 좌표
     # -------------------
     if direction == "주소 → 좌표":
         if mode == "건별 입력":
-            address = st.text_input("📌 주소를 입력하세요")
+            address = st.text_input("📌 주소를 입력하세요", placeholder="예: 충청북도 충주시 호암수청1로 29")
 
             if st.button("좌표 변환"):
-                location, level = resolve_address(address, geolocator)
-                if location:
-                    st.success(f"위도: {location.latitude}, 경도: {location.longitude}")
-                    st.info(f"변환정확도: {level}")
+                result = get_coords_from_address(address)
+                if result["위도"] and result["경도"]:
+                    st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']}")
+                    st.info(f"정확도구분: {result['정확도구분']}")
                 else:
-                    st.error("⚠️ 변환 실패")
+                    st.error("⚠️ 변환 실패: " + result["정확도구분"])
 
         else:
             st.download_button(
@@ -51,12 +48,12 @@ def run_geocoding_tool():
                 df = pd.read_excel(uploaded)
                 results = []
                 for addr in df["주소"]:
-                    location, level = resolve_address(addr, geolocator)
+                    res = get_coords_from_address(addr)
                     results.append({
                         "주소": addr,
-                        "위도": location.latitude if location else None,
-                        "경도": location.longitude if location else None,
-                        "변환정확도": level
+                        "위도": res["위도"],
+                        "경도": res["경도"],
+                        "정확도구분": res["정확도구분"]
                     })
 
                 result_df = pd.DataFrame(results)
@@ -78,23 +75,13 @@ def run_geocoding_tool():
 
             if st.button("주소 조회"):
                 try:
-                    location = geolocator.reverse(f"{lat}, {lon}", language="ko")
-                    if location:
-                        addr = location.raw.get("address", {})
-                        road = addr.get("road", "")
-                        house_number = addr.get("house_number", "")
-                        dong = addr.get("suburb", "") or addr.get("neighbourhood", "")
-                        city = addr.get("city", "") or addr.get("town", "") or addr.get("county", "")
-                        state = addr.get("state", "")
-                        postcode = addr.get("postcode", "")
-            
-                        # 한국식 주소 구성
-                        full_address = f"{state} {city} {dong} {road} {house_number}".strip()
-                        st.success(f"📍 주소: {full_address}")
+                    result = get_address_from_coords(lat, lon)
+                    if result["주소"]:
+                        st.success("📍 주소: " + result["주소"])
                     else:
-                        st.warning("결과 없음")
-                except Exception as e:
-                    st.error("좌표 형식을 확인해주세요")
+                        st.warning("📭 결과 없음")
+                except:
+                    st.error("⚠️ 형식 오류 또는 API 오류")
 
         else:
             st.download_button(
@@ -110,19 +97,12 @@ def run_geocoding_tool():
                 results = []
                 for i, row in df.iterrows():
                     lat, lon = row["위도"], row["경도"]
-                    try:
-                        location = geolocator.reverse(f"{lat}, {lon}")
-                        results.append({
-                            "위도": lat,
-                            "경도": lon,
-                            "주소": location.address if location else "결과 없음"
-                        })
-                    except:
-                        results.append({
-                            "위도": lat,
-                            "경도": lon,
-                            "주소": "오류"
-                        })
+                    res = get_address_from_coords(lat, lon)
+                    results.append({
+                        "위도": lat,
+                        "경도": lon,
+                        "주소": res["주소"]
+                    })
 
                 result_df = pd.DataFrame(results)
                 st.success("✅ 주소 조회 완료")
@@ -130,12 +110,52 @@ def run_geocoding_tool():
                 download = to_excel(result_df)
                 st.download_button("📥 결과 다운로드", data=download, file_name="result_coord_to_addr.xlsx")
 
+
+# -----------------------------
+# 주소 → 좌표 변환 함수 (카카오 API)
+# -----------------------------
+def get_coords_from_address(address):
+    url = "https://dapi.kakao.com/v2/local/search/address.json"
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    params = {"query": address}
+    r = requests.get(url, headers=headers, params=params)
+    if r.status_code == 200:
+        documents = r.json().get("documents", [])
+        if documents:
+            doc = documents[0]
+            return {
+                "위도": doc["y"],
+                "경도": doc["x"],
+                "정확도구분": "정좌표"
+            }
+        else:
+            return {"위도": None, "경도": None, "정확도구분": "주소없음"}
+    return {"위도": None, "경도": None, "정확도구분": "API오류"}
+
+# -----------------------------
+# 좌표 → 주소 변환 함수 (카카오 API)
+# -----------------------------
+def get_address_from_coords(lat, lon):
+    url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    params = {"x": lon, "y": lat}
+    r = requests.get(url, headers=headers, params=params)
+    if r.status_code == 200:
+        docs = r.json().get("documents", [])
+        if docs:
+            address = docs[0].get("address", {})
+            full = f"{address.get('region_1depth_name', '')} {address.get('region_2depth_name', '')} {address.get('region_3depth_name', '')} {address.get('road_name', '')} {address.get('main_address_no', '')}"
+            return {"주소": full.strip()}
+        else:
+            return {"주소": None}
+    return {"주소": None}
+
 # -----------------------------
 # 템플릿 생성 함수
 # -----------------------------
 def generate_template(template_type="address"):
     if template_type == "address":
-        df = pd.DataFrame({"주소": ["예: 충청북도 충주시 칠금동 123-4"]})
+        df = pd.DataFrame({"주소": ["충청북도 충주시 호암수청1로 29"]})
     elif template_type == "coordinate":
         df = pd.DataFrame({"위도": ["36.991"], "경도": ["127.925"]})
     else:
@@ -153,30 +173,4 @@ def to_excel(df):
     df.to_excel(output, index=False)
     output.seek(0)
     return output
-
-# -----------------------------
-# 주소 정밀도 보정 판단
-# -----------------------------
-def resolve_address(address, geolocator):
-    location = geolocator.geocode(address)
-    if location:
-        return location, "정좌표"
-
-    try:
-        # 예: '충북 충주시' 형태
-        location = geolocator.geocode(" ".join(address.split()[:2]))
-        if location:
-            return location, "인근주소"
-    except:
-        pass
-
-    try:
-        # 예: '충북'만으로
-        location = geolocator.geocode(address.split()[0])
-        if location:
-            return location, "시군구 대표좌표"
-    except:
-        pass
-
-    return None, "변환 실패"
 

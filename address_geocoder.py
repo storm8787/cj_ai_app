@@ -16,13 +16,17 @@ NAVER_CLIENT_SECRET = st.secrets["NAVER_API"]["client_secret"]
 def run_geocoding_tool():
     st.title("📍 주소-좌표 변환기")
 
-    # 1. 변환 방향 선택
-    st.markdown("#### 📌 변환 방향")
-    direction = st.radio("", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
-    
-    # 2. 처리 방식 선택
-    st.markdown("#### 🛠️ 처리 방식")
-    mode = st.radio("", ["건별", "파일별"], horizontal=True)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        with st.container():
+            # 1. 변환 방향 선택
+            st.markdown("#### 📌 변환 방향")
+            direction = st.radio("", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
+    with col2:
+        # 2. 처리 방식 선택
+        st.markdown("#### 🛠️ 처리 방식")
+        mode = st.radio("", ["건별", "파일별"], horizontal=True)
 
     if direction == "주소 → 좌표":
         if mode == "건별":

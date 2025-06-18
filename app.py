@@ -18,7 +18,7 @@ from festival_analysis_app import festival_analysis_app  # ✅ 축제 분석 메
 from data_validator_app import data_validator_app
 from official_merit_report_app import create_official_merit_report
 from report_writer import report_writer_app
-from address_geocoder import rungeocoding_tool
+from address_geocoder import run_geocoding_tool
 
 def main():
     st.sidebar.title("🧰 기능 선택")

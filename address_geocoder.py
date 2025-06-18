@@ -13,6 +13,8 @@ KAKAO_API_KEY = st.secrets["KAKAO_API_KEY"]
 
 def run_geocoding_tool():
     st.header("📍 (업무지원) 주소-좌표 변환기")
+    st.write("🔐 카카오 API Key:", KAKAO_API_KEY)
+
 
     # 1. 변환 방향 선택
     direction = st.radio("변환 방향을 선택하세요", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)

@@ -121,6 +121,10 @@ def get_coords_from_address(address):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"query": address}
     r = requests.get(url, headers=headers, params=params)
+
+    r = requests.get(url, headers=headers, params=params)
+    st.write("API 응답 내용:", r.status_code, r.text)  # 👈 추가
+
     if r.status_code == 200:
         documents = r.json().get("documents", [])
         if documents:

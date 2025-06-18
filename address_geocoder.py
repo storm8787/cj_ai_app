@@ -10,16 +10,13 @@ import requests
 import io
 
 VWORLD_API_KEY = st.secrets["VWORLD"]["KEY"]
-
 NAVER_CLIENT_ID = st.secrets["NAVER_API"]["client_id"]
 NAVER_CLIENT_SECRET = st.secrets["NAVER_API"]["client_secret"]
 
-
 def run_geocoding_tool():
-    st.title("📍 주소-좌표 변환기 (VWorld + 네이버맵)")
-    
+    st.title("📍 주소-좌표 변환기")
+
     direction = st.radio("변환 방향", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
-    show_map = st.checkbox("🗺️ 지도 보기 (네이버맵)", value=False)
 
     if direction == "주소 → 좌표":
         address = st.text_input("📌 주소 입력", placeholder="예: 충청북도 충주시 으뜸로 21")
@@ -27,7 +24,8 @@ def run_geocoding_tool():
             result = get_coords_from_vworld(address)
             if result["위도"] and result["경도"]:
                 st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']}")
-                if show_map:
+                
+                if st.toggle("🗺️ 지도 보기"):
                     draw_naver_map(result["위도"], result["경도"])
             else:
                 st.error("❌ 변환 실패: " + result["오류"])
@@ -39,7 +37,8 @@ def run_geocoding_tool():
             result = get_address_from_vworld(lat, lon)
             if result["주소"]:
                 st.success("📍 주소: " + result["주소"])
-                if show_map:
+                
+                if st.toggle("🗺️ 지도 보기"):
                     draw_naver_map(lat, lon)
             else:
                 st.warning("📭 결과 없음")

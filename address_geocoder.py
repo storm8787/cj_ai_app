@@ -94,7 +94,7 @@ def run_geocoding_tool():
                     else:
                         st.warning("결과 없음")
                 except Exception as e:
-                    st.error("좌표 형식을 확인해주세요.")
+                    st.error("좌표 형식을 확인해주세요")
 
         else:
             st.download_button(

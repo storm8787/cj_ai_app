@@ -148,9 +148,9 @@ def handle_single_address_to_coords():
         else:
             st.error("❌ 변환 실패: " + res["오류"])
 
-    if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
-        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
-        st.info(st.session_state.get("coord_msg", ""))
+    #if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
+        #draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        #st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
 # ✅ 좌표 → 주소 (건별)
@@ -172,9 +172,9 @@ def handle_single_coords_to_address():
         else:
             st.warning("📭 결과 없음")
 
-    if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
-        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
-        st.info(st.session_state.get("coord_msg", ""))
+    #if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
+        #draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        #st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
 # ✅ 파일 업로드용 주소 → 좌표 (핵심부만)

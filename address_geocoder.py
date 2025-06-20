@@ -127,9 +127,7 @@ def draw_kakao_static_map(lat, lon):
     </html>
     """
     # sandbox=False ⇒ Mixed-content·CSP 디버깅 시 사용, 정식 배포 시 True 로
-    st.components.v1.html(html, height=400, scrolling=False, sandbox=False)
-
-
+    st.components.v1.html(html, height=400, scrolling=False)
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

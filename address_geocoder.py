@@ -9,7 +9,7 @@ import pandas as pd
 import requests
 import io
 
-KAKAO_API_KEY = st.secrets["KAKAO_API"]["key"]
+KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
 
 # ─────────────────────────────────────────────
 # ✅ 실행 함수

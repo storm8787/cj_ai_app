@@ -142,7 +142,7 @@ def draw_folium_map(lat, lon):
     folium.Marker([lat, lon], tooltip="📍 위치").add_to(m)
 
     # 지도를 스트림릿에 표시
-    st_folium(m, width=900, height=500, returned_objects=[])
+    st_folium(m, width=1200, height=500, returned_objects=[])
 
 # ─────────────────────────────────────────────
 # ✅ 지도 표시 함수(파일별)
@@ -157,20 +157,27 @@ def draw_folium_map_multiple(df):
         st.warning("⚠️ 유효한 좌표 데이터가 없어 지도를 생성할 수 없습니다.")
         return
 
-    # ✅ 지도 생성
+    # ✅ 지도 생성 (초기 중심값은 의미 없음, fit_bounds로 덮어씀)
     m = folium.Map(location=[df["위도"].mean(), df["경도"].mean()], zoom_start=12, tiles="CartoDB positron")
 
+    bounds = []  # 마커 경계 저장용
     for _, row in df.iterrows():
         try:
             lat = float(row["위도"])
             lon = float(row["경도"])
             addr = row.get("주소", "")
             folium.Marker([lat, lon], tooltip=addr).add_to(m)
+            bounds.append([lat, lon])  # 좌표 리스트에 추가
         except Exception as e:
             print(f"🚨 마커 생성 중 오류: {e}")
             continue
 
-    st_folium(m, width=900, height=500, key="map_multiple")
+    # ✅ 모든 마커를 포함하는 범위로 지도 줌 자동 조정
+    if bounds:
+        m.fit_bounds(bounds)
+
+    st_folium(m, width=1200, height=500, key="map_multiple")
+
 
 
 # ─────────────────────────────────────────────
@@ -259,7 +266,7 @@ def handle_file_address_to_coords():
     st.dataframe(out_df)
     to_excel_download(out_df, "결과_주소→좌표.xlsx")
 
-    if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
+    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
         valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
         valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
@@ -298,7 +305,7 @@ def handle_file_coords_to_address():
         st.dataframe(result_df)
         to_excel_download(result_df, "결과_좌표→주소.xlsx")
 
-        if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
+        if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
             valid_df = out_df.dropna(subset=["위도", "경도"])
             valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
             valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")

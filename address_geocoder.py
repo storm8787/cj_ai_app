@@ -11,14 +11,187 @@ import io
 
 KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
 
+# ✅ 행정동 중심좌표 DB (직접 수집한 것 기반)
+dong_coords = {
+    "주덕읍": ("36.9756382529379", "127.795607766653"),
+    "살미면": ("36.9053897150325", "127.964612737336"),
+    "수안보면": ("36.8472710272136", "127.994785817453"),
+    "대소원면": ("36.977810921957", "127.81798438609"),
+    "신니면": ("36.995573390012", "127.736394413436"),
+    "노은면": ("37.0481450135857", "127.754137176945"),
+    "앙성면": ("37.1091674050492", "127.750768224757"),
+    "중앙탑면": ("37.028931544342", "127.857035068528"),
+    "금가면": ("37.0430221614579", "127.924478732073"),
+    "동량면": ("37.0263327303528", "127.963254082287"),
+    "산척면": ("37.0816686531557", "127.9559645917"),
+    "엄정면": ("37.0866781306916", "127.914877536217"),
+    "소태면": ("37.1097895873743", "127.847739119082"),
+    "성내.충인동": ("36.9734381778844", "127.933869282965"),
+    "교현.안림동": ("36.9747966497151", "127.935282939261"),
+    "교현2동": ("36.9814769299978", "127.929102109455"),
+    "용산동": ("36.9642270579558", "127.938737856086"),
+    "지현동": ("36.9682108608662", "127.932188386436"),
+    "문화동": ("36.9716759115419", "127.925560081272"),
+    "호암.직동": ("36.9529358203833", "127.933609911294"),
+    "달천동": ("36.9601080580716", "127.903345363646"),
+    "봉방동": ("36.9736601560487", "127.919281720775"),
+    "칠금.금릉동": ("36.9821246699753", "127.919046610961"),
+    "연수동": ("36.9867248377519", "127.934130527889"),
+    "목행.용탄동": ("37.0115867558614", "127.917010287047"),
+}
+
+default_coords = ("36.991", "127.925")  # 충주시청 기준
+
 # ─────────────────────────────────────────────
-# ✅ 실행 함수
+# ✅ 카카오 API 함수
 # ─────────────────────────────────────────────
+def get_coords_from_kakao(address):
+    url = "https://dapi.kakao.com/v2/local/search/address.json"
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    params = {"query": address}
+    r = requests.get(url, headers=headers, params=params)
+    if r.status_code == 200:
+        docs = r.json()["documents"]
+        if docs:
+            x = docs[0]["x"]
+            y = docs[0]["y"]
+            return {"위도": y, "경도": x, "정확도": "정좌표", "오류": ""}
+        return {"위도": None, "경도": None, "정확도": "", "오류": "주소 없음"}
+    return {"위도": None, "경도": None, "정확도": "", "오류": f"API 오류({r.status_code})"}
+
+def get_coords_with_fallback(address):
+    result = get_coords_from_kakao(address)
+    if result["위도"]:
+        return result
+
+    short = ' '.join(address.split()[:2])
+    result = get_coords_from_kakao(short)
+    if result["위도"]:
+        result["정확도"] = "인근주소 보정"
+        return result
+
+    for dong, (lat, lon) in dong_coords.items():
+        if dong in address:
+            return {"위도": lat, "경도": lon, "정확도": "행정동 대표좌표", "오류": ""}
+
+    lat, lon = default_coords
+    return {"위도": lat, "경도": lon, "정확도": "시군구 대표좌표", "오류": ""}
+
+def get_address_from_kakao(lat, lon):
+    url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    params = {"x": lon, "y": lat}
+    r = requests.get(url, headers=headers, params=params)
+    if r.status_code == 200:
+        data = r.json()
+        if data["documents"]:
+            return {"주소": data["documents"][0]["address"]["address_name"], "오류": ""}
+        return {"주소": None, "오류": "주소 없음"}
+    return {"주소": None, "오류": f"API 오류({r.status_code})"}
+
+# ─────────────────────────────────────────────
+# ✅ 지도 표시 함수 (Static + 마커)
+# ─────────────────────────────────────────────
+def draw_kakao_static_map(lat, lon):
+    url = f"https://map.kakao.com/link/map/{lat},{lon}"
+    st.markdown("### 🗺️ 지도 미리보기")
+    st.components.v1.html(
+        f'<iframe src="{url}" width="100%" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>',
+        height=400
+    )
+
+# ─────────────────────────────────────────────
+# ✅ Streamlit 주요 함수들
+# ─────────────────────────────────────────────
+def handle_single_address_to_coords():
+    address = st.text_input("📌 주소 입력", placeholder="예: 충청북도 충주시 으뜸로 21")
+    if st.button("변환 실행"):
+        result = get_coords_with_fallback(address)
+        if result["위도"]:
+            st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']} ({result['정확도']})")
+            st.session_state["last_lat"] = result["위도"]
+            st.session_state["last_lon"] = result["경도"]
+            if st.button("🗺️ 지도 보기"):
+                draw_kakao_static_map(result["위도"], result["경도"])
+        else:
+            st.error("❌ 변환 실패: " + result["오류"])
+
+def handle_single_coords_to_address():
+    lat = st.text_input("위도", placeholder="예: 36.991")
+    lon = st.text_input("경도", placeholder="예: 127.925")
+    if st.button("주소 조회"):
+        result = get_address_from_kakao(lat, lon)
+        if result["주소"]:
+            st.success("📍 주소: " + result["주소"])
+            st.session_state["last_lat"] = lat
+            st.session_state["last_lon"] = lon
+            if st.button("🗺️ 지도 보기"):
+                draw_kakao_static_map(lat, lon)
+        else:
+            st.warning("📭 결과 없음")
+
+def handle_file_address_to_coords():
+    st.markdown("📥 템플릿 형식: 주소 컬럼 이름은 반드시 `주소`")
+    generate_template(["주소"], "template_주소→좌표.xlsx")
+    uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
+    if uploaded:
+        df = pd.read_excel(uploaded)
+        if "주소" not in df.columns:
+            st.error("❌ '주소' 컬럼이 누락되었습니다.")
+            return
+        results = []
+        for addr in df["주소"]:
+            r = get_coords_with_fallback(addr)
+            results.append({
+                "주소": addr,
+                "위도": r["위도"],
+                "경도": r["경도"],
+                "정확도": r["정확도"],
+                "오류": r["오류"]
+            })
+        result_df = pd.DataFrame(results)
+        st.success("✅ 변환 완료")
+        st.dataframe(result_df)
+        to_excel_download(result_df, "결과_주소→좌표.xlsx")
+
+def handle_file_coords_to_address():
+    st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`")
+    generate_template(["위도", "경도"], "template_좌표→주소.xlsx")
+    uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
+    if uploaded:
+        df = pd.read_excel(uploaded)
+        if not all(col in df.columns for col in ["위도", "경도"]):
+            st.error("❌ '위도', '경도' 컬럼이 누락되었습니다.")
+            return
+        results = []
+        for _, row in df.iterrows():
+            r = get_address_from_kakao(row["위도"], row["경도"])
+            results.append({
+                "위도": row["위도"],
+                "경도": row["경도"],
+                "주소": r["주소"],
+                "오류": r["오류"]
+            })
+        result_df = pd.DataFrame(results)
+        st.success("✅ 변환 완료")
+        st.dataframe(result_df)
+        to_excel_download(result_df, "결과_좌표→주소.xlsx")
+
+def generate_template(columns, filename):
+    df = pd.DataFrame(columns=columns)
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False)
+    st.download_button("📥 템플릿 다운로드", data=buffer.getvalue(), file_name=filename, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+def to_excel_download(df, filename):
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False)
+    st.download_button("📤 결과 다운로드", data=buffer.getvalue(), file_name=filename, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
 def run_geocoding_tool():
-    st.title("📍 주소-자포 변환기")
+    st.title("📍 주소-좌표 변환기")
 
     col1, col2 = st.columns(2)
-
     with col1:
         st.markdown("#### 🔹 변환 방향")
         direction = st.radio("", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
@@ -37,143 +210,7 @@ def run_geocoding_tool():
         else:
             handle_file_coords_to_address()
 
-# ─────────────────────────────────────────────
-# ✅ 카카오 API 연동 함수
-# ─────────────────────────────────────────────
-def get_coords_from_kakao(address):
-    url = "https://dapi.kakao.com/v2/local/search/address.json"
-    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
-    params = {"query": address}
-    r = requests.get(url, headers=headers, params=params)
-    if r.status_code == 200:
-        data = r.json()
-        if data["documents"]:
-            x = data["documents"][0]["x"]
-            y = data["documents"][0]["y"]
-            return {"위도": y, "경도": x, "오류": ""}
-        return {"위도": None, "경도": None, "오류": "주소 없음"}
-    return {"위도": None, "경도": None, "오류": f"API 오류({r.status_code})"}
-
-def get_address_from_kakao(lat, lon):
-    url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
-    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
-    params = {"x": lon, "y": lat}
-    r = requests.get(url, headers=headers, params=params)
-    if r.status_code == 200:
-        data = r.json()
-        if data["documents"]:
-            addr = data["documents"][0]["address"]["address_name"]
-            return {"주소": addr, "오류": ""}
-        return {"주소": None, "오류": "주소 없음"}
-    return {"주소": None, "오류": f"API 오류({r.status_code})"}
-
-# ─────────────────────────────────────────────
-# ✅ 건별 변환 함수
-# ─────────────────────────────────────────────
-def handle_single_address_to_coords():
-    address = st.text_input("📌 주소 입력", placeholder="예: 충청북도 충주시 으뜸로 21")
-
-    if st.button("변환 실행", key="convert_address"):
-        result = get_coords_from_kakao(address)
-        if result["위도"] and result["경도"]:
-            st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']}")
-            st.session_state["last_lat"] = result["위도"]
-            st.session_state["last_lon"] = result["경도"]
-            st.session_state["address_success"] = True
-        else:
-            st.error("❌ 변환 실패: " + result["오류"])
-            st.session_state["address_success"] = False
-
-    if st.session_state.get("address_success"):
-        if st.button("🗺️ 지도 보기", key="show_map_btn1"):
-            draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
-
-def handle_single_coords_to_address():
-    lat = st.text_input("위도", placeholder="예: 36.991")
-    lon = st.text_input("경도", placeholder="예: 127.925")
-
-    if st.button("주소 조회", key="convert_coords"):
-        result = get_address_from_kakao(lat, lon)
-        if result["주소"]:
-            st.success("📍 주소: " + result["주소"])
-            st.session_state["last_lat"] = lat
-            st.session_state["last_lon"] = lon
-            st.session_state["coords_success"] = True
-        else:
-            st.warning("📭 결과 없음")
-            st.session_state["coords_success"] = False
-
-    if st.session_state.get("coords_success"):
-        if st.button("🗺️ 지도 보기", key="show_map_btn2"):
-            draw_kakao_map(lat, lon)
-
-# ─────────────────────────────────────────────
-# ✅ 파일별 처리 함수
-# ─────────────────────────────────────────────
-def handle_file_address_to_coords():
-    st.markdown("📥 템플릿 형식: 주소 컬럼 이름은 반드시 `주소`로 입력")
-    generate_template(["주소"], "template_주소→좌표.xlsx")
-    uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
-    if uploaded:
-        df = pd.read_excel(uploaded)
-        if "주소" not in df.columns:
-            st.error("❌ '주소' 컬럼이 누락되었습니다.")
-            return
-        results = []
-        for addr in df["주소"]:
-            r = get_coords_from_kakao(addr)
-            results.append({"주소": addr, "위도": r["위도"], "경도": r["경도"], "오류": r["오류"]})
-        result_df = pd.DataFrame(results)
-        st.success("✅ 변환 완료")
-        st.dataframe(result_df)
-        to_excel_download(result_df, "결과_주소→좌표.xlsx")
-
-def handle_file_coords_to_address():
-    st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`로 입력")
-    generate_template(["위도", "경도"], "template_좌표→주소.xlsx")
-    uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
-    if uploaded:
-        df = pd.read_excel(uploaded)
-        if not all(col in df.columns for col in ["위도", "경도"]):
-            st.error("❌ '위도', '경도' 컬럼이 누락되었습니다.")
-            return
-        results = []
-        for _, row in df.iterrows():
-            r = get_address_from_kakao(row["위도"], row["경도"])
-            results.append({"위도": row["위도"], "경도": row["경도"], "주소": r["주소"], "오류": r["오류"]})
-        result_df = pd.DataFrame(results)
-        st.success("✅ 변환 완료")
-        st.dataframe(result_df)
-        to_excel_download(result_df, "결과_좌표→주소.xlsx")
-
-def draw_kakao_map(lat, lon):
-    map_html = f"""
-    <iframe width="100%" height="400px"
-        src="https://map.kakao.com/link/map/{lat},{lon}"
-        frameborder="0" allowfullscreen></iframe>
-    """
-    st.markdown("### 🗺️ 지도 미리보기")
-    st.components.v1.html(map_html, height=400)
-
-
-
-# ─────────────────────────────────────────────
-# ✅ 템플릿 및 엑셀 다운로드 함수
-# ─────────────────────────────────────────────
-def generate_template(columns, filename):
-    df = pd.DataFrame(columns=columns)
-    buffer = io.BytesIO()
-    df.to_excel(buffer, index=False)
-    st.download_button("📥 템플릿 다운로드", data=buffer.getvalue(), file_name=filename, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-def to_excel_download(df, filename):
-    buffer = io.BytesIO()
-    df.to_excel(buffer, index=False)
-    st.download_button("📤 결과 다운로드", data=buffer.getvalue(), file_name=filename, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-# ─────────────────────────────────────────────
 # ✅ 실행
-# ─────────────────────────────────────────────
 if __name__ == "__main__":
     run_geocoding_tool()
 

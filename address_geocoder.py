@@ -252,86 +252,92 @@ def handle_single_coords_to_address():
 # ✅ 파일 업로드용 주소 → 좌표 (핵심부만)
 # ─────────────────────────────────────────────
 def handle_file_address_to_coords():
-    # ✅ 최초 진입 시 세션 상태 초기화
-    if "multi_map_df" not in st.session_state:
-        st.session_state["multi_map_df"] = None
+    # ✅ 항상 진입 시 세션 클리어
+    st.session_state["multi_map_df"] = None
+    st.session_state["show_multi_map"] = False
 
     st.markdown("📥 템플릿 형식: 주소 컬럼 이름은 반드시 `주소`")
     generate_template(["주소"], "template_주소→좌표.xlsx")
     up = st.file_uploader("📂 파일 업로드", type="xlsx")
 
-    if up:
-        df = pd.read_excel(up)
-        if "주소" not in df.columns:
-            st.error("❌ '주소' 컬럼이 누락되었습니다.")
-            return
+    if not up:
+        return
 
-        results = []
-        for addr in df["주소"]:
-            r = get_coords_with_fallback(addr)
-            results.append({
-                "주소": addr,
-                "위도": r["위도"],
-                "경도": r["경도"],
-                "정확도": r["정확도"],
-                "오류": r["오류"]
-            })
-        out_df = pd.DataFrame(results)
-        st.dataframe(out_df)
-        to_excel_download(out_df, "결과_주소→좌표.xlsx")
+    df = pd.read_excel(up)
+    if "주소" not in df.columns:
+        st.error("❌ '주소' 컬럼이 누락되었습니다.")
+        return
 
-        if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
-            valid_df = out_df.dropna(subset=["위도", "경도"])
-            st.session_state["multi_map_df"] = valid_df
+    results = []
+    for addr in df["주소"]:
+        r = get_coords_with_fallback(addr)
+        results.append({
+            "주소": addr,
+            "위도": r["위도"],
+            "경도": r["경도"],
+            "정확도": r["정확도"],
+            "오류": r["오류"]
+        })
+    out_df = pd.DataFrame(results)
+    st.dataframe(out_df)
+    to_excel_download(out_df, "결과_주소→좌표.xlsx")
 
-    # ✅ 지도는 파일 업로드 여부와 관계없이 별도 조건으로 실행
-    if st.session_state.get("multi_map_df") is not None:
+    # ✅ 지도 보기 버튼 눌렀을 때만 세션 상태 설정
+    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
+        valid_df = out_df.dropna(subset=["위도", "경도"])
+        st.session_state["multi_map_df"] = valid_df
+        st.session_state["show_multi_map"] = True
+
+    # ✅ 버튼 눌렀을 때만 지도 표시
+    if st.session_state["show_multi_map"] and st.session_state["multi_map_df"] is not None:
         draw_folium_map_multiple(st.session_state["multi_map_df"])
-
 
 # ─────────────────────────────────────────────
 # ✅ 파일 업로드용 좌표 → 주소 (핵심부만)
 # ─────────────────────────────────────────────
 def handle_file_coords_to_address():
-    # ✅ 이전 지도 상태 초기화 (단 최초 진입 시에만)
-    if "multi_map_df" not in st.session_state:
-        st.session_state["multi_map_df"] = None
-    
+    # ✅ 진입 시 항상 세션 클리어
+    st.session_state["multi_map_df"] = None
+    st.session_state["show_multi_map"] = False
+
     st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`")
     generate_template(["위도", "경도"], "template_좌표→주소.xlsx")
     uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
-    if uploaded:
-        df = pd.read_excel(uploaded)
-        if not all(col in df.columns for col in ["위도", "경도"]):
-            st.error("❌ '위도', '경도' 컬럼이 누락되었습니다.")
-            return
-        results = []
-        for _, row in df.iterrows():
-            r = get_address_from_kakao(row["위도"], row["경도"])
-            results.append({
-                "위도": row["위도"],
-                "경도": row["경도"],
-                "지번주소": r.get("지번주소",""),
-                "도로명주소": r.get("도로명주소",""),
-                "오류": r["오류"]
-            })
-        result_df = pd.DataFrame(results)
-        st.success("✅ 변환 완료")
-        st.dataframe(result_df)
-        to_excel_download(result_df, "결과_좌표→주소.xlsx")
 
-        if "show_multi_map" not in st.session_state:
-            st.session_state["show_multi_map"] = False
+    if not uploaded:
+        return
 
-        # 버튼 누르면 True 설정
-        if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
-            valid_df = result_df.dropna(subset=["위도", "경도"])
-            st.session_state["multi_map_df"] = valid_df
-            #st.session_state["show_multi_map"] = True
+    df = pd.read_excel(uploaded)
+    if not all(col in df.columns for col in ["위도", "경도"]):
+        st.error("❌ '위도', '경도' 컬럼이 누락되었습니다.")
+        return
 
-    #버튼 누른 이후에만 지도 실행
-    if st.session_state["multi_map_df"] is not None:
+    results = []
+    for _, row in df.iterrows():
+        r = get_address_from_kakao(row["위도"], row["경도"])
+        results.append({
+            "위도": row["위도"],
+            "경도": row["경도"],
+            "지번주소": r.get("지번주소", ""),
+            "도로명주소": r.get("도로명주소", ""),
+            "오류": r["오류"]
+        })
+
+    result_df = pd.DataFrame(results)
+    st.success("✅ 변환 완료")
+    st.dataframe(result_df)
+    to_excel_download(result_df, "결과_좌표→주소.xlsx")
+
+    # ✅ 지도 보기 버튼 눌렀을 때만 세션에 마커 데이터 저장
+    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_coord"):
+        valid_df = result_df.dropna(subset=["위도", "경도"])
+        st.session_state["multi_map_df"] = valid_df
+        st.session_state["show_multi_map"] = True
+
+    # ✅ 버튼 눌렀을 때만 지도 표시
+    if st.session_state["show_multi_map"] and st.session_state["multi_map_df"] is not None:
         draw_folium_map_multiple(st.session_state["multi_map_df"])
+
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

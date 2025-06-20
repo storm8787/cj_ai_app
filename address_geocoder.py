@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import io
-from urllib.parse import 
+from urllib.parse import quote_plus
 
 KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
 JS_KEY = st.secrets["KAKAO_API"]["JS_KEY"]

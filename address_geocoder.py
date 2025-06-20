@@ -319,7 +319,7 @@ def handle_file_coords_to_address():
 
         # 버튼 누르면 True 설정
         if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
-            valid_df = out_df.dropna(subset=["위도", "경도"])
+            valid_df = result_df.dropna(subset=["위도", "경도"])
             st.session_state["multi_map_df"] = valid_df
             st.session_state["show_multi_map"] = True
 

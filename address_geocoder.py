@@ -332,8 +332,8 @@ def handle_file_coords_to_address():
             st.session_state["show_multi_map"] = True
 
         # 버튼 누른 이후에만 지도 실행
-        if st.session_state["show_multi_map"]:
-            draw_folium_map_multiple(st.session_state["multi_map_df"])
+        #if st.session_state["show_multi_map"]:
+            #draw_folium_map_multiple(st.session_state["multi_map_df"])
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

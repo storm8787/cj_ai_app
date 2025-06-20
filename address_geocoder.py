@@ -136,7 +136,9 @@ def draw_folium_map(lat, lon):
         return
 
     # 지도 생성
-    m = folium.Map(location=[lat, lon], zoom_start=17)
+    #m = folium.Map(location=[lat, lon], zoom_start=17)
+    m = folium.Map(location=[lat, lon], zoom_start=17, tiles='CartoDB positron')
+
     folium.Marker([lat, lon], tooltip="📍 위치").add_to(m)
 
     # 지도를 스트림릿에 표시

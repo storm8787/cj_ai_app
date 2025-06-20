@@ -9,6 +9,8 @@ import pandas as pd
 import requests
 import io
 import certifi
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 VWORLD_API_KEY = st.secrets["VWORLD"]["KEY"]
 NAVER_CLIENT_ID = st.secrets["NAVER_API"]["client_id"]
@@ -135,7 +137,7 @@ def get_coords_from_vworld(address):
         "type": "ROAD",
         "address": address,
     }
-    r = requests.get(url, params=params, verify=certifi.where())
+    r = requests.get(url, params=params, verify=False)
     if r.status_code == 200:
         res = r.json()
         if res["response"]["status"] == "OK" and res["response"]["result"]:
@@ -155,7 +157,7 @@ def get_address_from_vworld(lat, lon):
         "point": f"{lon},{lat}",
     }
     #r = requests.get(url, params=params)
-    r = requests.get(url, params=params, verify=certifi.where())
+    r = requests.get(url, params=params, verify=False)
     if r.status_code == 200:
         res = r.json()
         if res["response"]["status"] == "OK" and res["response"]["result"]:

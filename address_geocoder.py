@@ -132,6 +132,16 @@ def handle_file_coords_to_address():
         st.dataframe(result_df)
         to_excel_download(result_df, "결과_좌표→주소.xlsx")
 
+def draw_kakao_map(lat, lon):
+    map_html = f"""
+    <iframe width="100%" height="400px"
+        src="https://map.kakao.com/link/map/{lat},{lon}" 
+        frameborder="0" allowfullscreen></iframe>
+    """
+    st.markdown("### 🗺️ 지도 미리보기")
+    st.components.v1.html(map_html, height=400)
+
+
 # ─────────────────────────────────────────────
 # ✅ 템플릿 및 엑셀 다운로드 함수
 # ─────────────────────────────────────────────

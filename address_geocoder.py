@@ -148,6 +148,16 @@ def draw_folium_map(lat, lon):
 # ✅ 지도 표시 함수(파일별)
 # ─────────────────────────────────────────────
 def draw_folium_map_multiple(df):
+    # ✅ 좌표값을 숫자로 강제 변환하고, 실패한 행은 제거
+    df["위도"] = pd.to_numeric(df["위도"], errors="coerce")
+    df["경도"] = pd.to_numeric(df["경도"], errors="coerce")
+    df = df.dropna(subset=["위도", "경도"])
+
+    if df.empty:
+        st.warning("⚠️ 유효한 좌표 데이터가 없어 지도를 생성할 수 없습니다.")
+        return
+
+    # ✅ 지도 생성
     m = folium.Map(location=[df["위도"].mean(), df["경도"].mean()], zoom_start=12, tiles="CartoDB positron")
 
     for _, row in df.iterrows():
@@ -161,6 +171,7 @@ def draw_folium_map_multiple(df):
             continue
 
     st_folium(m, width=900, height=500)
+
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

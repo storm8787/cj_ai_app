@@ -10,6 +10,7 @@ import requests
 import io
 
 KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
+JS_KEY = st.secrets["KAKAO_API"]["JS_KEY"]
 
 # ✅ 행정동 중심좌표 DB (직접 수집한 것 기반)
 dong_coords = {
@@ -90,30 +91,35 @@ def get_address_from_kakao(lat, lon):
     return {"주소": None, "오류": f"API 오류({r.status_code})"}
 
 # ─────────────────────────────────────────────
-# ✅ 지도 표시 함수 (Static + 마커)
+# ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)
 # ─────────────────────────────────────────────
-# ─────────────────────────────────────────────
-# ✅ 지도 표시 함수 (Static Map + 마커 + 디버그)
-# ─────────────────────────────────────────────
-def draw_kakao_static_map(lat, lon):
-    st.markdown("### 🗺️ 지도 미리보기 (정적 지도 + 마커)")
+def draw_kakao_map(lat, lon):
+    js_key = st.secrets["KAKAO_API"]["js_key"]
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0">
+      <div id="map" style="width:100%;height:400px;"></div>
 
-    static_url = (
-        "https://dapi.kakao.com/v2/map/staticmap"        # ← map(단수)
-        f"?center={lon},{lat}&level=3&w=600&h=400"
-        f"&markers=type:d|pos:{lon},{lat}"               # ← markers & 쉼표 구분
-    )
+      <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}"></script>
+      <script>
+        var container = document.getElementById('map');
+        var options = {{
+          center: new kakao.maps.LatLng({lat}, {lon}),
+          level: 3
+        }};
+        var map = new kakao.maps.StaticMap(container, options);
 
-    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
-    resp = requests.get(static_url, headers=headers)
-
-    st.write("DEBUG-status:", resp.status_code, resp.text[:120])  # 필요 시 확인
-
-    if resp.status_code == 200:
-        st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
-    else:
-        st.error(f"❌ 지도 표시 실패: {resp.status_code}")
-
+        new kakao.maps.Marker({{
+          map: map,
+          position: new kakao.maps.LatLng({lat}, {lon})
+        }});
+      </script>
+    </body>
+    </html>
+    """
+    st.components.v1.html(html, height=400, scrolling=False)
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)
@@ -121,69 +127,76 @@ def draw_kakao_static_map(lat, lon):
 def handle_single_address_to_coords():
     address = st.text_input("📌 주소 입력", placeholder="예: 충청북도 충주시 으뜸로 21")
 
-    # 변환 버튼
     if st.button("변환 실행", key="btn_convert_addr"):
         res = get_coords_with_fallback(address)
         if res["위도"]:
             msg = f"📌 위도: {res['위도']} / 경도: {res['경도']} ({res['정확도']})"
             st.success(msg)
-            st.session_state["last_lat"] = res["위도"]
-            st.session_state["last_lon"] = res["경도"]
-            st.session_state["coord_msg"] = msg
+            st.session_state.update(
+                last_lat=res["위도"],
+                last_lon=res["경도"],
+                coord_msg=msg
+            )
         else:
             st.error("❌ 변환 실패: " + res["오류"])
 
-    # 지도 버튼 (항상 표시, 좌표 있을 때만 동작)
     if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
-        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
         st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
 # ✅ 좌표 → 주소 (건별)
 # ─────────────────────────────────────────────
 def handle_single_coords_to_address():
-    lat = st.text_input("위도",  placeholder="예: 36.991")
-    lon = st.text_input("경도",  placeholder="예: 127.925")
+    lat = st.text_input("위도", placeholder="예: 36.991")
+    lon = st.text_input("경도", placeholder="예: 127.925")
 
-    # 조회 버튼
     if st.button("주소 조회", key="btn_convert_coord"):
         res = get_address_from_kakao(lat, lon)
         if res["주소"]:
             msg = f"📍 주소: {res['주소']}"
             st.success(msg)
-            st.session_state["last_lat"] = lat
-            st.session_state["last_lon"] = lon
-            st.session_state["coord_msg"] = msg
+            st.session_state.update(
+                last_lat=lat,
+                last_lon=lon,
+                coord_msg=msg
+            )
         else:
             st.warning("📭 결과 없음")
 
-    # 지도 버튼
     if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
-        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
         st.info(st.session_state.get("coord_msg", ""))
+
+# ─────────────────────────────────────────────
+# ✅ 파일 업로드용 주소 → 좌표 (핵심부만)
+# ─────────────────────────────────────────────
 def handle_file_address_to_coords():
     st.markdown("📥 템플릿 형식: 주소 컬럼 이름은 반드시 `주소`")
     generate_template(["주소"], "template_주소→좌표.xlsx")
-    uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
-    if uploaded:
-        df = pd.read_excel(uploaded)
-        if "주소" not in df.columns:
-            st.error("❌ '주소' 컬럼이 누락되었습니다.")
-            return
-        results = []
-        for addr in df["주소"]:
-            r = get_coords_with_fallback(addr)
-            results.append({
-                "주소": addr,
-                "위도": r["위도"],
-                "경도": r["경도"],
-                "정확도": r["정확도"],
-                "오류": r["오류"]
-            })
-        result_df = pd.DataFrame(results)
-        st.success("✅ 변환 완료")
-        st.dataframe(result_df)
-        to_excel_download(result_df, "결과_주소→좌표.xlsx")
+    up = st.file_uploader("📂 파일 업로드", type="xlsx")
+    if not up:
+        return
+
+    df = pd.read_excel(up)
+    if "주소" not in df.columns:
+        st.error("❌ '주소' 컬럼이 누락되었습니다.")
+        return
+
+    results = []
+    for addr in df["주소"]:
+        r = get_coords_with_fallback(addr)
+        results.append({
+            "주소": addr,
+            "위도": r["위도"],
+            "경도": r["경도"],
+            "정확도": r["정확도"],
+            "오류": r["오류"]
+        })
+    out_df = pd.DataFrame(results)
+    st.dataframe(out_df)
+    to_excel_download(out_df, "결과_주소→좌표.xlsx")
+
 
 def handle_file_coords_to_address():
     st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`")

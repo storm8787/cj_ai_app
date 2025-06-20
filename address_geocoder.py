@@ -99,20 +99,21 @@ def draw_kakao_static_map(lat, lon):
     st.markdown("### 🗺️ 지도 미리보기 (정적 지도 + 마커)")
 
     static_url = (
-        "https://dapi.kakao.com/v2/maps/staticmap"
+        "https://dapi.kakao.com/v2/map/staticmap"        # ← map(단수)
         f"?center={lon},{lat}&level=3&w=600&h=400"
-        f"&markers=type:d|pos:{lon}%20{lat}"
+        f"&markers=type:d|pos:{lon},{lat}"               # ← markers & 쉼표 구분
     )
 
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     resp = requests.get(static_url, headers=headers)
 
-    st.write("DEBUG-status:", resp.status_code, resp.text[:120])   # 필요 없으면 삭제
+    st.write("DEBUG-status:", resp.status_code, resp.text[:120])  # 필요 시 확인
 
     if resp.status_code == 200:
         st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
     else:
         st.error(f"❌ 지도 표시 실패: {resp.status_code}")
+
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

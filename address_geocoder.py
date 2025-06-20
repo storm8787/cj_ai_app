@@ -128,13 +128,19 @@ def get_address_from_kakao(lat, lon):
 # ─────────────────────────────────────────────
 def draw_folium_map(lat, lon):
     try:
+        # 문자열로 넘어왔을 경우를 대비해 float 변환
         lat = float(lat)
         lon = float(lon)
-        m = folium.Map(location=[lat, lon], zoom_start=16)
-        folium.Marker([lat, lon], popup="📍 위치").add_to(m)
-        st_folium(m, width=600, height=400)
-    except Exception as e:
-        st.error(f"❌ 지도 표시 오류: {e}")
+    except ValueError:
+        st.error("❌ 위도/경도 값이 유효하지 않습니다.")
+        return
+
+    # 지도 생성
+    m = folium.Map(location=[lat, lon], zoom_start=17)
+    folium.Marker([lat, lon], tooltip="📍 위치").add_to(m)
+
+    # 지도를 스트림릿에 표시
+    st_folium(m, width=700, height=500, returned_objects=[])
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

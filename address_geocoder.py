@@ -148,24 +148,19 @@ def draw_folium_map(lat, lon):
 # ✅ 지도 표시 함수(파일별)
 # ─────────────────────────────────────────────
 def draw_folium_map_multiple(df):
-    if df.empty:
-        st.warning("표시할 좌표 데이터가 없습니다.")
-        return
-
-    # 평균 중심 위치
-    center_lat = df["위도"].astype(float).mean()
-    center_lon = df["경도"].astype(float).mean()
-
-    m = folium.Map(location=[center_lat, center_lon], zoom_start=13, tiles='CartoDB positron')
+    m = folium.Map(location=[df["위도"].mean(), df["경도"].mean()], zoom_start=12, tiles="CartoDB positron")
 
     for _, row in df.iterrows():
-        lat = float(row["위도"])
-        lon = float(row["경도"])
-        label = row.get("주소", "📍 위치")  # 또는 row.get("지번주소") 등
-        folium.Marker([lat, lon], tooltip=label).add_to(m)
+        try:
+            lat = float(row["위도"])
+            lon = float(row["경도"])
+            addr = row.get("주소", "")
+            folium.Marker([lat, lon], tooltip=addr).add_to(m)
+        except Exception as e:
+            print(f"🚨 마커 생성 중 오류: {e}")
+            continue
 
-    st_folium(m, width=900, height=600)
-
+    st_folium(m, width=900, height=500)
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

@@ -97,16 +97,16 @@ def get_address_from_kakao(lat, lon):
 from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
-    """Kakao Static Map REST + 마커 — 스트림릿 호환"""
+    """Kakao Static Map REST + 마커 (스트림릿에서도 200 OK)"""
     lat = str(lat)
     lon = str(lon)
 
     static_url = (
         "https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={lon},{lat}"          # 중심 좌표 (경도,위도)
-        "&level=3"                      # 확대레벨
-        "&width=600&height=400"         # 가로·세로(px) 640 이하 권장
-        f"&markers=pos:{lon}%20{lat}"   # 마커 — 'pos:' 뒤에 경도␠위도
+        f"?center={lon},{lat}"             # 중심(경도,위도)
+        "&level=3"
+        "&width=600&height=400"            # ← w/h가 아니라 width/height
+        f"&markers={lon},{lat}"            # ← markers 하나, 경도,위도
     )
 
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
@@ -118,8 +118,6 @@ def draw_kakao_static_map(lat, lon):
     else:
         st.error(f"❌ 지도 표시 실패: {resp.status_code}")
         st.text(resp.text[:200])
-
-
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

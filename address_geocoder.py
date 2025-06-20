@@ -161,16 +161,25 @@ def handle_single_coords_to_address():
 
     if st.button("주소 조회", key="btn_convert_coord"):
         res = get_address_from_kakao(lat, lon)
-        if res["주소"]:
-            msg = f"📍 주소: {res['주소']}"
-            st.success(msg)
+
+        jibun = res.get("지번주소", "")
+        road = res.get("도로명주소", "")
+
+        if jibun or road:
+            st.success("📍 변환 결과")
+            if road:
+                st.write(f"🛣️ 도로명주소: {road}")
+            if jibun:
+                st.write(f"🏡 지번주소: {jibun}")
+
             st.session_state.update(
                 last_lat=lat,
                 last_lon=lon,
-                coord_msg=msg
+                coord_msg=f"도로명: {road}, 지번: {jibun}"
             )
         else:
             st.warning("📭 결과 없음")
+
 
     #if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
         #draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
@@ -245,7 +254,7 @@ def run_geocoding_tool():
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("#### 🔹 변환 방향")
+        st.markdown("#### 🔄 변환 방향")
         direction = st.radio("", ["주소 → 좌표", "좌표 → 주소"], horizontal=True)
     with col2:
         st.markdown("#### 🛠️ 처리 방식")

@@ -94,7 +94,7 @@ def get_address_from_kakao(lat, lon):
 # ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)
 # ─────────────────────────────────────────────
 def draw_kakao_map(lat, lon):
-    js_key = st.secrets["KAKAO_API"]["js_key"]
+    js_key = st.secrets["KAKAO_API"]["JS_KEY"]
     html = f"""
     <!DOCTYPE html>
     <html>

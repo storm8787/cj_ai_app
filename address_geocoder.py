@@ -97,26 +97,28 @@ def get_address_from_kakao(lat, lon):
 from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
-    """REST Static Map + 마커 (CSP 문제 없음)"""
+    """Kakao Static Map REST + 마커 — 스트림릿 호환"""
     lat = str(lat)
     lon = str(lon)
 
     static_url = (
         "https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={lon},{lat}"
-        "&level=3&w=600&h=400"
-        f"&markers=type:d|pos:{lon}%20{lat}"    # 파이프(|) 그대로, 좌표 사이 공백은 %20
+        f"?center={lon},{lat}"          # 중심 좌표 (경도,위도)
+        "&level=3"                      # 확대레벨
+        "&width=600&height=400"         # 가로·세로(px) 640 이하 권장
+        f"&markers=pos:{lon}%20{lat}"   # 마커 — 'pos:' 뒤에 경도␠위도
     )
 
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     resp = requests.get(static_url, headers=headers)
 
-    st.write("DEBUG:", resp.status_code)       # 200이면 성공
+    st.write("DEBUG status:", resp.status_code)   # 200이면 성공
     if resp.status_code == 200:
         st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
     else:
         st.error(f"❌ 지도 표시 실패: {resp.status_code}")
         st.text(resp.text[:200])
+
 
 
 # ─────────────────────────────────────────────

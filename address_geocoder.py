@@ -84,12 +84,21 @@ def get_address_from_kakao(lat, lon):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"x": lon, "y": lat}
     r = requests.get(url, headers=headers, params=params)
+
     if r.status_code == 200:
         data = r.json()
         if data["documents"]:
-            return {"주소": data["documents"][0]["address"]["address_name"], "오류": ""}
-        return {"주소": None, "오류": "주소 없음"}
-    return {"주소": None, "오류": f"API 오류({r.status_code})"}
+            doc = data["documents"][0]
+            jibun = doc.get("address", {}).get("address_name")
+            road = doc.get("road_address", {}).get("address_name")
+            return {
+                "지번주소": jibun,
+                "도로명주소": road,
+                "오류": ""
+            }
+        return {"지번주소": None, "도로명주소": None, "오류": "주소 없음"}
+    return {"지번주소": None, "도로명주소": None, "오류": f"API 오류({r.status_code})"}
+
 
 # ─────────────────────────────────────────────
 # ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)

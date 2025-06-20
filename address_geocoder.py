@@ -101,7 +101,6 @@ def get_coords_with_fallback(address):
     lat, lon = default_coords
     return {"위도": lat, "경도": lon, "정확도": "시군구 대표좌표", "오류": ""}
 
-
 def get_address_from_kakao(lat, lon):
     url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
@@ -110,18 +109,29 @@ def get_address_from_kakao(lat, lon):
 
     if r.status_code == 200:
         data = r.json()
-        if data["documents"]:
-            doc = data["documents"][0]
+        docs = data.get("documents", [])
+        if docs:
+            doc = docs[0]
             jibun = doc.get("address", {}).get("address_name")
-            road = doc.get("road_address", {}).get("address_name")
+            road_info = doc.get("road_address")
+            road = road_info.get("address_name") if road_info else None
+
+            if not jibun and not road:
+                return {
+                    "지번주소": None,
+                    "도로명주소": None,
+                    "오류": "주소정제 실패"
+                }
+
             return {
                 "지번주소": jibun,
                 "도로명주소": road,
                 "오류": ""
             }
-        return {"지번주소": None, "도로명주소": None, "오류": "주소 없음"}
-    return {"지번주소": None, "도로명주소": None, "오류": f"API 오류({r.status_code})"}
 
+        return {"지번주소": None, "도로명주소": None, "오류": "주소정제 실패"}
+
+    return {"지번주소": None, "도로명주소": None, "오류": f"API 오류({r.status_code})"}
 
 # ─────────────────────────────────────────────
 # ✅ 지도 표시 함수(건별별)

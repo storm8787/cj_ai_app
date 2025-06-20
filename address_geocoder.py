@@ -8,6 +8,9 @@ import streamlit as st
 import pandas as pd
 import requests
 import io
+import folium
+from streamlit_folium import st_folium
+
 from urllib.parse import quote_plus
 
 KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
@@ -121,42 +124,17 @@ def get_address_from_kakao(lat, lon):
 
 
 # ─────────────────────────────────────────────
-# ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)
+# ✅ 지도 표시 함수
 # ─────────────────────────────────────────────
-from urllib.parse import quote_plus
-
-def draw_kakao_static_map(lat, lon):
-    lat, lon = float(lat), float(lon)
-    js_key   = JS_KEY                    # JavaScript 키
-
-    html = f"""
-    <!doctype html>
-    <html>
-    <head>
-      <meta charset="utf-8" />
-      <style>html,body,#map{{margin:0;width:100%;height:400px;}}</style>
-
-      <!-- 반드시 https 로, &libraries=services 를 같이 줘야 https 리소스를 불러옵니다 -->
-      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}&libraries=services&autoload=false"></script>
-    </head>
-    <body>
-      <div id="map"></div>
-
-      <script>
-        kakao.maps.load(function() {{
-          var center = new kakao.maps.LatLng({lat}, {lon});
-          var map = new kakao.maps.Map(document.getElementById('map'), {{
-              center: center,
-              level: 3
-          }});
-          new kakao.maps.Marker({{ position: center, map: map }});
-        }});
-      </script>
-    </body>
-    </html>
-    """
-    # sandbox=False ⇒ Mixed-content·CSP 디버깅 시 사용, 정식 배포 시 True 로
-    st.components.v1.html(html, height=400, scrolling=False)
+def draw_folium_map(lat, lon):
+    try:
+        lat = float(lat)
+        lon = float(lon)
+        m = folium.Map(location=[lat, lon], zoom_start=16)
+        folium.Marker([lat, lon], popup="📍 위치").add_to(m)
+        st_folium(m, width=600, height=400)
+    except Exception as e:
+        st.error(f"❌ 지도 표시 오류: {e}")
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)
@@ -177,9 +155,11 @@ def handle_single_address_to_coords():
         else:
             st.error("❌ 변환 실패: " + res["오류"])
 
-    #if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
-        #draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
-        #st.info(st.session_state.get("coord_msg", ""))
+    if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
+        lat = st.session_state["last_lat"]
+        lon = st.session_state["last_lon"]
+        draw_folium_map(lat, lon)
+        st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
 # ✅ 좌표 → 주소 (건별)
@@ -209,10 +189,9 @@ def handle_single_coords_to_address():
         else:
             st.warning("📭 결과 없음")
 
-
-    #if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
-        #draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
-        #st.info(st.session_state.get("coord_msg", ""))
+    if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
+        draw_folium_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
 # ✅ 파일 업로드용 주소 → 좌표 (핵심부만)

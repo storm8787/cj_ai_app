@@ -68,13 +68,25 @@ def get_coords_with_fallback(address):
         result["정확도"] = "정좌표"
         return result
 
-    # 2차: 읍면동까지 유지한 보정 주소 시도
-    parts = address.split()
-    if len(parts) >= 3:
-        fallback_address = ' '.join(parts[:3])  # 예: 충청북도 충주시 중앙탑면
-        result = get_coords_from_kakao(fallback_address)
+    # 2차: 진짜 인근번지 보정 시도 (예: 31-3 → 31-2 → 31)
+    import re
+    match = re.search(r"(\d+)-(\d+)", address)
+    if match:
+        base = int(match.group(1))
+        sub = int(match.group(2))
+        for i in range(1, 4):  # 최대 3번만 시도
+            new_sub = sub - i
+            if new_sub < 0:
+                break
+            new_addr = re.sub(r"\d+-\d+", f"{base}-{new_sub}", address)
+            result = get_coords_from_kakao(new_addr)
+            if result["위도"]:
+                result["정확도"] = f"인근번지 보정({base}-{new_sub})"
+                return result
+        # 단일번지로 재시도
+        result = get_coords_from_kakao(address.replace(f"{base}-{sub}", str(base)))
         if result["위도"]:
-            result["정확도"] = "인근주소 보정"
+            result["정확도"] = f"인근번지 보정({base})"
             return result
 
     # 3차: 행정동 기반 좌표 보정

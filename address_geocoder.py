@@ -72,26 +72,40 @@ def get_address_from_kakao(lat, lon):
 # ─────────────────────────────────────────────
 def handle_single_address_to_coords():
     address = st.text_input("📌 주소 입력", placeholder="예: 충청북도 충주시 으뜸로 21")
-    if st.button("변환 실행"):
+
+    if st.button("변환 실행", key="convert_address"):
         result = get_coords_from_kakao(address)
         if result["위도"] and result["경도"]:
             st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']}")
-            if st.checkbox("🗺️ 지도 보기"):
-                draw_kakao_map(result["위도"], result["경도"])
+            st.session_state["last_lat"] = result["위도"]
+            st.session_state["last_lon"] = result["경도"]
+            st.session_state["address_success"] = True
         else:
             st.error("❌ 변환 실패: " + result["오류"])
+            st.session_state["address_success"] = False
+
+    if st.session_state.get("address_success"):
+        if st.button("🗺️ 지도 보기", key="show_map_btn1"):
+            draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
 
 def handle_single_coords_to_address():
     lat = st.text_input("위도", placeholder="예: 36.991")
     lon = st.text_input("경도", placeholder="예: 127.925")
-    if st.button("주소 조회"):
+
+    if st.button("주소 조회", key="convert_coords"):
         result = get_address_from_kakao(lat, lon)
         if result["주소"]:
             st.success("📍 주소: " + result["주소"])
-            if st.checkbox("🗺️ 지도 보기"):
-                draw_kakao_map(result["위도"], result["경도"])
+            st.session_state["last_lat"] = lat
+            st.session_state["last_lon"] = lon
+            st.session_state["coords_success"] = True
         else:
             st.warning("📭 결과 없음")
+            st.session_state["coords_success"] = False
+
+    if st.session_state.get("coords_success"):
+        if st.button("🗺️ 지도 보기", key="show_map_btn2"):
+            draw_kakao_map(lat, lon)
 
 # ─────────────────────────────────────────────
 # ✅ 파일별 처리 함수
@@ -135,11 +149,12 @@ def handle_file_coords_to_address():
 def draw_kakao_map(lat, lon):
     map_html = f"""
     <iframe width="100%" height="400px"
-        src="https://map.kakao.com/link/map/{lat},{lon}" 
+        src="https://map.kakao.com/link/map/{lat},{lon}"
         frameborder="0" allowfullscreen></iframe>
     """
     st.markdown("### 🗺️ 지도 미리보기")
     st.components.v1.html(map_html, height=400)
+
 
 
 # ─────────────────────────────────────────────

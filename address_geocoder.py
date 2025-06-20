@@ -239,7 +239,8 @@ def handle_file_coords_to_address():
             results.append({
                 "위도": row["위도"],
                 "경도": row["경도"],
-                "주소": r["주소"],
+                "지번주소": r.get("지번주소",""),
+                "도로명주소": r.get("도로명주소",""),
                 "오류": r["오류"]
             })
         result_df = pd.DataFrame(results)

@@ -261,10 +261,15 @@ def handle_file_address_to_coords():
 
     if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
-        # ✅ 문자열을 숫자로 변환
         valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
         valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
-        draw_folium_map_multiple(valid_df)
+        valid_df = valid_df.dropna(subset=["위도", "경도"])
+        st.session_state["map_data"] = valid_df
+
+    # 👇 버튼 밖에서 지도 그리기
+    if "map_data" in st.session_state:
+        draw_folium_map_multiple(st.session_state["map_data"])
+
 
 # ─────────────────────────────────────────────
 # ✅ 파일 업로드용 좌표 → 주소 (핵심부만)
@@ -295,10 +300,14 @@ def handle_file_coords_to_address():
 
         if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
             valid_df = out_df.dropna(subset=["위도", "경도"])
-            # ✅ 문자열을 숫자로 변환
             valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
             valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
-            draw_folium_map_multiple(valid_df)
+            valid_df = valid_df.dropna(subset=["위도", "경도"])
+            st.session_state["map_data"] = valid_df
+
+        # 👇 버튼 밖에서 지도 그리기
+        if "map_data" in st.session_state:
+            draw_folium_map_multiple(st.session_state["map_data"])
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

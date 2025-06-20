@@ -94,32 +94,44 @@ def get_address_from_kakao(lat, lon):
 # ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)
 # ─────────────────────────────────────────────
 def draw_kakao_map(lat, lon):
-    js_key = st.secrets["KAKAO_API"]["JS_KEY"]
+    # lat·lon 은 문자열일 수도 있으므로 float 로 변환
+    lat, lon = float(lat), float(lon)
+
     html = f"""
     <!DOCTYPE html>
     <html>
-    <head><meta charset="utf-8"></head>
-    <body style="margin:0">
-      <div id="map" style="width:100%;height:400px;"></div>
+    <head>
+      <meta charset="utf-8">
+      <style>html,body,#map{{margin:0;width:100%;height:400px;}}</style>
+      <!-- ① https 로 명시 + autoload=false -->
+      <script type="text/javascript"
+              src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={JS_KEY}&autoload=false">
+      </script>
+    </head>
+    <body>
+      <div id="map"></div>
 
-      <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}"></script>
       <script>
-        var container = document.getElementById('map');
-        var options = {{
-          center: new kakao.maps.LatLng({lat}, {lon}),
-          level: 3
-        }};
-        var map = new kakao.maps.StaticMap(container, options);
+        // ② SDK 로드 후 지도 생성
+        kakao.maps.load(function() {{
+          var center = new kakao.maps.LatLng({lat}, {lon});
+          var options = {{
+            center: center,
+            level: 3
+          }};
+          var map = new kakao.maps.Map(document.getElementById('map'), options);
 
-        new kakao.maps.Marker({{
-          map: map,
-          position: new kakao.maps.LatLng({lat}, {lon})
+          new kakao.maps.Marker({{
+            map: map,
+            position: center
+          }});
         }});
       </script>
     </body>
     </html>
     """
     st.components.v1.html(html, height=400, scrolling=False)
+
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

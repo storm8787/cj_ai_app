@@ -142,7 +142,7 @@ def draw_folium_map(lat, lon):
     folium.Marker([lat, lon], tooltip="📍 위치").add_to(m)
 
     # 지도를 스트림릿에 표시
-    st_folium(m, width=1200, height=500, returned_objects=[])
+    st_folium(m, width=1500, height=500, returned_objects=[])
 
 # ─────────────────────────────────────────────
 # ✅ 지도 표시 함수(파일별)
@@ -176,9 +176,7 @@ def draw_folium_map_multiple(df):
     if bounds:
         m.fit_bounds(bounds)
 
-    st_folium(m, width=1200, height=500, key="map_multiple")
-
-
+    st_folium(m, width=1500, height=500, key="map_multiple")
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)
@@ -268,14 +266,13 @@ def handle_file_address_to_coords():
 
     if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
-        valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
-        valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
-        valid_df = valid_df.dropna(subset=["위도", "경도"])
-        st.session_state["map_data"] = valid_df
+        st.session_state["multi_map_df"] = valid_df  # 세션에 저장
+        st.session_state["show_multi_map"] = True  # 지도 보기 플래그 켜기
 
-    # 👇 버튼 밖에서 지도 그리기
-    if "map_data" in st.session_state:
-        draw_folium_map_multiple(st.session_state["map_data"])
+    # ✅ 버튼 클릭 이후에만 지도 렌더링
+    if st.session_state.get("show_multi_map", False):
+        draw_folium_map_multiple(st.session_state["multi_map_df"])
+
 
 
 # ─────────────────────────────────────────────
@@ -307,14 +304,12 @@ def handle_file_coords_to_address():
 
         if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
             valid_df = out_df.dropna(subset=["위도", "경도"])
-            valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
-            valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
-            valid_df = valid_df.dropna(subset=["위도", "경도"])
-            st.session_state["map_data"] = valid_df
+            st.session_state["multi_map_df"] = valid_df  # 세션에 저장
+            st.session_state["show_multi_map"] = True  # 지도 보기 플래그 켜기
 
-        # 👇 버튼 밖에서 지도 그리기
-        if "map_data" in st.session_state:
-            draw_folium_map_multiple(st.session_state["map_data"])
+        # ✅ 버튼 클릭 이후에만 지도 렌더링
+        if st.session_state.get("show_multi_map", False):
+            draw_folium_map_multiple(st.session_state["multi_map_df"])
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

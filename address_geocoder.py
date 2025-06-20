@@ -97,27 +97,38 @@ def get_address_from_kakao(lat, lon):
 from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
-    """Kakao Static Map REST + 마커 (스트림릿에서도 200 OK)"""
-    lat = str(lat)
-    lon = str(lon)
+    js_key = JS_KEY  # secrets.toml에 넣은 JavaScript 키
+    lat, lon = float(lat), float(lon)
 
-    static_url = (
-        "https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={lon},{lat}"             # 중심(경도,위도)
-        "&level=3"
-        "&width=600&height=400"            # ← w/h가 아니라 width/height
-        f"&markers={lon},{lat}"            # ← markers 하나, 경도,위도
-    )
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <style>html,body,#map{{margin:0;width:100%;height:400px;}}</style>
+      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}&autoload=false"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        kakao.maps.load(function() {{
+            var container = document.getElementById('map');
+            var options = {{
+                center: new kakao.maps.LatLng({lat}, {lon}),
+                level: 3
+            }};
+            var map = new kakao.maps.Map(container, options);
+            new kakao.maps.Marker({{
+                map: map,
+                position: new kakao.maps.LatLng({lat}, {lon})
+            }});
+        }});
+      </script>
+    </body>
+    </html>
+    """
+    st.components.v1.html(html, height=400, scrolling=False)
 
-    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
-    resp = requests.get(static_url, headers=headers)
-
-    st.write("DEBUG status:", resp.status_code)   # 200이면 성공
-    if resp.status_code == 200:
-        st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
-    else:
-        st.error(f"❌ 지도 표시 실패: {resp.status_code}")
-        st.text(resp.text[:200])
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

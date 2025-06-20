@@ -93,17 +93,21 @@ def get_address_from_kakao(lat, lon):
 # ✅ 지도 표시 함수 (Static + 마커)
 # ─────────────────────────────────────────────
 def draw_kakao_static_map(lat, lon):
-    map_url = (
-        f"https://map.kakao.com/link/map/충주시 위치,{lon},{lat}"
-    )
-
-    static_img_url = (
+    st.markdown("### 🗺️ 지도 미리보기 (정적 지도 + 마커)")
+    
+    url = (
         f"https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={lon},{lat}&level=3&marker=type:d|pos:{lon}%20{lat}&w=600&h=400"
+        f"?center={lon},{lat}&level=3"
+        f"&marker=type:d|pos:{lon}%20{lat}&w=600&h=400"
     )
+    
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    response = requests.get(url, headers=headers)
 
-    st.markdown("### 🗺️ 지도 미리보기 (정적)")
-    st.image(static_img_url, caption="📌 해당 위치", use_column_width=True)
+    if response.status_code == 200:
+        st.image(response.content, caption="📌 해당 위치", use_column_width=True)
+    else:
+        st.error(f"❌ 지도 표시 실패: {response.status_code}")
 
 # ─────────────────────────────────────────────
 # ✅ Streamlit 주요 함수들

@@ -177,7 +177,7 @@ def draw_folium_map_multiple(df):
             lon = float(row["경도"])
 
             # ✅ 주소가 없을 때도 가능한 범위 내에서 fallback
-            addr = row.get("주소") or row.get("지번주소") or row.get("도로명주소") or ""
+            addr = row.get("주소") or row.get("지번주소") or row.get("도로명주소") or "주소없음"
 
             folium.Marker([lat, lon], tooltip=addr).add_to(m)
             bounds.append([lat, lon])
@@ -324,16 +324,12 @@ def handle_file_coords_to_address():
         if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
             valid_df = result_df.dropna(subset=["위도", "경도"])
 
-            # ✅ 디버깅 코드 (웹에 출력)
-            st.markdown(f"📌 지도에 찍힐 좌표 수: **{len(valid_df)}**")
-            st.dataframe(valid_df[["위도", "경도", "지번주소", "도로명주소"]])
-
             st.session_state["multi_map_df"] = valid_df
             st.session_state["show_multi_map"] = True
 
-        # 버튼 누른 이후에만 지도 실행
-        #if st.session_state["show_multi_map"]:
-            #draw_folium_map_multiple(st.session_state["multi_map_df"])
+        #버튼 누른 이후에만 지도 실행
+        if st.session_state["show_multi_map"]:
+            draw_folium_map_multiple(st.session_state["multi_map_df"])
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

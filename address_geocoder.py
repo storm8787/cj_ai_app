@@ -8,6 +8,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import io
+from urllib.parse import 
 
 KAKAO_API_KEY = st.secrets["KAKAO_API"]["KEY"]
 JS_KEY = st.secrets["KAKAO_API"]["JS_KEY"]
@@ -93,45 +94,28 @@ def get_address_from_kakao(lat, lon):
 # ─────────────────────────────────────────────
 # ✅ 지도 표시 함수 (JavaScript StaticMap + 마커)
 # ─────────────────────────────────────────────
-def draw_kakao_map(lat, lon):
-    # lat·lon 은 문자열일 수도 있으므로 float 로 변환
-    lat, lon = float(lat), float(lon)
+from urllib.parse import quote_plus
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>html,body,#map{{margin:0;width:100%;height:400px;}}</style>
-      <!-- ① https 로 명시 + autoload=false -->
-      <script type="text/javascript"
-              src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={JS_KEY}&autoload=false">
-      </script>
-    </head>
-    <body>
-      <div id="map"></div>
+def draw_kakao_static_map(lat, lon):
+    """REST StaticMap: 100 % 표시되며 JS 키 필요 없음."""
+    lat, lon = str(lat), str(lon)
 
-      <script>
-        // ② SDK 로드 후 지도 생성
-        kakao.maps.load(function() {{
-          var center = new kakao.maps.LatLng({lat}, {lon});
-          var options = {{
-            center: center,
-            level: 3
-          }};
-          var map = new kakao.maps.Map(document.getElementById('map'), options);
+    static_url = (
+        "https://dapi.kakao.com/v2/maps/staticmap"
+        f"?center={lon},{lat}"
+        "&level=3&w=600&h=400"
+        # markers 파라미터는 URL-encoding 필요
+        f"&markers=type:d|pos:{quote_plus(lon + ',' + lat)}"
+    )
 
-          new kakao.maps.Marker({{
-            map: map,
-            position: center
-          }});
-        }});
-      </script>
-    </body>
-    </html>
-    """
-    st.components.v1.html(html, height=400, scrolling=False)
+    headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
+    resp = requests.get(static_url, headers=headers)
 
+    st.write("DEBUG:", resp.status_code)  # 200 이면 성공
+    if resp.status_code == 200:
+        st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
+    else:
+        st.error(f"❌ 지도 표시 실패: {resp.status_code}\n{resp.text[:200]}")
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

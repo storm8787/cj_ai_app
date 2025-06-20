@@ -175,9 +175,12 @@ def draw_folium_map_multiple(df):
         try:
             lat = float(row["위도"])
             lon = float(row["경도"])
-            addr = row.get("주소", "")
+
+            # ✅ 주소가 없을 때도 가능한 범위 내에서 fallback
+            addr = row.get("주소") or row.get("지번주소") or row.get("도로명주소") or ""
+
             folium.Marker([lat, lon], tooltip=addr).add_to(m)
-            bounds.append([lat, lon])  # 좌표 리스트에 추가
+            bounds.append([lat, lon])
         except Exception as e:
             print(f"🚨 마커 생성 중 오류: {e}")
             continue

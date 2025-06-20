@@ -252,6 +252,10 @@ def handle_single_coords_to_address():
 # ✅ 파일 업로드용 주소 → 좌표 (핵심부만)
 # ─────────────────────────────────────────────
 def handle_file_address_to_coords():
+    # ✅ 이전 지도 상태 초기화
+    st.session_state["show_multi_map"] = False
+    st.session_state["multi_map_df"] = None
+    
     st.markdown("📥 템플릿 형식: 주소 컬럼 이름은 반드시 `주소`")
     generate_template(["주소"], "template_주소→좌표.xlsx")
     up = st.file_uploader("📂 파일 업로드", type="xlsx")
@@ -284,7 +288,7 @@ def handle_file_address_to_coords():
     if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
         st.session_state["multi_map_df"] = valid_df
-        st.session_state["show_multi_map"] = False
+        st.session_state["show_multi_map"] = True
 
     # 버튼 누른 이후에만 지도 실행
     if st.session_state["show_multi_map"]:
@@ -294,6 +298,10 @@ def handle_file_address_to_coords():
 # ✅ 파일 업로드용 좌표 → 주소 (핵심부만)
 # ─────────────────────────────────────────────
 def handle_file_coords_to_address():
+    # ✅ 이전 지도 상태 초기화
+    st.session_state["show_multi_map"] = False
+    st.session_state["multi_map_df"] = None
+    
     st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`")
     generate_template(["위도", "경도"], "template_좌표→주소.xlsx")
     uploaded = st.file_uploader("📂 파일 업로드", type="xlsx")
@@ -325,7 +333,7 @@ def handle_file_coords_to_address():
             valid_df = result_df.dropna(subset=["위도", "경도"])
 
             st.session_state["multi_map_df"] = valid_df
-            st.session_state["show_multi_map"] = False
+            st.session_state["show_multi_map"] = True
 
         #버튼 누른 이후에만 지도 실행
         if st.session_state["show_multi_map"]:

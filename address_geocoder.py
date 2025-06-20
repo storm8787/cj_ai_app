@@ -259,8 +259,11 @@ def handle_file_address_to_coords():
     st.dataframe(out_df)
     to_excel_download(out_df, "결과_주소→좌표.xlsx")
 
-    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
+    if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
+        # ✅ 문자열을 숫자로 변환
+        valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
+        valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
         draw_folium_map_multiple(valid_df)
 
 # ─────────────────────────────────────────────
@@ -290,8 +293,11 @@ def handle_file_coords_to_address():
         st.dataframe(result_df)
         to_excel_download(result_df, "결과_좌표→주소.xlsx")
 
-        if st.button("🗺️ 지도 보기", key="btn_show_map_multi_coord"):
-            valid_df = result_df.dropna(subset=["위도", "경도"])
+        if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
+            valid_df = out_df.dropna(subset=["위도", "경도"])
+            # ✅ 문자열을 숫자로 변환
+            valid_df["위도"] = pd.to_numeric(valid_df["위도"], errors="coerce")
+            valid_df["경도"] = pd.to_numeric(valid_df["경도"], errors="coerce")
             draw_folium_map_multiple(valid_df)
 
 def generate_template(columns, filename):

@@ -98,26 +98,26 @@ from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
     """REST Static Map + 마커 (CSP 문제 없음)"""
-    lat, lon = str(lat), str(lon)          # 문자열 변환
-    coord      = f"{lon},{lat}"            # center 파라미터용
-    coord_enc  = quote_plus(coord)         # markers 파라미터용
+    lat = str(lat)
+    lon = str(lon)
 
     static_url = (
         "https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={coord}"
+        f"?center={lon},{lat}"
         "&level=3&w=600&h=400"
-        f"&markers=type:d|pos:{coord_enc}"
+        f"&markers=type:d|pos:{lon}%20{lat}"    # 파이프(|) 그대로, 좌표 사이 공백은 %20
     )
 
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     resp = requests.get(static_url, headers=headers)
 
-    st.write("DEBUG:", resp.status_code)   # 200이면 성공
+    st.write("DEBUG:", resp.status_code)       # 200이면 성공
     if resp.status_code == 200:
         st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
     else:
         st.error(f"❌ 지도 표시 실패: {resp.status_code}")
         st.text(resp.text[:200])
+
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

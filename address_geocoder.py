@@ -103,6 +103,7 @@ def draw_kakao_static_map(lat, lon):
     
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     response = requests.get(url, headers=headers)
+    st.write("DEBUG-status:", response.status_code, response.text[:120])
 
     if response.status_code == 200:
         st.image(response.content, caption="📌 해당 위치", use_column_width=True)

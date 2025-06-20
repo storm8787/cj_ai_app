@@ -268,7 +268,7 @@ def handle_file_address_to_coords():
         st.session_state["show_multi_map"] = False
 
     # 버튼 누르면 True 설정
-    if st.button("🗺️ 지도 보기 (여러 마커)", key="btn_show_map_multi_addr"):
+    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
         valid_df = out_df.dropna(subset=["위도", "경도"])
         st.session_state["multi_map_df"] = valid_df
         st.session_state["show_multi_map"] = True
@@ -304,13 +304,17 @@ def handle_file_coords_to_address():
         st.dataframe(result_df)
         to_excel_download(result_df, "결과_좌표→주소.xlsx")
 
+        if "show_multi_map" not in st.session_state:
+            st.session_state["show_multi_map"] = False
+
+        # 버튼 누르면 True 설정
         if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
             valid_df = out_df.dropna(subset=["위도", "경도"])
-            st.session_state["multi_map_df"] = valid_df  # 세션에 저장
-            st.session_state["show_multi_map"] = True  # 지도 보기 플래그 켜기
+            st.session_state["multi_map_df"] = valid_df
+            st.session_state["show_multi_map"] = True
 
-        # ✅ 버튼 클릭 이후에만 지도 렌더링
-        if st.session_state.get("show_multi_map", False):
+        # 버튼 누른 이후에만 지도 실행
+        if st.session_state["show_multi_map"]:
             draw_folium_map_multiple(st.session_state["multi_map_df"])
 
 def generate_template(columns, filename):

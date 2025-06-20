@@ -97,25 +97,27 @@ def get_address_from_kakao(lat, lon):
 from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
-    """REST StaticMap: 100 % 표시되며 JS 키 필요 없음."""
-    lat, lon = str(lat), str(lon)
+    """REST Static Map + 마커 (CSP 문제 없음)"""
+    lat, lon = str(lat), str(lon)          # 문자열 변환
+    coord      = f"{lon},{lat}"            # center 파라미터용
+    coord_enc  = quote_plus(coord)         # markers 파라미터용
 
     static_url = (
         "https://dapi.kakao.com/v2/maps/staticmap"
-        f"?center={lon},{lat}"
+        f"?center={coord}"
         "&level=3&w=600&h=400"
-        # markers 파라미터는 URL-encoding 필요
-        f"&markers=type:d|pos:{quote_plus(lon + ',' + lat)}"
+        f"&markers=type:d|pos:{coord_enc}"
     )
 
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     resp = requests.get(static_url, headers=headers)
 
-    st.write("DEBUG:", resp.status_code)  # 200 이면 성공
+    st.write("DEBUG:", resp.status_code)   # 200이면 성공
     if resp.status_code == 200:
         st.image(resp.content, caption="📌 해당 위치", use_column_width=True)
     else:
-        st.error(f"❌ 지도 표시 실패: {resp.status_code}\n{resp.text[:200]}")
+        st.error(f"❌ 지도 표시 실패: {resp.status_code}")
+        st.text(resp.text[:200])
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)
@@ -137,7 +139,7 @@ def handle_single_address_to_coords():
             st.error("❌ 변환 실패: " + res["오류"])
 
     if st.button("🗺️ 지도 보기", key="btn_show_map_addr") and st.session_state.get("last_lat"):
-        draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
         st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────
@@ -161,7 +163,7 @@ def handle_single_coords_to_address():
             st.warning("📭 결과 없음")
 
     if st.button("🗺️ 지도 보기", key="btn_show_map_coord") and st.session_state.get("last_lat"):
-        draw_kakao_map(st.session_state["last_lat"], st.session_state["last_lon"])
+        draw_kakao_static_map(st.session_state["last_lat"], st.session_state["last_lon"])
         st.info(st.session_state.get("coord_msg", ""))
 
 # ─────────────────────────────────────────────

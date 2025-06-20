@@ -137,12 +137,12 @@ def draw_folium_map(lat, lon):
 
     # 지도 생성
     #m = folium.Map(location=[lat, lon], zoom_start=17)
-    m = folium.Map(location=[lat, lon], zoom_start=17, tiles='OpenStreetMap')
+    m = folium.Map(location=[lat, lon], zoom_start=17, tiles='CartoDB positron')
 
     folium.Marker([lat, lon], tooltip="📍 위치").add_to(m)
 
     # 지도를 스트림릿에 표시
-    st_folium(m, width=700, height=500, returned_objects=[])
+    st_folium(m, width=900, height=500, returned_objects=[])
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)

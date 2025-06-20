@@ -137,7 +137,10 @@ def get_coords_from_vworld(address):
         "type": "ROAD",
         "address": address,
     }
-    r = requests.get(url, params=params, verify=False)
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+    r = requests.get(url, params=params, headers=headers, verify=False)
     if r.status_code == 200:
         res = r.json()
         if res["response"]["status"] == "OK" and res["response"]["result"]:
@@ -157,7 +160,11 @@ def get_address_from_vworld(lat, lon):
         "point": f"{lon},{lat}",
     }
     #r = requests.get(url, params=params)
-    r = requests.get(url, params=params, verify=False)
+    #r = requests.get(url, params=params, verify=False)
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+    r = requests.get(url, params=params, headers=headers, verify=False)
     if r.status_code == 200:
         res = r.json()
         if res["response"]["status"] == "OK" and res["response"]["result"]:

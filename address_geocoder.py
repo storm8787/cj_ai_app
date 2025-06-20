@@ -97,37 +97,38 @@ def get_address_from_kakao(lat, lon):
 from urllib.parse import quote_plus
 
 def draw_kakao_static_map(lat, lon):
-    js_key = JS_KEY  # secrets.toml에 넣은 JavaScript 키
     lat, lon = float(lat), float(lon)
+    js_key   = JS_KEY                    # JavaScript 키
 
     html = f"""
-    <!DOCTYPE html>
+    <!doctype html>
     <html>
     <head>
       <meta charset="utf-8" />
       <style>html,body,#map{{margin:0;width:100%;height:400px;}}</style>
-      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}&autoload=false"></script>
+
+      <!-- 반드시 https 로, &libraries=services 를 같이 줘야 https 리소스를 불러옵니다 -->
+      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={js_key}&libraries=services&autoload=false"></script>
     </head>
     <body>
       <div id="map"></div>
+
       <script>
         kakao.maps.load(function() {{
-            var container = document.getElementById('map');
-            var options = {{
-                center: new kakao.maps.LatLng({lat}, {lon}),
-                level: 3
-            }};
-            var map = new kakao.maps.Map(container, options);
-            new kakao.maps.Marker({{
-                map: map,
-                position: new kakao.maps.LatLng({lat}, {lon})
-            }});
+          var center = new kakao.maps.LatLng({lat}, {lon});
+          var map = new kakao.maps.Map(document.getElementById('map'), {{
+              center: center,
+              level: 3
+          }});
+          new kakao.maps.Marker({{ position: center, map: map }});
         }});
       </script>
     </body>
     </html>
     """
-    st.components.v1.html(html, height=400, scrolling=False)
+    # sandbox=False ⇒ Mixed-content·CSP 디버깅 시 사용, 정식 배포 시 True 로
+    st.components.v1.html(html, height=400, scrolling=False, sandbox=False)
+
 
 
 # ─────────────────────────────────────────────

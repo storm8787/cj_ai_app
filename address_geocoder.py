@@ -76,6 +76,8 @@ def handle_single_address_to_coords():
         result = get_coords_from_kakao(address)
         if result["위도"] and result["경도"]:
             st.success(f"📌 위도: {result['위도']} / 경도: {result['경도']}")
+            if st.checkbox("🗺️ 지도 보기"):
+                draw_kakao_map(result["위도"], result["경도"])
         else:
             st.error("❌ 변환 실패: " + result["오류"])
 
@@ -86,6 +88,8 @@ def handle_single_coords_to_address():
         result = get_address_from_kakao(lat, lon)
         if result["주소"]:
             st.success("📍 주소: " + result["주소"])
+            if st.checkbox("🗺️ 지도 보기"):
+                draw_kakao_map(result["위도"], result["경도"])
         else:
             st.warning("📭 결과 없음")
 

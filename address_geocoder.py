@@ -124,7 +124,7 @@ def get_address_from_kakao(lat, lon):
 
 
 # ─────────────────────────────────────────────
-# ✅ 지도 표시 함수
+# ✅ 지도 표시 함수(건별별)
 # ─────────────────────────────────────────────
 def draw_folium_map(lat, lon):
     try:
@@ -143,6 +143,29 @@ def draw_folium_map(lat, lon):
 
     # 지도를 스트림릿에 표시
     st_folium(m, width=900, height=500, returned_objects=[])
+
+# ─────────────────────────────────────────────
+# ✅ 지도 표시 함수(파일별)
+# ─────────────────────────────────────────────
+def draw_folium_map_multiple(df):
+    if df.empty:
+        st.warning("표시할 좌표 데이터가 없습니다.")
+        return
+
+    # 평균 중심 위치
+    center_lat = df["위도"].astype(float).mean()
+    center_lon = df["경도"].astype(float).mean()
+
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=13, tiles='CartoDB positron')
+
+    for _, row in df.iterrows():
+        lat = float(row["위도"])
+        lon = float(row["경도"])
+        label = row.get("주소", "📍 위치")  # 또는 row.get("지번주소") 등
+        folium.Marker([lat, lon], tooltip=label).add_to(m)
+
+    st_folium(m, width=900, height=600)
+
 
 # ─────────────────────────────────────────────
 # ✅ 주소 → 좌표 (건별)
@@ -230,7 +253,13 @@ def handle_file_address_to_coords():
     st.dataframe(out_df)
     to_excel_download(out_df, "결과_주소→좌표.xlsx")
 
+    if st.button("🗺️ 지도 보기", key="btn_show_map_multi_addr"):
+        valid_df = out_df.dropna(subset=["위도", "경도"])
+        draw_folium_map_multiple(valid_df)
 
+# ─────────────────────────────────────────────
+# ✅ 파일 업로드용 좌표 → 주소 (핵심부만)
+# ─────────────────────────────────────────────
 def handle_file_coords_to_address():
     st.markdown("📥 템플릿 형식: 위도/경도 컬럼 이름은 반드시 `위도`, `경도`")
     generate_template(["위도", "경도"], "template_좌표→주소.xlsx")
@@ -254,6 +283,10 @@ def handle_file_coords_to_address():
         st.success("✅ 변환 완료")
         st.dataframe(result_df)
         to_excel_download(result_df, "결과_좌표→주소.xlsx")
+
+        if st.button("🗺️ 지도 보기", key="btn_show_map_multi_coord"):
+            valid_df = result_df.dropna(subset=["위도", "경도"])
+            draw_folium_map_multiple(valid_df)
 
 def generate_template(columns, filename):
     df = pd.DataFrame(columns=columns)

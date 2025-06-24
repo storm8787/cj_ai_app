@@ -10,11 +10,12 @@ import streamlit as st
 import pytesseract
 from PIL import Image
 from PyPDF2 import PdfReader
-import openai
 import os
 from prompt_templates import get_prompt
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # OCR 추출 함수
 def extract_text_from_file(file):
@@ -31,7 +32,7 @@ def extract_text_from_file(file):
 
 # GPT 호출 함수
 def call_gpt(prompt):
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "너는 충주시 카카오 채널 홍보 담당 비서야. 시민이 이해하기 쉬운 홍보멘트를 정제해줘."},

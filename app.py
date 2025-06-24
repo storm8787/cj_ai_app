@@ -93,7 +93,7 @@ def main():
         report_writer_app()        
     elif st.session_state.selected_app == "(업무지원) 주소-좌표 변환기":
         run_geocoding_tool()        
-    elif st.session_state.selected_app == "(생성형 AI) 카카오톡 홍보멘트 생성기":
+    elif st.session_state.selected_app == "(생성형AI) 카카오톡 홍보멘트 생성기":
         generate_kakao_promo()
 
 if __name__ == "__main__":

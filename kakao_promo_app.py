@@ -4,33 +4,40 @@
 # In[ ]:
 
 
-# kakao_promo_app.py
-
 import streamlit as st
-import pytesseract
+import requests
 from PIL import Image
 from PyPDF2 import PdfReader
 import os
 from prompt_templates import get_prompt
-
 from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# OCR 추출 함수
-def extract_text_from_file(file):
-    if file.type == "application/pdf":
+# ✅ Hugging Face OCR API 호출 함수
+def extract_text_via_huggingface(file):
+    url = "https://storm8787-kakao_promo_app.hf.space/api/predict"  # 🔁 너의 URL로 변경 필요
+
+    file_bytes = file.read()
+    file.seek(0)  # 나중에 다시 쓸 수 있게 포인터 복구
+    file_ext = file.name.split(".")[-1].lower()
+
+    # PDF면 변환해서 텍스트 추출, 아니면 OCR
+    if file_ext == "pdf":
         pdf = PdfReader(file)
         text = ""
         for page in pdf.pages:
             text += page.extract_text() or ""
         return text.strip()
     else:
-        image = Image.open(file)
-        text = pytesseract.image_to_string(image, lang="kor+eng")
-        return text.strip()
+        files = {"data": ("image.jpg", file_bytes, "image/jpeg")}
+        response = requests.post(url, files=files)
+        if response.status_code == 200:
+            return response.json()["data"][0]
+        else:
+            return f"❌ OCR 실패: {response.status_code}"
 
-# GPT 호출 함수
+# ✅ GPT 호출 함수
 def call_gpt(prompt):
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -41,7 +48,7 @@ def call_gpt(prompt):
     )
     return response.choices[0].message.content.strip()
 
-# Streamlit 앱 메인
+# ✅ Streamlit 앱 메인
 def generate_kakao_promo():
     st.header("💬 카카오톡 홍보멘트 생성기")
 
@@ -51,8 +58,8 @@ def generate_kakao_promo():
 
     if st.button("📢 홍보문구 생성"):
         with st.spinner("GPT가 문구를 정리하는 중입니다..."):
-            ocr_text = extract_text_from_file(uploaded_file) if uploaded_file else ""
-            st.write("🔍 OCR 결과:", ocr_text[:100])
+            ocr_text = extract_text_via_huggingface(uploaded_file) if uploaded_file else ""
+            st.write("🔍 OCR 결과 (앞부분):", ocr_text[:100])
 
             final_text = (text_input.strip() + "\n\n" + ocr_text).strip() if text_input else ocr_text
 

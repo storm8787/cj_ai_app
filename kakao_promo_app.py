@@ -16,7 +16,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ✅ Hugging Face OCR API 호출 함수
 def extract_text_via_huggingface(file):
-    url = "https://storm8787-kakao_promo_app.hf.space/api/predict"
+    url = "https://storm8787-kakao_promo_app.hf.space/run/predict"
 
     files = {"file": (file.name, file, file.type)}
 

@@ -52,6 +52,8 @@ def generate_kakao_promo():
     if st.button("📢 홍보문구 생성"):
         with st.spinner("GPT가 문구를 정리하는 중입니다..."):
             ocr_text = extract_text_from_file(uploaded_file) if uploaded_file else ""
+            st.write("🔍 OCR 결과:", ocr_text[:100])
+
             final_text = (text_input.strip() + "\n\n" + ocr_text).strip() if text_input else ocr_text
 
             if not final_text:

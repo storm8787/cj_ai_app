@@ -13,20 +13,30 @@ from prompt_templates import get_prompt
 from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+KAKAO_API_KEY = os.getenv("KAKAO_API_KEY")  # 환경변수로부터 카카오 API 키 불러오기
 
-# ✅ Hugging Face OCR API 호출 함수
-def extract_text_via_huggingface(file):
-    url = "https://storm8787-kakao_promo_app.hf.space/run/predict"
-
-    files = {"file": (file.name, file, file.type)}
+# ✅ 카카오 OCR API 호출 함수
+def extract_text_via_kakao(file):
+    headers = {
+        "Authorization": f"KakaoAK {KAKAO_API_KEY}"
+    }
 
     try:
-        response = requests.post(url, files=files, verify=False)  # 🔥 SSL 인증서 무시
+        files = {"image": (file.name, file, file.type)}
+        response = requests.post(
+            "https://dapi.kakao.com/v2/vision/text/ocr",
+            headers=headers,
+            files=files
+        )
         response.raise_for_status()
         result = response.json()
-        return result.get("data", [""])[0]
+
+        words = [item['recognition_words'] for item in result.get("result", [])]
+        flat_text = "\n".join([" ".join(word_list) for word_list in words if word_list])
+        return flat_text
+
     except Exception as e:
-        return f"OCR 실패: {str(e)}"
+        return f"OCR 오류: {e}"
 
 # ✅ GPT 호출 함수
 def call_gpt(prompt):
@@ -49,7 +59,7 @@ def generate_kakao_promo():
 
     if st.button("📢 홍보문구 생성"):
         with st.spinner("GPT가 문구를 정리하는 중입니다..."):
-            ocr_text = extract_text_via_huggingface(uploaded_file) if uploaded_file else ""
+            ocr_text = extract_text_via_kakao(uploaded_file) if uploaded_file else ""
             st.write("🔍 OCR 결과 (앞부분):", ocr_text[:100])
 
             final_text = (text_input.strip() + "\n\n" + ocr_text).strip() if text_input else ocr_text

@@ -14,3 +14,5 @@ chardet
 geopy
 folium
 streamlit-folium
+pytesseract
+Pillow

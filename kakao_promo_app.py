@@ -63,3 +63,9 @@ def generate_kakao_promo():
             st.success("✅ 홍보 멘트 생성 완료!")
             st.text_area("🎯 생성된 홍보멘트", value=result, height=300)
 
+
+# In[ ]:
+
+
+
+

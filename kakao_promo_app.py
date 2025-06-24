@@ -12,28 +12,36 @@ import os
 from prompt_templates import get_prompt
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-KAKAO_API_KEY = os.getenv("KAKAO_API_KEY")  # 환경변수로부터 카카오 API 키 불러오기
+# ✅ 환경설정 (Kakao API Key 불러오기)
+import toml
+secrets = toml.load(".streamlit/secrets.toml")  # 경로는 환경에 따라 조정
+KAKAO_API_KEY = secrets["KAKAO_API"]["KEY"]
 
-# ✅ 카카오 OCR API 호출 함수
+# ✅ OpenAI 클라이언트 설정
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# ✅ 이미지 -> 텍스트 (Kakao OCR API)
 def extract_text_via_kakao(file):
+    url = "https://dapi.kakao.com/v2/vision/text/ocr"
+
     headers = {
         "Authorization": f"KakaoAK {KAKAO_API_KEY}"
     }
+
+    # Streamlit 업로드 파일은 BytesIO이므로 그대로 전송 가능
+    files = {
+        "image": (file.name, file, file.type)
+    }
+
     try:
-        files = {"image": (file.name, file, file.type)}
-        response = requests.post(
-            "https://dapi.kakao.com/v2/vision/text/ocr",
-            headers=headers,
-            files=files
-        )
+        response = requests.post(url, headers=headers, files=files)
         response.raise_for_status()
         result = response.json()
-
-        words = [item['recognition_words'] for item in result.get("result", [])]
-        flat_text = "\n".join([" ".join(word_list) for word_list in words if word_list])
-        return flat_text
-
+        # OCR 결과 문자열로 합치기
+        words = []
+        for item in result.get("result", []):
+            words.append(item.get("recognition_word", ""))
+        return " ".join(words)
     except Exception as e:
         return f"OCR 오류: {e}"
 
@@ -58,7 +66,18 @@ def generate_kakao_promo():
 
     if st.button("📢 홍보문구 생성"):
         with st.spinner("GPT가 문구를 정리하는 중입니다..."):
-            ocr_text = extract_text_via_kakao(uploaded_file) if uploaded_file else ""
+            ocr_text = ""
+
+            if uploaded_file:
+                if uploaded_file.type == "application/pdf":
+                    # PDF 처리
+                    reader = PdfReader(uploaded_file)
+                    first_page = reader.pages[0]
+                    ocr_text = first_page.extract_text()
+                else:
+                    # 이미지 처리
+                    ocr_text = extract_text_via_kakao(uploaded_file)
+
             st.write("🔍 OCR 결과 (앞부분):", ocr_text[:100])
 
             final_text = (text_input.strip() + "\n\n" + ocr_text).strip() if text_input else ocr_text
@@ -72,6 +91,10 @@ def generate_kakao_promo():
 
             st.success("✅ 홍보 멘트 생성 완료!")
             st.text_area("🎯 생성된 홍보멘트", value=result, height=300)
+
+# ✅ Streamlit 실행
+if __name__ == "__main__":
+    generate_kakao_promo()
 
 
 # In[ ]:

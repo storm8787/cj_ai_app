@@ -20,7 +20,6 @@ def extract_text_via_kakao(file):
     headers = {
         "Authorization": f"KakaoAK {KAKAO_API_KEY}"
     }
-
     try:
         files = {"image": (file.name, file, file.type)}
         response = requests.post(

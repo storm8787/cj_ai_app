@@ -39,7 +39,7 @@ def extract_text_from_image(image_file):
         return f"[OCR 오류] {str(e)}"
 
 def generate_kakao_promo():
-    st.title("📢 카카오톡 홍보멘트 생성기")
+    st.title("📢 카카오채널 홍보멘트 생성기")
 
     st.markdown("""
     - 텍스트만 입력하거나

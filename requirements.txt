@@ -17,3 +17,5 @@ streamlit-folium
 pytesseract
 Pillow
 gradio_client
+google-cloud-vision
+google-auth

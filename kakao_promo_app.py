@@ -49,7 +49,7 @@ def generate_kakao_promo():
     - 텍스트 + 이미지를 함께 입력할 수 있습니다.
     """)
 
-    category = st.selectbox("홍보 카테고리", ["시정홍보", "정책공지", "축제", "이벤트", "재난알림"])
+    category = st.selectbox("홍보 카테고리", ["시정홍보", "정책공지","문화행사", "축제", "이벤트", "재난알림"])
     user_text = st.text_area("📥 텍스트 입력 (선택사항)")
     uploaded_image = st.file_uploader("🖼️ 이미지 업로드 (선택사항)", type=["png", "jpg", "jpeg"])
 

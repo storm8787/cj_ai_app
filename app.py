@@ -19,7 +19,7 @@ from data_validator_app import data_validator_app
 from official_merit_report_app import create_official_merit_report
 from report_writer import report_writer_app
 from address_geocoder import run_geocoding_tool
-from kakao_promo_app import generate_kakao_promo
+from kakao_promo_app import generate_kakao_promo, extract_text_from_image
 
 def main():
     st.sidebar.title("🧰 기능 선택")

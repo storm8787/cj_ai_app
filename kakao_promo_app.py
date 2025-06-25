@@ -5,45 +5,43 @@
 
 
 import streamlit as st
-from gradio_client import Client, handle_file
 from openai import OpenAI
 from prompt_templates import get_prompt
-import requests
-import tempfile
+from google.cloud import vision
+from google.oauth2 import service_account
+import io
 
 # ✅ OpenAI 클라이언트 설정
 client_gpt = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ✅ Hugging Face OCR 클라이언트 설정
-client_ocr = Client("prithivMLmods/Multimodal-OCR2")
+# ✅ Google Vision 클라이언트 설정
+google_creds = service_account.Credentials.from_service_account_info(
+    st.secrets["google_service_account"]
+)
+vision_client = vision.ImageAnnotatorClient(credentials=google_creds)
 
+# ✅ 이미지에서 텍스트 추출 함수
 def extract_text_from_image(image_file):
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
-            tmp.write(image_file.read())
-            tmp_path = tmp.name
+        image_bytes = image_file.read()
+        image = vision.Image(content=image_bytes)
+        response = vision_client.text_detection(image=image)
+        texts = response.text_annotations
 
-        result = client_ocr.predict(
-            model_name="Nanonets-OCR-s",
-            text="추출해줘",
-            image=handle_file(tmp_path),
-            max_new_tokens=1024,
-            temperature=0.6,
-            top_p=0.9,
-            top_k=50,
-            repetition_penalty=1.2,
-            api_name="/generate_image"
-        )
-        return result
+        if not texts:
+            return "[OCR 오류] 텍스트를 찾을 수 없습니다."
+        return texts[0].description.strip()
+
     except Exception as e:
         return f"[OCR 오류] {str(e)}"
 
+# ✅ 메인 기능 함수
 def generate_kakao_promo():
     st.title("📢 카카오채널 홍보멘트 생성기")
 
     st.markdown("""
-    - 텍스트만 입력하거나
-    - 이미지만 업로드하거나
+    - 텍스트만 입력하거나  
+    - 이미지만 업로드하거나  
     - 텍스트 + 이미지를 함께 입력할 수 있습니다.
     """)
 
@@ -57,9 +55,8 @@ def generate_kakao_promo():
 
             # 1️⃣ OCR 처리
             if uploaded_image is not None:
+                st.info("📸 OCR 판독 완료")
                 ocr_text = extract_text_from_image(uploaded_image)
-                st.markdown("**📝 OCR 결과:**")
-                st.info(ocr_text)
                 final_input += ocr_text + "\n"
 
             # 2️⃣ 사용자 입력 추가
@@ -73,11 +70,12 @@ def generate_kakao_promo():
                 messages=[{"role": "user", "content": prompt}]
             )
             result_text = completion.choices[0].message.content
+
             st.success("✅ 홍보 문구 생성 완료!")
             st.markdown("---")
             st.markdown(result_text)
 
-        st.markdown("""---
+        st.markdown("""---  
         ✨ *충주시 홍보부서의 톤앤매너를 기반으로 작성되었습니다.*
         """)
 

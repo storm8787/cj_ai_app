@@ -7,61 +7,77 @@
 import streamlit as st
 from gradio_client import Client, handle_file
 from openai import OpenAI
-import os
+from prompt_templates import get_prompt
+import requests
+import tempfile
 
-# ✅ OpenAI API 키 설정
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-# Hugging Face OCR 설정
+# ✅ OpenAI 클라이언트 설정
+client_gpt = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# ✅ Hugging Face OCR 클라이언트 설정
 client_ocr = Client("prithivMLmods/Multimodal-OCR2")
 
-def run_ocr_from_image(image_path):
-    result = client_ocr.predict(
-        model_name="Nanonets-OCR-s",
-        text="Extract text",
-        image=handle_file(image_path),
-        max_new_tokens=1024,
-        temperature=0.6,
-        top_p=0.9,
-        top_k=50,
-        repetition_penalty=1.2,
-        api_name="/generate_image"
-    )
-    return result
+def extract_text_from_image(image_file):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+            tmp.write(image_file.read())
+            tmp_path = tmp.name
 
-def generate_promo(text):
-    prompt = f"""다음 내용을 바탕으로 홍보 문구를 작성해줘:\n\n{text}\n\n형식은 간결한 한 문장으로 부탁해."""
-    response = client_gpt.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content.strip()
+        result = client_ocr.predict(
+            model_name="Nanonets-OCR-s",
+            text="추출해줘",
+            image=handle_file(tmp_path),
+            max_new_tokens=1024,
+            temperature=0.6,
+            top_p=0.9,
+            top_k=50,
+            repetition_penalty=1.2,
+            api_name="/generate_image"
+        )
+        return result
+    except Exception as e:
+        return f"[OCR 오류] {str(e)}"
 
-# Streamlit UI
-st.title("📢 홍보 문구 생성기")
+def generate_kakao_promo():
+    st.title("📢 카카오톡 홍보멘트 생성기")
 
-uploaded_image = st.file_uploader("이미지를 업로드하세요", type=["png", "jpg", "jpeg"])
-input_text = st.text_area("추가 텍스트 입력 (선택)", placeholder="홍보하고 싶은 문구나 키워드를 입력하세요")
+    st.markdown("""
+    - 텍스트만 입력하거나
+    - 이미지만 업로드하거나
+    - 텍스트 + 이미지를 함께 입력할 수 있습니다.
+    """)
 
-if st.button("홍보 문구 생성"):
-    final_text = ""
+    category = st.selectbox("홍보 카테고리", ["시정홍보", "정책공지", "축제", "이벤트", "재난알림"])
+    user_text = st.text_area("📥 텍스트 입력 (선택사항)")
+    uploaded_image = st.file_uploader("🖼️ 이미지 업로드 (선택사항)", type=["png", "jpg", "jpeg"])
 
-    # 1. 이미지 있으면 OCR 실행
-    if uploaded_image is not None:
-        with open("temp_img.jpg", "wb") as f:
-            f.write(uploaded_image.read())
-        ocr_text = run_ocr_from_image("temp_img.jpg")
-        st.markdown("📝 OCR 결과:\n" + ocr_text)
-        final_text += ocr_text + " "
+    if st.button("🔍 홍보 문구 생성"):
+        with st.spinner("분석 중..."):
+            final_input = ""
 
-    # 2. 입력 텍스트 있으면 결합
-    if input_text:
-        final_text += input_text.strip()
+            # 1️⃣ OCR 처리
+            if uploaded_image is not None:
+                ocr_text = extract_text_from_image(uploaded_image)
+                st.markdown("**📝 OCR 결과:**")
+                st.info(ocr_text)
+                final_input += ocr_text + "\n"
 
-    if final_text.strip() == "":
-        st.warning("텍스트나 이미지를 입력해야 홍보 문구를 만들 수 있어요.")
-    else:
-        with st.spinner("GPT가 홍보 문구를 작성 중입니다..."):
-            promo = generate_promo(final_text)
+            # 2️⃣ 사용자 입력 추가
+            if user_text:
+                final_input += user_text
+
+            # 3️⃣ 프롬프트 구성 및 GPT 호출
+            prompt = get_prompt(category, final_input)
+            completion = client_gpt.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            result_text = completion.choices[0].message.content
             st.success("✅ 홍보 문구 생성 완료!")
-            st.markdown(f"**🗣️ 홍보 문구:**\n> {promo}")
+            st.markdown("---")
+            st.markdown(result_text)
+
+        st.markdown("""---
+        ✨ *충주시 홍보부서의 톤앤매너를 기반으로 작성되었습니다.*
+        """)
 

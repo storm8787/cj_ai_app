@@ -42,8 +42,8 @@ def generate_kakao_promo():
     st.title("📢 카카오채널 홍보멘트 생성기")
 
     st.markdown("""
-    - 텍스트만 입력하거나  
-    - 이미지만 업로드하거나  
+    - 텍스트만 입력하거나
+    - 이미지만 업로드하거나
     - 텍스트 + 이미지를 함께 입력할 수 있습니다.
     """)
 
@@ -52,44 +52,32 @@ def generate_kakao_promo():
     uploaded_image = st.file_uploader("🖼️ 이미지 업로드 (선택사항)", type=["png", "jpg", "jpeg"])
 
     if st.button("🔍 홍보 문구 생성"):
-        final_input = ""
+        with st.spinner("분석 중..."):
+            final_input = ""
 
-        # 1️⃣ OCR 처리
-        if uploaded_image is not None:
-            with st.spinner("🧠 이미지에서 텍스트 추출 중..."):
-                try:
-                    ocr_text = extract_text_from_image(uploaded_image)
-                    st.success("✅ OCR 판독 완료!")
-                    final_input += ocr_text + "\n"
-                except Exception as e:
-                    st.error(f"❌ OCR 오류: {str(e)}")
-                    return  # 중단
+            # 1️⃣ OCR 처리
+            if uploaded_image is not None:
+                ocr_text = extract_text_from_image(uploaded_image)
+                st.markdown("**📝 OCR 결과:**")
+                st.info(ocr_text)
+                final_input += ocr_text + "\n"
 
-        # 2️⃣ 사용자 입력 추가
-        if user_text:
-            final_input += user_text
+            # 2️⃣ 사용자 입력 추가
+            if user_text:
+                final_input += user_text
 
-        if not final_input.strip():
-            st.warning("⚠️ 텍스트 입력 또는 이미지 업로드가 필요합니다.")
-            return
-
-        # 3️⃣ 프롬프트 구성 및 GPT 호출
-        with st.spinner("✍️ 홍보멘트 생성 중..."):
+            # 3️⃣ 프롬프트 구성 및 GPT 호출
             prompt = get_prompt(category, final_input)
-            try:
-                completion = client_gpt.chat.completions.create(
-                    model="gpt-4",
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                result_text = completion.choices[0].message.content
-                st.success("✅ 홍보 문구 생성 완료!")
-                st.markdown("---")
-                st.markdown(result_text)
-            except Exception as e:
-                st.error(f"❌ GPT 생성 오류: {str(e)}")
+            completion = client_gpt.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            result_text = completion.choices[0].message.content
+            st.success("✅ 홍보 문구 생성 완료!")
+            st.markdown("---")
+            st.markdown(result_text)
 
-        st.markdown("""---  
-        ✨ *충주시 홍보부서의 톤앤매너를 기반으로 작성되었습니다.*  
+        st.markdown("""---
+        ✨ *충주시 홍보부서의 톤앤매너를 기반으로 작성되었습니다.*
         """)
-
 

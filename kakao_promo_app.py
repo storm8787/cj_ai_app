@@ -23,7 +23,11 @@ vision_client = vision.ImageAnnotatorClient(credentials=google_creds)
 # ✅ 이미지에서 텍스트 추출 함수
 def extract_text_from_image(image_file):
     try:
+        # 이미지 바이트를 한 번만 읽기
         image_bytes = image_file.read()
+        if not image_bytes:
+            return "[OCR 오류] 이미지 파일을 읽을 수 없습니다."
+
         image = vision.Image(content=image_bytes)
         response = vision_client.text_detection(image=image)
         texts = response.text_annotations
@@ -55,13 +59,19 @@ def generate_kakao_promo():
 
             # 1️⃣ OCR 처리
             if uploaded_image is not None:
-                st.info("📸 OCR 판독 완료")
+                st.info("📸 이미지에서 텍스트 추출 중...")
                 ocr_text = extract_text_from_image(uploaded_image)
+                st.markdown("**📝 OCR 결과:**")
+                st.code(ocr_text)
                 final_input += ocr_text + "\n"
 
             # 2️⃣ 사용자 입력 추가
             if user_text:
                 final_input += user_text
+
+            if not final_input.strip():
+                st.error("❌ 텍스트 또는 이미지에서 입력된 내용이 없습니다.")
+                return
 
             # 3️⃣ 프롬프트 구성 및 GPT 호출
             prompt = get_prompt(category, final_input)
@@ -78,4 +88,8 @@ def generate_kakao_promo():
         st.markdown("""---  
         ✨ *충주시 홍보부서의 톤앤매너를 기반으로 작성되었습니다.*
         """)
+
+# ✅ 앱 실행
+if __name__ == "__main__":
+    generate_kakao_promo()
 

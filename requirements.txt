@@ -16,3 +16,4 @@ folium
 streamlit-folium
 pytesseract
 Pillow
+gradio_client

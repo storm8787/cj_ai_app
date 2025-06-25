@@ -9,8 +9,8 @@ from gradio_client import Client, handle_file
 from openai import OpenAI
 import os
 
-# ChatGPT 설정
-client_gpt = OpenAI(api_key=st.secrets["openai_api_key"])
+# ✅ OpenAI API 키 설정
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 # Hugging Face OCR 설정
 client_ocr = Client("prithivMLmods/Multimodal-OCR2")
 

@@ -7,8 +7,6 @@
 import streamlit as st
 
 def run():
-    st.title("충주시 AI 연구소")
-    st.write("여기는 메인 대시보드입니다.")
     # 페이지 내부 스타일 적용
     st.markdown("""
     <style>
@@ -131,8 +129,7 @@ def run():
         충주시는 최신 인공지능 기술을 바탕으로 공무원의 업무 효율성을 높이고, 시민에게 보다 나은 행정 서비스를 제공하기 위해 다양한 스마트 도구를 개발·운영하고 있습니다.
     </p>
     """, unsafe_allow_html=True)
-
-    # AI 도구 카드
+        # AI 도구 카드
     tools = [
         {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
         {"icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
@@ -142,16 +139,20 @@ def run():
         {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
     ]
 
-    st.markdown('<div class="tool-grid">', unsafe_allow_html=True)
-    for tool in tools:
-        st.markdown(f"""
-        <div class="tool-card">
-            <div class="tool-icon">{tool['icon']}</div>
-            <div class="tool-title">{tool['title']}</div>
-            <div class="tool-desc">{tool['desc']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # 2행 3열 그리드 카드 레이아웃
+    for i in range(0, len(tools), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(tools):
+                tool = tools[i + j]
+                with cols[j]:
+                    st.markdown(f"""
+                    <div class="tool-card">
+                        <div class="tool-icon">{tool['icon']}</div>
+                        <div class="tool-title">{tool['title']}</div>
+                        <div class="tool-desc">{tool['desc']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     # 통계
     st.markdown('<div class="section-title">AI 도구 활용 현황</div>', unsafe_allow_html=True)

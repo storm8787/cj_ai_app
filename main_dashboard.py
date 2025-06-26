@@ -16,13 +16,13 @@ def run():
     }
 
     .header-section {
-        background: linear-gradient(135deg, #1e40af, #3b82f6);
-        color: white;
+        background: white;
+        color: #1f2937;
         padding: 80px 20px;
         text-align: center;
         margin-bottom: 0;
+        border-bottom: 1px solid #e5e7eb;
     }
-
     .header-title {
         font-size: 3rem;
         font-weight: 700;

@@ -199,123 +199,65 @@ def run():
     #</div>
     #""", unsafe_allow_html=True)
     st.markdown("""
-    <style>
-    .contact-support {
-        background: linear-gradient(to right, #4F46E5, #3B82F6);
-        color: white;
-        padding: 2.5rem 2rem;
-        border-radius: 16px;
-        text-align: center;
-        margin-top: 3rem;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
+<style>
+.contact-support {
+    background: linear-gradient(to right, #dc2626, #f87171);
+    color: white;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    text-align: center;
+    margin-top: 3rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
 
-    .contact-support h2 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+.contact-support h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
 
-    .contact-support p {
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-        opacity: 0.95;
-    }
+.contact-support p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.95;
+}
 
-    .contact-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
+.contact-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
 
-    .contact-button {
-        background: white;
-        color: #3B82F6;
-        padding: 0.75rem 1.5rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: transform 0.2s ease;
-        text-decoration: none;
-    }
+.contact-button {
+    background: white;
+    color: #dc2626;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease;
+    text-decoration: none;
+}
 
-    .contact-button:hover {
-        transform: scale(1.05);
-    }
-    
-    .footer {
-        background-color: #111827;
-        color: #9ca3af;
-        padding: 2rem 2rem 1rem 2rem;
-        margin-top: 3rem;
-    }
+.contact-button:hover {
+    transform: scale(1.05);
+    background: #ffe4e6;
+}
+</style>
 
-    .footer-columns {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 2rem;
-    }
-
-    .footer h4 {
-        font-size: 1.1rem;
-        color: white;
-        margin-bottom: 0.8rem;
-    }
-
-    .footer p, .footer li {
-        font-size: 0.95rem;
-        margin: 0.2rem 0;
-    }
-
-    .footer-bottom {
-        text-align: center;
-        border-top: 1px solid #374151;
-        margin-top: 1.5rem;
-        padding-top: 1rem;
-        font-size: 0.85rem;
-    }
-    </style>
-
-    <div class="contact-support">
-        <h2>문의 및 지원</h2>
-        <p>AI 도구 사용에 대한 문의사항이나 기술 지원이 필요하시면 언제든지 연락해 주세요.</p>
-        <div class="contact-buttons">
-            <a href="mailto:strom8787@korea.kr" class="contact-button">📧 이메일 문의</a>
-            <a href="tel:0438505312" class="contact-button">📞 전화 문의</a>
-        </div>
+<div class="contact-support">
+    <h2>문의 및 지원</h2>
+    <p>AI 도구 사용에 대한 문의사항이나 기술 지원이 필요하시면 언제든지 연락해 주세요.</p>
+    <div class="contact-buttons">
+        <a href="mailto:strom8787@korea.kr" class="contact-button">📧 이메일 문의</a>
+        <a href="tel:0438505312" class="contact-button">📞 전화 문의</a>
     </div>
+</div>
+""", unsafe_allow_html=True)
 
-    <div class="footer">
-        <div class="footer-columns">
-            <div>
-                <h4>충주시 AI 연구소</h4>
-                <p>혁신적인 AI 기술로 시민 중심의 스마트 행정서비스를 구현하겠습니다.</p>
-            </div>
-            <div>
-                <h4>서비스</h4>
-                <ul>
-                    <li>보도자료 생성기</li>
-                    <li>공적조서 생성기</li>
-                    <li>빅데이터 분석기</li>
-                    <li>홍보멘트 생성기</li>
-                </ul>
-            </div>
-            <div>
-                <h4>연락처</h4>
-                <p>📍 충청북도 충주시</p>
-                <p>📞 043-850-5312</p>
-                <p>📧 strom8787@korea.kr</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            © 2025 충주시 AI 연구소. All rights reserved.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 

@@ -17,7 +17,7 @@ def run():
     .header-section {
         background: #FF4B4B;
         color: white;
-        padding: 40px 20px;
+        padding: 60px 20px;
         text-align: center;
         margin-bottom: 0;
     }
@@ -68,7 +68,7 @@ def run():
 /
     .intro-section {
         text-align: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.5rem;
     }
 
     .intro-text {

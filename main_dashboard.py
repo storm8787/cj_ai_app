@@ -17,7 +17,7 @@ def run():
     .header-section {
         background: #FF4B4B;
         color: white;
-        padding: 60px 20px;
+        padding: 50px 20px;
         text-align: center;
         margin-bottom: 0;
     }

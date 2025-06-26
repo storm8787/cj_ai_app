@@ -117,7 +117,7 @@ def run():
 
     # 헤더
     st.markdown("""
-    <div class="header-section">
+    <div class="header-section" style="background: white; color: #1f2937;">
         <div class="header-title">충주시 AI 연구소</div>
         <div class="header-subtitle">AI로 더 똑똑한 행정서비스를 만들어갑니다</div>
     </div>

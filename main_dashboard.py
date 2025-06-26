@@ -172,14 +172,13 @@ def run():
 
     # AI 도구 카드 (2행 3열)
     tools = [
-        {"key": "press_release", "icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
-        {"key": "merit_report", "icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
-        {"key": "festival", "icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
-        {"key": "kakao_promo", "icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
-        {"key": "excel_merge", "icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
-        {"key": "geocode", "icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
+        {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
+        {"icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
+        {"icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
+        {"icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
+        {"icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
+        {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
     ]
-
 
     for i in range(0, len(tools), 3):
         cols = st.columns(3)
@@ -187,11 +186,13 @@ def run():
             if i + j < len(tools):
                 tool = tools[i + j]
                 with cols[j]:
-                    clicked = st.button(f"{tool['icon']} {tool['title']}", key=tool['key'])
-                    st.markdown(f"<div style='text-align:center; color:#4b5563;'>{tool['desc']}</div>", unsafe_allow_html=True)
-                    if clicked:
-                        st.session_state["selected_app"] = tool["key"]
-                        st.experimental_rerun()
+                    st.markdown(f"""
+                    <div class="tool-card">
+                        <div class="tool-icon">{tool['icon']}</div>
+                        <div class="tool-title">{tool['title']}</div>
+                        <div class="tool-desc">{tool['desc']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     # 푸터
     st.markdown("""

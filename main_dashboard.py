@@ -7,6 +7,8 @@
 import streamlit as st
 
 def run():
+    st.title("충주시 AI 연구소")
+    st.write("여기는 메인 대시보드입니다.")
     # 페이지 내부 스타일 적용
     st.markdown("""
     <style>

@@ -168,22 +168,15 @@ def run():
     </style>
     """, unsafe_allow_html=True)
 
-
-
     # AI 도구 카드 (2행 3열)
     tools = [
-        {"key": "press_release", "icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성", "action": press_release_app},
-        {"key": "merit", "icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화", "action": create_official_merit_report},
-        {"key": "festival", "icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석", "action": festival_analysis_app},
-        {"key": "kakao", "icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구", "action": generate_kakao_promo},
-        {"key": "excel", "icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드", "action": excel_merger},
-        {"key": "geocode", "icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환", "action": run_geocoding_tool}
+        {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
+        {"icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
+        {"icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
+        {"icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
+        {"icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
+        {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
     ]
-
-    # 헤더, 소개 생략 — 그대로 유지 가능
-
-    # 기능 버튼 클릭 처리
-    selected_tool = None
 
     for i in range(0, len(tools), 3):
         cols = st.columns(3)
@@ -191,22 +184,18 @@ def run():
             if i + j < len(tools):
                 tool = tools[i + j]
                 with cols[j]:
-                    with st.container():
-                        clicked = st.button(
-                            label=f"""
-                            <div class="tool-card">
-                                <div class="tool-icon">{tool['icon']}</div>
-                                <div class="tool-title">{tool['title']}</div>
-                                <div class="tool-desc">{tool['desc']}</div>
-                            </div>
-                            """,
-                            key=tool["key"],
-                            help=tool["title"],
-                            use_container_width=True,
-                        )
-                        if clicked:
-                            selected_tool = tool["action"]
+                    st.markdown(f"""
+                    <div class="tool-card">
+                        <div class="tool-icon">{tool['icon']}</div>
+                        <div class="tool-title">{tool['title']}</div>
+                        <div class="tool-desc">{tool['desc']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-    if selected_tool:
-        selected_tool()  # 해당 기능으로 이동
+    # 푸터
+    st.markdown("""
+    <div class="footer">
+        © 2025 충주시 AI 연구소 · All rights reserved.
+    </div>
+    """, unsafe_allow_html=True)
 

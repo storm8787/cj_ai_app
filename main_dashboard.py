@@ -16,13 +16,14 @@ def run():
     }
 
     .header-section {
-        background: white;
-        color: #1f2937;
+        background: #FF4B4B;
+        color: white;
         padding: 80px 20px;
         text-align: center;
         margin-bottom: 0;
         border-bottom: 1px solid #e5e7eb;
     }
+
     .header-title {
         font-size: 3rem;
         font-weight: 700;
@@ -117,10 +118,11 @@ def run():
 
     # 헤더
     st.markdown("""
-    <div class="header-section" style="background: white; color: #1f2937;">
+    <div class="header-section">
         <div class="header-title">충주시 AI 연구소</div>
-        <div class="header-subtitle">AI로 더 똑똑한 행정서비스를 만들어갑니다</div>
+        <div class="header-subtitle" style="opacity: 0.9;">AI로 더 똑똑한 행정서비스를 만들어갑니다</div>
     </div>
+
     """, unsafe_allow_html=True)
 
     # 소개

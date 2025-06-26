@@ -9,7 +9,8 @@ import streamlit as st
 st.set_page_config(
     page_title="더 가까이, 충주시 AI 연구",
     page_icon="logo.png",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 from press_release_app import press_release_app

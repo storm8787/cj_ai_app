@@ -121,19 +121,43 @@ def run():
     """, unsafe_allow_html=True)
 
         # 소개
+        # 소개
     st.markdown("""
     <div class="intro-section">
-        <div style="max-width: 700px; margin: 0 auto; text-align: center;">
-            <h2 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 1rem;">
-                AI 기반 스마트 업무도구
-            </h2>
-            <p style="font-size: 1rem; color: #374151; line-height: 1.7;">
+        <div class="intro-inner">
+            <h2 class="intro-title">AI 기반 스마트 업무도구</h2>
+            <p class="intro-text">
                 충주시는 최신 인공지능 기술을 활용하여 공무원들의 업무 효율성을 높이고,<br>
                 시민들에게 더 나은 서비스를 제공하기 위한 다양한 AI 도구들을 개발했습니다.
             </p>
         </div>
     </div>
+
+    <style>
+    .intro-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 30px 20px;
+    }
+    .intro-inner {
+        text-align: center;
+        max-width: 720px;
+    }
+    .intro-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    .intro-text {
+        font-size: 1rem;
+        color: #374151;
+        line-height: 1.7;
+    }
+    </style>
     """, unsafe_allow_html=True)
+
 
 
     # AI 도구 카드 (2행 3열)

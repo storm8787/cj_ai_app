@@ -199,65 +199,69 @@ def run():
     #</div>
     #""", unsafe_allow_html=True)
     st.markdown("""
-<style>
-.contact-support {
-    background: linear-gradient(to right, #dc2626, #f87171);
-    color: white;
-    padding: 2.5rem 2rem;
-    border-radius: 16px;
-    text-align: center;
-    margin-top: 3rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
+    <style>
+    .contact-support {
+        background: linear-gradient(to right, #dc2626, #f87171);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 16px;
+        text-align: center;
+        margin-top: 3rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
 
-.contact-support h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
+    .contact-support h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
 
-.contact-support p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.95;
-}
+    .contact-support p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+    }
 
-.contact-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
+    .contact-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 
-.contact-button {
-    background: white;
-    color: #dc2626;
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform 0.2s ease;
-    text-decoration: none;
-}
+    .contact-button {
+        background: white;
+        color: #dc2626;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease;
+        text-decoration: none;
+    }
 
-.contact-button:hover {
-    transform: scale(1.05);
-    background: #ffe4e6;
-}
-</style>
+    .contact-button:hover {
+        transform: scale(1.05);
+        background: #ffe4e6;
+    }
+    </style>
 
-<div class="contact-support">
-    <h2>문의 및 지원</h2>
-    <p>AI 도구 사용에 대한 문의사항이나 기술 지원이 필요하시면 언제든지 연락해 주세요.</p>
-    <div class="contact-buttons">
-        <a href="mailto:strom8787@korea.kr" class="contact-button">📧 이메일 문의</a>
-        <a href="tel:0438505312" class="contact-button">📞 전화 문의</a>
+    <div class="contact-support">
+        <h2>문의 및 지원</h2>
+        <p>AI 도구 사용에 대한 문의사항이나 기술 지원이 필요하시면 언제든지 연락해 주세요.</p>
+        <div class="contact-buttons">
+            <a href="mailto:strom8787@korea.kr" class="contact-button">📧 이메일 문의</a>
+            <a href="tel:0438505312" class="contact-button">📞 전화 문의</a>
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    <!-- 🔻 푸터 -->
+    <div class="footer">
+        © 2025 충주시 AI 연구소 · All rights reserved.
+    </div>
+    """, unsafe_allow_html=True)
 
 
 

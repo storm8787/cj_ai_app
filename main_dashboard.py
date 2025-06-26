@@ -35,6 +35,43 @@ def run():
         margin-bottom: 1.5rem;
     }
 
+    .badge-section {
+        display: flex;
+        justify-content: center;
+        margin-top: -0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .badge-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 0.8rem 1.5rem;
+        border-radius: 9999px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: white;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .badge-icons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .badge-icon {
+        width: 32px;
+        height: 32px;
+        background-color: #3b82f6;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
     .tool-card {
         background: white;
         border-radius: 16px;
@@ -65,7 +102,7 @@ def run():
         font-size: 0.9rem;
         color: #4b5563;
     }
-/
+
     .intro-section {
         text-align: center;
         margin-bottom: 2.5rem;
@@ -76,6 +113,7 @@ def run():
         color: #374151;
         max-width: 700px;
         margin: 0 auto 1rem auto;
+        line-height: 1.7;
     }
 
     .footer {
@@ -97,19 +135,33 @@ def run():
     </div>
     """, unsafe_allow_html=True)
 
+    # 배지 섹션 (아이콘 + 텍스트)
+    st.markdown("""
+    <div class="badge-section">
+        <div class="badge-content">
+            <div class="badge-icons">
+                <div class="badge-icon">🗃️</div>
+                <div class="badge-icon">📊</div>
+                <div class="badge-icon">📄</div>
+            </div>
+            <span>6가지 AI 도구 서비스</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     # 소개
     st.markdown("""
     <div class="intro-section">
         <h2 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 1rem;">
             AI 기반 스마트 업무도구
         </h2>
-        <p style="text-align: center; max-width: 680px; margin: 0 auto; font-size: 1rem; color: #374151; line-height: 1.7;">
+        <p class="intro-text">
             충주시는 최신 인공지능 기술을 활용하여 공무원들의 업무 효율성을 높이고, 
             시민들에게 더 나은 서비스를 제공하기 위한 다양한 AI 도구들을 개발했습니다.
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # AI 도구 카드 (2행 3열)
     tools = [
         {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},

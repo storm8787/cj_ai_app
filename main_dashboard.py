@@ -4,6 +4,18 @@
 # In[ ]:
 
 
+import streamlit as st
+
+# ✅ 기능 모듈 import
+from press_release_app import press_release_app
+from excel_merger import excel_merger
+from festival_analysis_app import festival_analysis_app
+from data_validator_app import data_validator_app
+from official_merit_report_app import create_official_merit_report
+from report_writer import report_writer_app
+from address_geocoder import run_geocoding_tool
+from kakao_promo_app import generate_kakao_promo
+
 def run():
     st.markdown("""
     <style>

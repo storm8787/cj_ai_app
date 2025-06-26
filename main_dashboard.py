@@ -66,18 +66,6 @@ def run():
         color: #4b5563;
     }
 
-    .intro-section {
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .intro-text {
-        font-size: 1rem;
-        color: #374151;
-        max-width: 700px;
-        margin: 0 auto 1rem auto;
-    }
-
     .footer {
         border-top: 1px solid #e5e7eb;
         margin-top: 2rem;
@@ -93,20 +81,12 @@ def run():
     st.markdown("""
     <div class="header-section">
         <div class="header-title">충주시 AI 연구소</div>
-        <div class="header-subtitle">AI로 더 똑똑한 행정서비스를 만들어갑니다</div>
+        <div class="header-subtitle">충주시는 최신 인공지능 기술을 바탕으로 공무원의 업무 효율성을 높이고, 
+            시민에게 보다 나은 행정 서비스를 제공하기 위해 다양한 스마트 도구를 개발·운영하고 있습니다.</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # 소개
-    st.markdown("""
-    <div class="intro-section">
-        <p class="intro-text">
-            충주시는 최신 인공지능 기술을 바탕으로 공무원의 업무 효율성을 높이고, 
-            시민에게 보다 나은 행정 서비스를 제공하기 위해 다양한 스마트 도구를 개발·운영하고 있습니다.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
+    
     # AI 도구 카드 (2행 3열)
     tools = [
         {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},

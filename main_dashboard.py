@@ -172,15 +172,14 @@ def run():
 
     # AI 도구 카드 (2행 3열)
     tools = [
-        {"icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
-        {"icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
-        {"icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
-        {"icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
-        {"icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
-        {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
+        {"key": "press_release", "icon": "📄", "title": "보도자료 생성기", "desc": "GPT로 자동 보도자료 작성"},
+        {"key": "merit_report", "icon": "📋", "title": "공적조서 생성기", "desc": "공적사항 요약·작성 자동화"},
+        {"key": "festival", "icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
+        {"key": "kakao_promo", "icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
+        {"key": "excel_merge", "icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
+        {"key": "geocode", "icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
     ]
 
-    st.markdown("""<div class="intro-section"><h2 style="text-align:center;">AI 기반 스마트 업무도구</h2></div>""", unsafe_allow_html=True)
 
     for i in range(0, len(tools), 3):
         cols = st.columns(3)

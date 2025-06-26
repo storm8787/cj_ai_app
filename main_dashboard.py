@@ -17,7 +17,7 @@ def run():
     .header-section {
         background: #FF4B4B;
         color: white;
-        padding: 80px 20px;
+        padding: 60px 20px;
         text-align: center;
         margin-bottom: 0;
     }
@@ -33,43 +33,6 @@ def run():
         font-weight: 300;
         opacity: 0.9;
         margin-bottom: 1.5rem;
-    }
-
-    .badge-section {
-        display: flex;
-        justify-content: center;
-        margin-top: -0.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .badge-content {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        padding: 0.8rem 1.5rem;
-        border-radius: 9999px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        color: white;
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
-
-    .badge-icons {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .badge-icon {
-        width: 32px;
-        height: 32px;
-        background-color: #3b82f6;
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
     }
 
     .tool-card {
@@ -127,24 +90,32 @@ def run():
     </style>
     """, unsafe_allow_html=True)
 
-    # 헤더
+    # 헤더 (뱃지 포함 통합버전)
     st.markdown("""
     <div class="header-section">
         <div class="header-title">충주시 AI 연구소</div>
         <div class="header-subtitle">인공지능으로 더 스마트한 행정서비스를 만들어갑니다</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # 배지 섹션 (아이콘 + 텍스트)
-    st.markdown("""
-    <div class="badge-section">
-        <div class="badge-content">
-            <div class="badge-icons">
-                <div class="badge-icon">🗃️</div>
-                <div class="badge-icon">📊</div>
-                <div class="badge-icon">📄</div>
+        <div style="margin-top: 1.5rem;">
+            <div style="
+                display: inline-flex;
+                align-items: center;
+                gap: 1rem;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                padding: 0.8rem 1.5rem;
+                border-radius: 9999px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                color: white;
+                font-weight: 500;
+                font-size: 0.95rem;
+            ">
+                <div style="display: flex; gap: 0.5rem;">
+                    <div style="width: 32px; height: 32px; background-color: #3b82f6; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">🗃️</div>
+                    <div style="width: 32px; height: 32px; background-color: #2563eb; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📊</div>
+                    <div style="width: 32px; height: 32px; background-color: #1d4ed8; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📄</div>
+                </div>
+                <span>6가지 AI 도구 서비스</span>
             </div>
-            <span>6가지 AI 도구 서비스</span>
         </div>
     </div>
     """, unsafe_allow_html=True)

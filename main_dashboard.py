@@ -66,6 +66,18 @@ def run():
         color: #4b5563;
     }
 
+    .intro-section {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .intro-text {
+        font-size: 1rem;
+        color: #374151;
+        max-width: 700px;
+        margin: 0 auto 1rem auto;
+    }
+
     .footer {
         border-top: 1px solid #e5e7eb;
         margin-top: 2rem;

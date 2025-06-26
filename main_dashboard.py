@@ -6,6 +6,17 @@
 
 import streamlit as st
 
+# ✅ 기능 모듈 import
+from press_release_app import press_release_app
+from excel_merger import excel_merger
+from festival_analysis_app import festival_analysis_app
+from data_validator_app import data_validator_app
+from official_merit_report_app import create_official_merit_report
+from report_writer import report_writer_app
+from address_geocoder import run_geocoding_tool
+from kakao_promo_app import generate_kakao_promo
+from main_dashboard import run as main_dashboard_run
+
 def run():
     st.markdown("""
     <style>
@@ -170,19 +181,19 @@ def run():
         {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
     ]
 
+    st.markdown("""<div class="intro-section"><h2 style="text-align:center;">AI 기반 스마트 업무도구</h2></div>""", unsafe_allow_html=True)
+
     for i in range(0, len(tools), 3):
         cols = st.columns(3)
         for j in range(3):
             if i + j < len(tools):
                 tool = tools[i + j]
                 with cols[j]:
-                    st.markdown(f"""
-                    <div class="tool-card">
-                        <div class="tool-icon">{tool['icon']}</div>
-                        <div class="tool-title">{tool['title']}</div>
-                        <div class="tool-desc">{tool['desc']}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    clicked = st.button(f"{tool['icon']} {tool['title']}", key=tool['key'])
+                    st.markdown(f"<div style='text-align:center; color:#4b5563;'>{tool['desc']}</div>", unsafe_allow_html=True)
+                    if clicked:
+                        st.session_state["selected_app"] = tool["key"]
+                        st.experimental_rerun()
 
     # 푸터
     st.markdown("""

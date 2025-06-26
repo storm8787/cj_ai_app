@@ -25,6 +25,7 @@ from address_geocoder import run_geocoding_tool
 from kakao_promo_app import generate_kakao_promo
 from main_dashboard import run as main_dashboard_run  # ✅ 메인페이지 모듈 추가
 
+
 def main():
     st.sidebar.title("🧰 기능 선택")
 
@@ -82,7 +83,7 @@ def main():
         st.session_state.selected_app = selected_app
 
     # ✅ 기능 실행 분기
-    if st.session_state.selected_app == "🏠 메인페이지":
+    if st.session_state.selected_app == "🏠 충주시 AI 연구":
         main_dashboard_run()
     elif st.session_state.selected_app == "(생성형AI) 보도자료 생성기":
         press_release_app()

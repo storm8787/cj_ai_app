@@ -110,9 +110,9 @@ def run():
                 font-size: 0.95rem;
             ">
                 <div style="display: flex; gap: 0.5rem;">
-                    <div style="width: 32px; height: 32px; background-color: #3b82f6; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">🗃️</div>
-                    <div style="width: 32px; height: 32px; background-color: #2563eb; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📊</div>
-                    <div style="width: 32px; height: 32px; background-color: #1d4ed8; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📄</div>
+                    <div style="width: 32px; height: 32px; background-color: #FCD34D; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">🗃️</div>
+                    <div style="width: 32px; height: 32px; background-color: #60A5FA; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📊</div>
+                    <div style="width: 32px; height: 32px; background-color: #34D399; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📄</div>
                 </div>
                 <span>6가지 AI 도구 서비스</span>
             </div>

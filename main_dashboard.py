@@ -100,13 +100,15 @@ def run():
     # 소개
     st.markdown("""
     <div class="intro-section">
-        <p class="intro-text">
+        <h2 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 1rem;">
+            AI 기반 스마트 업무도구
+        </h2>
+        <p class="intro-text" style="text-align: center;">
             충주시는 최신 인공지능 기술을 활용하여 공무원들의 업무 효율성을 높이고, 
             시민들에게 더 나은 서비스를 제공하기 위한 다양한 AI 도구들을 개발했습니다.
         </p>
     </div>
     """, unsafe_allow_html=True)
-
     
     # AI 도구 카드 (2행 3열)
     tools = [

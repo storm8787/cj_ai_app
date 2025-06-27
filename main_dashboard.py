@@ -181,7 +181,7 @@ def run():
                     <div style="width: 32px; height: 32px; background-color: #60A5FA; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📊</div>
                     <div style="width: 32px; height: 32px; background-color: #34D399; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">📄</div>
                 </div>
-                <span>6가지 AI 도구 서비스</span>
+                <span>8가지 AI 도구 서비스</span>
             </div>
         </div>
     </div>
@@ -207,9 +207,11 @@ def run():
         {"icon": "📊", "title": "빅데이터 분석기", "desc": "축제·관광 데이터 기반 분석"},
         {"icon": "💬", "title": "카카오톡 홍보멘트 생성기", "desc": "OCR + GPT 기반 시민홍보 문구"},
         {"icon": "📈", "title": "엑셀 취합기", "desc": "엑셀 파일 자동 병합 및 다운로드"},
-        {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"}
+        {"icon": "📍", "title": "주소-좌표 변환기", "desc": "주소 ↔ 위경도 자동 변환"},
+        {"icon": "📝", "title": "업무보고 생성기", "desc": "GPT 기반 업무보고 자동작성"},
+        {"icon": "🧾", "title": "간단 통계 보고서 생성기", "desc": "표 기반 통계분석 및 시사점"}
     ]
-    for i in range(0, len(tools), 3):
+    for i in range(0, 9, 3):
         cols = st.columns(3)
         for j in range(3):
             if i + j < len(tools):
@@ -222,6 +224,9 @@ def run():
                         <div class="tool-desc">{tool['desc']}</div>
                     </div>
                     """, unsafe_allow_html=True)
+            else:
+                with cols[j]
+                    st.markdown("<div class='tool-card' style='visibility:hidden'>빈칸</div>", unsafe_allow_html=True)
 
     # 문의 및 푸터
     st.markdown("""

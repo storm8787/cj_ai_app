@@ -24,6 +24,7 @@ from report_writer import report_writer_app
 from address_geocoder import run_geocoding_tool
 from kakao_promo_app import generate_kakao_promo
 from main_dashboard import run as main_dashboard_run  # ✅ 메인페이지 모듈 추가
+from simple_report_generator import simple_report_generator
 
 def main():
     st.sidebar.title("🧰 기능 선택")
@@ -36,6 +37,7 @@ def main():
         "(생성형AI) 빅데이터 분석기",
         "(생성형AI) 카카오톡 홍보멘트 생성기",
         "(생성형AI) 업무보고 생성기",
+        "(생성형AI) 간단통계 보고서 생성기",
         "(업무자동화) 엑셀 취합기",
         "(업무지원) 주소-좌표 변환기",        
         "(생성형AI) 공공데이터 검증기(개발중)"
@@ -100,6 +102,8 @@ def main():
         run_geocoding_tool()
     elif st.session_state.selected_app == "(생성형AI) 카카오톡 홍보멘트 생성기":
         generate_kakao_promo()
+    elif st.session_state.selected_app == "(생성형AI) 간단통계 보고서 생성기":
+        simple_report_generator()
 
 if __name__ == "__main__":
     main()

@@ -30,6 +30,7 @@ def run():
         padding: 50px 20px;
         text-align: center;
         margin-bottom: 0;
+        border-radius: 16px;
     }
 
     .header-title {

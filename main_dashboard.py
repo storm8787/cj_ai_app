@@ -227,7 +227,7 @@ def run():
                     </div>
                     """, unsafe_allow_html=True)
             else:
-                with cols[j]
+                with cols[j]:
                     st.markdown("<div class='tool-card' style='visibility:hidden'>빈칸</div>", unsafe_allow_html=True)
 
     # 문의 및 푸터

@@ -19,3 +19,4 @@ Pillow
 gradio_client
 google-cloud-vision
 google-auth
+tabulate

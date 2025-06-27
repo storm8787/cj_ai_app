@@ -83,7 +83,7 @@ def simple_report_generator():
 
         # ✅ 시각화 기능
         st.subheader("📌 데이터 시각화")
-        if st.checkbox("📈 시각화 생성하기"):
+        if st.checkbox("📈 그래프 생성하기"):
             selected_df = st.selectbox("📄 시각화할 표 선택", [f"표{i+1}" for i in range(len(dfs))])
             df = dfs[int(selected_df.replace("표", "")) - 1]
 

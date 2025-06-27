@@ -79,28 +79,5 @@ def simple_report_generator():
         st.subheader("📊 데이터 시각화 미리보기")
         for i, df in enumerate(dfs):
             st.markdown(f"✅ [표{i+1}]")
-            st.dataframe(df)
-
-        # ✅ 시각화 기능
-        st.subheader("📌 데이터 시각화")
-        if st.checkbox("📈 그래프 생성하기"):
-            selected_df = st.selectbox("📄 시각화할 표 선택", [f"표{i+1}" for i in range(len(dfs))])
-            df = dfs[int(selected_df.replace("표", "")) - 1]
-
-            chart_type = st.selectbox("📊 그래프 유형", ["선형(Line)", "막대(Bar)", "산점도(Scatter)"])
-            x_col = st.selectbox("🧭 X축 컬럼", df.columns)
-            y_col = st.selectbox("📐 Y축 컬럼", df.columns)
-
-            fig, ax = plt.subplots()
-            if chart_type == "선형(Line)":
-                ax.plot(df[x_col], df[y_col], marker="o")
-            elif chart_type == "막대(Bar)":
-                ax.bar(df[x_col], df[y_col])
-            elif chart_type == "산점도(Scatter)":
-                ax.scatter(df[x_col], df[y_col])
-
-            ax.set_xlabel(x_col)
-            ax.set_ylabel(y_col)
-            ax.set_title(f"{chart_type} 그래프: {x_col} vs {y_col}")
-            st.pyplot(fig)
+            st.dataframe(df)        
 

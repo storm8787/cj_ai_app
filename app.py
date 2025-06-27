@@ -25,7 +25,6 @@ from address_geocoder import run_geocoding_tool
 from kakao_promo_app import generate_kakao_promo
 from main_dashboard import run as main_dashboard_run  # ✅ 메인페이지 모듈 추가
 
-
 def main():
     st.sidebar.title("🧰 기능 선택")
 
@@ -36,9 +35,9 @@ def main():
         "(생성형AI) 공적조서 생성기",
         "(생성형AI) 빅데이터 분석기",
         "(생성형AI) 카카오톡 홍보멘트 생성기",
+        "(생성형AI) 업무보고 생성기",
         "(업무자동화) 엑셀 취합기",
-        "(업무지원) 주소-좌표 변환기",
-        "(생성형AI) 업무보고 생성기(개발중)",
+        "(업무지원) 주소-좌표 변환기",        
         "(생성형AI) 공공데이터 검증기(개발중)"
     ]
     admin_features = [
@@ -95,7 +94,7 @@ def main():
         data_validator_app()
     elif st.session_state.selected_app == "(생성형AI) 공적조서 생성기":
         create_official_merit_report()
-    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기(개발중)":
+    elif st.session_state.selected_app == "(생성형AI) 업무보고 생성기":
         report_writer_app()
     elif st.session_state.selected_app == "(업무지원) 주소-좌표 변환기":
         run_geocoding_tool()

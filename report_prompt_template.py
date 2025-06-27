@@ -9,14 +9,22 @@
 def get_report_prompt(report_type: str, format_type: str, title: str, keywords: list[str]) -> str:
     keyword_text = "\n".join(f"- {kw}" for kw in keywords)
 
+    # ✅ 공통 지시문 (모든 보고서에 무조건 포함됨)
+    common_guideline = f"""📄 제목: {title}
+
+다음은 충주시 내부 보고서 초안임.  
+문서는 반드시 다음 기준을 충실히 따를 것:
+
+- 전체는 **항목 중심 구조**로 작성할 것 (1. ~ 2. ~)
+- 문장은 **행정문서체**로 작성할 것 (예: '~되었음', '~임', '~필요함')
+- 모든 문장은 **개괄식 종결형**으로 작성할 것 (예: '~이 필요', '~으로 판단됨')
+
+"""
+
     # 계획보고
     if report_type == "계획보고":
         if format_type == "사업계획서형":
-            return f"""📄 제목: {title}
-
-다음은 충주시 내부 사업계획 보고서 초안임.  
-문서는 항목 중심으로 구성하며, 전체 문장은 행정문서체 및 개괄식 종결형으로 작성할 것.
-
+            return common_guideline + f"""
 1. 추진배경  
 2. 사업개요  
  - 사 업 명 :  
@@ -31,18 +39,14 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
 """
 
         elif format_type == "예산중심형":
-            return f"""📄 제목: {title}
-
-다음은 예산계획 중심 보고서 초안임.  
-예산 배정·활용계획 중심으로 항목화하고, 수치와 실무 관점의 구성을 유지할 것.
-
+            return common_guideline + f"""
 1. 예산 편성 배경  
 2. 사업개요  
  - 사 업 명 :  
  - 총 예산액 :  
  - 연차별 예산 계획 :  
 3. 예산 활용 계획  
-4. 검토사항 및 조정 필요내용  
+4. 예산 쟁점 및 검토사항  
 5. 향후 예산 일정
 
 📌 주요 키워드:
@@ -50,16 +54,12 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
 """
 
         elif format_type == "시행일정형":
-            return f"""📄 제목: {title}
-
-다음은 시행일정 중심 계획보고서 초안임.  
-단계별 일정과 해당 주요내용을 명확히 구분하여 작성할 것.
-
+            return common_guideline + f"""
 1. 사업개요  
-2. 추진일정 개요  
-3. 일정별 주요내용  
-4. 일정상 리스크 및 대응계획  
-5. 향후 일정 및 유의사항
+2. 단계별 추진 일정  
+3. 일정별 주요 내용  
+4. 일정상 리스크 및 대응  
+5. 향후 일정 공유 및 유의사항
 
 📌 주요 키워드:
 {keyword_text}
@@ -68,48 +68,36 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
     # 동향보고
     elif report_type == "동향보고":
         if format_type == "주간트렌드형":
-            return f"""📄 제목: {title}
-
-다음은 충주시 주간 동향 보고서 초안임.  
-최근 발생 동향을 항목화하고, 객관적 수치와 원인을 중심으로 작성할 것.
-
+            return common_guideline + f"""
 1. 요약 개요  
 2. 주요 동향 및 수치  
 3. 배경 및 원인 분석  
-4. 대응 현황 및 실무 조치  
-5. 향후 전망 및 협조 요청사항
+4. 대응 방향 및 협조사항  
+5. 향후 모니터링 사항
 
 📌 주요 키워드:
 {keyword_text}
 """
 
         elif format_type == "상황분석형":
-            return f"""📄 제목: {title}
-
-다음은 특정 사안에 대한 상황분석 보고서 초안임.  
-문제 발생 경과, 원인, 대응 등 전개 흐름을 구조화하여 작성할 것.
-
-1. 발생 개요  
+            return common_guideline + f"""
+1. 발생 개요 및 현황  
 2. 주요 원인 분석  
-3. 수치 기반 현황 (있을 경우)  
-4. 현재 대응 상황  
-5. 향후 조치 및 실무 제언
+3. 수치 기반 경향  
+4. 현재 대응 및 검토사항  
+5. 향후 대응 계획
 
 📌 주요 키워드:
 {keyword_text}
 """
 
         elif format_type == "이슈집중형":
-            return f"""📄 제목: {title}
-
-다음은 단일 이슈에 대한 집중 보고서 초안임.  
-이슈의 성격, 영향 범위, 대응 현황 등을 항목 중심으로 명확히 정리할 것.
-
+            return common_guideline + f"""
 1. 이슈 개요 (일시, 내용)  
-2. 주요 경과 및 파급 경로  
-3. 부서별 대응 현황  
-4. 외부 반응 또는 확산 상황  
-5. 향후 대응 방향 및 필요 조치
+2. 주요 경과 및 확산 경로  
+3. 부서 대응 내용  
+4. 외부 반응 또는 확산 현황  
+5. 향후 대응 및 메시지 방향
 
 📌 주요 키워드:
 {keyword_text}
@@ -118,30 +106,22 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
     # 성과보고
     elif report_type == "성과보고":
         if format_type == "정량지표형":
-            return f"""📄 제목: {title}
-
-다음은 정량 성과 중심 보고서 초안임.  
-실적 수치를 기반으로 각 항목을 구성하며, 정책적 활용가능성까지 기술할 것.
-
+            return common_guideline + f"""
 1. 사업개요  
  - 사업명 :  
  - 기간 :  
  - 예산 :  
-2. 주요 성과지표 및 수치  
-3. 성과 비교 및 해석  
-4. 정성적 효과 및 실무 기여  
-5. 향후 개선방향
+2. 주요 성과지표  
+3. 실적 수치 및 비교  
+4. 정성효과 및 기여도  
+5. 향후 계획
 
 📌 주요 키워드:
 {keyword_text}
 """
 
         elif format_type == "협업성과형":
-            return f"""📄 제목: {title}
-
-다음은 협업 기반 성과보고 초안임.  
-참여부서 및 성과의 연계성을 중심으로 정리할 것.
-
+            return common_guideline + f"""
 1. 사업개요  
 2. 참여부서 및 역할  
 3. 공동 추진성과  
@@ -153,16 +133,12 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
 """
 
         elif format_type == "성과홍보형":
-            return f"""📄 제목: {title}
-
-다음은 성과홍보용 간략 보고서 초안임.  
-핵심성과와 외부 공유에 적합한 내용을 항목별로 정리할 것.
-
-1. 사업개요  
+            return common_guideline + f"""
+1. 사업 개요  
 2. 대표 성과 요약  
-3. 수치 기반 성과 강조  
-4. 부서 기여 포인트  
-5. 대외 활용 계획
+3. 수치 기반 성과  
+4. 부서 기여 및 활용 포인트  
+5. 향후 알릴 계획
 
 📌 주요 키워드:
 {keyword_text}
@@ -171,18 +147,14 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
     # 상황보고
     elif report_type == "상황보고":
         if format_type == "재난상황형":
-            return f"""📄 제목: {title}
-
-다음은 재난 발생 시 작성하는 상황보고 초안임.  
-발생→조치→향후 대응 흐름으로 항목화하고 간결하게 서술할 것.
-
+            return common_guideline + f"""
 1. 발생 개요  
  - 일시 :  
  - 장소 :  
  - 유형 :  
-2. 피해 및 영향 상황  
+2. 피해 및 영향  
 3. 긴급 대응 조치  
-4. 후속 계획 및 복구 일정  
+4. 후속 조치 및 복구 계획  
 5. 유관 부서 협조사항
 
 📌 주요 키워드:
@@ -190,32 +162,24 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
 """
 
         elif format_type == "시설이상형":
-            return f"""📄 제목: {title}
-
-다음은 시설 이상 발생 시 작성하는 보고서 초안임.  
-장애 내용과 복구조치를 중심으로 구성할 것.
-
+            return common_guideline + f"""
 1. 발생 개요  
 2. 주요 증상 및 영향  
-3. 대응 경과 및 복구 내용  
+3. 대응 경과 및 조치 내용  
 4. 원인 파악 결과  
-5. 향후 재발방지 계획
+5. 향후 재발방지 방안
 
 📌 주요 키워드:
 {keyword_text}
 """
 
         elif format_type == "민원폭증형":
-            return f"""📄 제목: {title}
-
-다음은 민원 폭증 상황에 대한 보고서 초안임.  
-유형별 수치, 원인, 대응 계획을 항목화할 것.
-
-1. 민원 폭증 개요  
-2. 민원유형별 통계  
+            return common_guideline + f"""
+1. 민원 발생 개요  
+2. 민원유형별 통계 및 변화  
 3. 주요 원인 분석  
-4. 대응 현황 및 실무 조치  
-5. 향후 조정방안 및 검토사항
+4. 부서별 대응 현황  
+5. 향후 대응 및 제도 개선 방향
 
 📌 주요 키워드:
 {keyword_text}
@@ -224,29 +188,21 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
     # 기타보고
     elif report_type == "기타보고":
         if format_type == "민원회신형":
-            return f"""📄 제목: {title}
-
-다음은 민원 회신용 보고서 초안임.  
-민원 처리 과정과 결과를 정리하고, 향후 대응 내용을 포함할 것.
-
+            return common_guideline + f"""
 1. 민원 개요  
  - 접수일 :  
  - 민원유형 :  
 2. 민원 내용 요약  
 3. 처리 결과  
-4. 관련 근거 및 규정  
-5. 향후 안내 및 재발방지 대책
+4. 관련 근거 또는 규정  
+5. 향후 안내사항
 
 📌 주요 키워드:
 {keyword_text}
 """
 
         elif format_type == "안내문형":
-            return f"""📄 제목: {title}
-
-다음은 시민 안내를 위한 내부 보고용 초안임.  
-항목별로 안내 목적, 일정, 신청 방법 등을 정리할 것.
-
+            return common_guideline + f"""
 1. 프로그램 개요  
 2. 운영일정 및 장소  
 3. 신청방법 및 대상  
@@ -258,16 +214,12 @@ def get_report_prompt(report_type: str, format_type: str, title: str, keywords: 
 """
 
         elif format_type == "내부의견서형":
-            return f"""📄 제목: {title}
-
-다음은 내부 의견서 초안임.  
-검토 배경과 실무적 제안을 항목별로 정리할 것.
-
-1. 검토 배경  
+            return common_guideline + f"""
+1. 검토 배경 및 필요성  
 2. 관련 기준 및 사례  
-3. 실무 의견  
+3. 실무 검토의견  
 4. 예상 문제점 및 고려사항  
-5. 최종 제안사항
+5. 최종 의견 및 제안사항
 
 📌 주요 키워드:
 {keyword_text}
